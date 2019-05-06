@@ -1,9 +1,11 @@
 ﻿using Assets;
+using Assets.Script;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.XR;
 
 public class BoardEventListener : MonoBehaviour
 {
@@ -23,8 +25,13 @@ public class BoardEventListener : MonoBehaviour
     TouchEventData latestTouchEvent = new TouchEventData();
     Material pointerInviMat;
     Material pointerVisMat;
+    bool canGazeControl = true;
+    System.Object gazeControlLocker = new System.Object();
+
+    TouchGestureRecognizer gestureRecognizer = new TouchGestureRecognizer();
     void Start()
     {
+        //StartCoroutine(VRActivator("Cardboard"));
         board = GameObject.Find("Board");
         boardBound = board.transform.GetComponent<Collider>().bounds;
         camScreenCenter = Camera.main.WorldToScreenPoint(Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, Camera.main.nearClipPlane)));
@@ -34,13 +41,19 @@ public class BoardEventListener : MonoBehaviour
         pointerVisMat = Resources.Load("Materials/PointerMarkMat", typeof(Material)) as Material;
         connectWebSocketServer();
     }
+    public IEnumerator VRActivator(string deviceName)
+    {
+        XRSettings.LoadDeviceByName(deviceName);
+        yield return null;
+        XRSettings.enabled = true;
+    }
     void OnApplicationQuit()
     {
         wsClient.Close();
     }
     void connectWebSocketServer()
     {
-        wsClient = new WebSocketSharp.WebSocket(string.Format("ws://{0}/main.html", "192.168.0.123:8080"));
+        wsClient = new WebSocketSharp.WebSocket(string.Format("ws://{0}/main.html", GlobalData.LoadServerAddress()));
         wsClient.OnMessage += WsClient_OnMessage;
         wsClient.Connect();
     }
@@ -52,7 +65,7 @@ public class BoardEventListener : MonoBehaviour
             //Debug.Log(msg);
             try
             {
-                Debug.Log(msg);
+                //Debug.Log(msg);
                 TouchEventData touchEvent = TouchEventData.ParseToucEventFromJsonString(msg);
                 //string decodedMsg = "From JSON: ";
                 //decodedMsg += string.Format("Event type:{0};Pointers count: {1};AvaiPointers:{2}", touchEvent.EventType, touchEvent.PointerCount, touchEvent.AvaiPointers.Length);
@@ -60,6 +73,7 @@ public class BoardEventListener : MonoBehaviour
                 {
                     latestTouchEvent.Clone(touchEvent);
                 }
+                HandleTouchEvent(touchEvent);
             }
             catch(Exception ex)
             {
@@ -112,16 +126,33 @@ public class BoardEventListener : MonoBehaviour
                             }
                         }
                         //focusWindow.transform.position = new Vector3(hitInfo.point.x, hitInfo.point.y, hitInfo.point.z - 0.02f);
-                        focusWindow.transform.Translate(new Vector3(newPos.x - curPos.x, newPos.y - curPos.y, newPos.z - FOCUSWINDOW_DEPTHOFFSET - curPos.z));
+                        lock (gazeControlLocker)
+                        {
+                            if (canGazeControl)
+                            {
+                                focusWindow.transform.Translate(new Vector3(newPos.x - curPos.x, newPos.y - curPos.y, newPos.z - FOCUSWINDOW_DEPTHOFFSET - curPos.z));
+                            }
+                        }
                         //Debug.Log("Collision Point: " + hitInfo.point.ToString());
                     }
+                    
                 }
             }
         }
+        lock (gazeControlLocker)
+        {
+            if(!canGazeControl && (focusWindowRelTouchTranslate.x != 0 || focusWindowRelTouchTranslate.y != 0))
+            {
+                Vector2 translationByTouch = new Vector2();
+                translationByTouch.x = focusWindowRelTouchTranslate.x * focusWindow.GetComponent<Collider>().bounds.size.x;
+                translationByTouch.y = -focusWindowRelTouchTranslate.y * focusWindow.GetComponent<Collider>().bounds.size.y;
+                focusWindow.transform.Translate(translationByTouch.x, translationByTouch.y, 0);
+            }
+        }
         //Process UI based on touch input
-        UpdateUIBasedOnTouchPointers(latestTouchEvent);
+        UpdateTouchPointersViz(latestTouchEvent);
     }
-    void UpdateUIBasedOnTouchPointers(TouchEventData latestTouchEvent)
+    void UpdateTouchPointersViz(TouchEventData latestTouchEvent)
     {
         Bounds virtualPadArea = focusWindow.GetComponent<Collider>().bounds;
         
@@ -154,6 +185,35 @@ public class BoardEventListener : MonoBehaviour
                 }
             }
             
+        }
+    }
+
+    object focusWindowTouchTranslateLock = new object();
+    Vector2 focusWindowRelTouchTranslate = new Vector2();
+    void HandleTouchEvent(TouchEventData touchEvent)
+    {
+        focusWindowRelTouchTranslate.Set(0, 0);
+        TouchGestureRecognizer.TouchGesture recognizedGesture = gestureRecognizer.recognizeGesture(touchEvent);
+        if(recognizedGesture.GestureType == TouchGestureRecognizer.TouchGestureType.PAD_TRANSLATING)
+        {
+            lock (gazeControlLocker)
+            {
+                canGazeControl = false;
+            }
+            Vector2 eventMetaData = (Vector2)recognizedGesture.MetaData;
+            lock (focusWindowTouchTranslateLock)
+            {
+                focusWindowRelTouchTranslate.Set(eventMetaData.x, eventMetaData.y);
+            }
+            //Debug.Log("Translating Focus Window");
+            return;
+        }
+        if(recognizedGesture.GestureType == TouchGestureRecognizer.TouchGestureType.NONE)
+        {
+            lock (gazeControlLocker)
+            {
+                canGazeControl = true;
+            }
         }
     }
 }

@@ -53,8 +53,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\BoardEventListener.cs" />
-     <Compile Include="Assets\BoardPointerListener.cs" />
      <Compile Include="Assets\GoogleVR\Beta\Demos\Scripts\DemoObjectController6DoF.cs" />
      <Compile Include="Assets\GoogleVR\Beta\Demos\Scripts\DemoSeeThroughController.cs" />
      <Compile Include="Assets\GoogleVR\Beta\Scripts\GvrBetaControllerInput.cs" />
@@ -179,10 +177,15 @@
      <Compile Include="Assets\GoogleVR\Scripts\Utilities\Internal\GvrCursorHelper.cs" />
      <Compile Include="Assets\GoogleVR\Scripts\Utilities\Internal\SuppressMemoryAllocationErrorAttribute.cs" />
      <Compile Include="Assets\GoogleVR\Scripts\Video\GvrVideoPlayerTexture.cs" />
-     <Compile Include="Assets\TouchEventData.cs" />
-     <Compile Include="Assets\TouchPointerData.cs" />
+     <Compile Include="Assets\Script\BoardEventListener.cs" />
+     <Compile Include="Assets\Script\GlobalData.cs" />
+     <Compile Include="Assets\Script\IntroDlgEventHandler.cs" />
+     <Compile Include="Assets\Script\TouchEventData.cs" />
+     <Compile Include="Assets\Script\TouchGestureRecognizer.cs" />
+     <Compile Include="Assets\Script\TouchPointerData.cs" />
      <None Include="Assets\GoogleVR\Shaders\GvrUIOverlayFont.shader" />
      <None Include="Assets\GoogleVR\Shaders\GvrAdditiveOverlay.shader" />
+     <None Include="Assets\Resources\VRSlateServerAddress.txt" />
      <None Include="Assets\GoogleVR\Shaders\GvrController.shader" />
      <None Include="Assets\GoogleVR\Shaders\GvrUnlitTransparentOverlay.shader" />
      <None Include="Assets\GoogleVR\Beta\Shaders\GvrSeeThroughUI.shader" />

@@ -3,6 +3,7 @@ PlayerPath?
 D:/Unity stuffs/Unity Projects/VirtualScreen/VirtualScreen.apk
 SceneListBegin?
 Assets/ScreenRoom.unity
+Assets/StartupScene.unity
 SceneListEnd?
 984dcc0ba3707b7691fbdca8ff508d28 Unity.TextMeshPro.dll:TMPro.TMP_SelectionCaret
 23efcd1831b04ace52b7b3485f150f24 Assembly-CSharp.dll:.GvrDropdown
@@ -204,3 +205,4 @@ f0077b931a26a7eeaf5e245c7ef51ec4 Assembly-CSharp.dll:.GvrPointerInputModule
 71bb6a6b6c8f052f948db64c7dd3ca4f Assembly-CSharp.dll:.GvrXREventsSubscriber
 719e5a8f63dda20dad1ba86875c22268 Assembly-CSharp.dll:GoogleVR.VideoDemo.AutoPlayVideo
 9ef0ed9504edb9d0914e240dee1b7846 Assembly-CSharp.dll:GoogleVR.Beta.GvrBetaControllerVisualMulti
+245a12587ed7d4d82b72b489c4af5913 Assembly-CSharp.dll:.IntroDlgEventHandler
