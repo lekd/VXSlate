@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Assets.Script;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -23,7 +24,7 @@ public class IntroDlgEventHandler : MonoBehaviour
     {
         if (serverAddrIF.text.CompareTo("") != 0)
         {
-            
+            GlobalData.SERVER_ADDR = serverAddrIF.text;
             SceneManager.LoadScene(1);
         }
     }

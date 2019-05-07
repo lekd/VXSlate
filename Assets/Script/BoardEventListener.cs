@@ -11,14 +11,14 @@ public class BoardEventListener : MonoBehaviour
 {
     //GameObject board;
     // Start is called before the first frame update
-    const float FOCUSWINDOW_DEPTHOFFSET = 0.02f;
+    const float VIRTUALPAD_DEPTHOFFSET = 0.02f;
     const float GAZEPOINTER_DEPTHOFFSET = 0.01f;
     const int MAX_POINTERS = 5;
-    Vector3 camScreenCenter = new Vector3(0,0,0);
-    GameObject board;
+    public GameObject board;
     Bounds boardBound;
-    GameObject focusWindow;
-    GameObject gazePointer;
+    public GameObject playerCamera;
+    public GameObject virtualPad;
+    public GameObject gazePointer;
     WebSocketSharp.WebSocket wsClient;
     //simple handling of touch pointers for UI updateing
     System.Object pointerUpdateLock = new System.Object();
@@ -32,10 +32,10 @@ public class BoardEventListener : MonoBehaviour
     void Start()
     {
         //StartCoroutine(VRActivator("Cardboard"));
+        playerCamera = GameObject.Find("Player");
         board = GameObject.Find("Board");
         boardBound = board.transform.GetComponent<Collider>().bounds;
-        camScreenCenter = Camera.main.WorldToScreenPoint(Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, Camera.main.nearClipPlane)));
-        focusWindow = GameObject.Find("FocusWindow");
+        virtualPad = GameObject.Find("VirtualPad");
         gazePointer = GameObject.Find("GazePointer");
         pointerInviMat = Resources.Load("Materials/TransparentMat", typeof(Material)) as Material;
         pointerVisMat = Resources.Load("Materials/PointerMarkMat", typeof(Material)) as Material;
@@ -85,83 +85,104 @@ public class BoardEventListener : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //update scale here
+        lock (virtualPadScaleRatioLock)
+        {
+            if(virtualPadScaleRatio.x != 0 && virtualPadScaleRatio.y != 0)
+            {
+                virtualPad.transform.localScale = new Vector3(virtualPadScaleRatio.x, virtualPadScaleRatio.y, 1);
+                virtualPadScaleRatio.Set(0, 0);
+            }
+        }
+        //update location of the virtual pad
+        Bounds fwBound = virtualPad.GetComponent<Collider>().bounds;
+        Rect virtualPad2DContainerLimit = new Rect();
+        virtualPad2DContainerLimit.xMin = boardBound.min.x + fwBound.size.x / 2;
+        virtualPad2DContainerLimit.yMin = boardBound.min.y + fwBound.size.y / 2;
+        virtualPad2DContainerLimit.xMax = boardBound.max.x - fwBound.size.x / 2;
+        virtualPad2DContainerLimit.yMax = boardBound.max.y - fwBound.size.y / 2;
         RaycastHit hitInfo;
-        Ray ray = Camera.main.ScreenPointToRay(camScreenCenter);
+        //Ray ray = Camera.main.ScreenPointToRay(camScreenCenter);
+        Ray ray = new Ray(gazePointer.transform.position, gazePointer.transform.position - playerCamera.transform.position);
         //check current gaze
         if(Physics.Raycast(ray, out hitInfo))
         {
             if(hitInfo.collider != null)
             {
-                //gazePointer.transform.position = hitInfo.point;
-                if (hitInfo.collider.name.CompareTo("Board") == 0 || hitInfo.collider.name.CompareTo("FocusWindow") == 0)
+                if (hitInfo.collider.name.CompareTo("Board") == 0 || hitInfo.collider.name.CompareTo("VirtualPad") == 0)
                 {
                     //Debug.Log("Hit object: " + hitInfo.collider.name);
-                    gazePointer.transform.position = new Vector3(hitInfo.point.x, hitInfo.point.y, hitInfo.point.z - GAZEPOINTER_DEPTHOFFSET);
+                    //gazePointer.transform.position = new Vector3(hitInfo.point.x, hitInfo.point.y, hitInfo.point.z - GAZEPOINTER_DEPTHOFFSET);
                     if (hitInfo.collider.name.CompareTo("Board") == 0)
                     {
                         Vector3 newPos = hitInfo.point;
-                        Vector3 curPos = focusWindow.transform.position;
-                        Bounds fwBound = focusWindow.GetComponent<Collider>().bounds;
-                        Bounds nextBound = new Bounds(newPos, fwBound.size);
-                        if (!boardBound.Contains(nextBound.min))
-                        {
-                            if (nextBound.min.x < boardBound.min.x)
-                            {
-                                newPos.x = newPos.x + (boardBound.min.x - nextBound.min.x);
-                            }
-                            if (nextBound.min.y < boardBound.min.y)
-                            {
-                                newPos.y = newPos.y + (boardBound.min.y - nextBound.min.y);
-                            }
-                        }
-                        if (!boardBound.Contains(nextBound.max))
-                        {
-                            if (nextBound.max.x > boardBound.max.x)
-                            {
-                                newPos.x = newPos.x - (nextBound.max.x - boardBound.max.x);
-                            }
-                            if (nextBound.max.y > boardBound.max.y)
-                            {
-                                newPos.y = newPos.y - (nextBound.max.y - boardBound.max.y);
-                            }
-                        }
-                        //focusWindow.transform.position = new Vector3(hitInfo.point.x, hitInfo.point.y, hitInfo.point.z - 0.02f);
+                        Vector3 curPos = virtualPad.transform.position;
+                        newPos = boundPointToContainer(newPos, virtualPad2DContainerLimit);
+                        //virtualPad.transform.position = new Vector3(hitInfo.point.x, hitInfo.point.y, hitInfo.point.z - 0.02f);
                         lock (gazeControlLocker)
                         {
                             if (canGazeControl)
                             {
-                                focusWindow.transform.Translate(new Vector3(newPos.x - curPos.x, newPos.y - curPos.y, newPos.z - FOCUSWINDOW_DEPTHOFFSET - curPos.z));
+                                virtualPad.transform.Translate(new Vector3(newPos.x - curPos.x, newPos.y - curPos.y, newPos.z - VIRTUALPAD_DEPTHOFFSET - curPos.z));
                             }
                         }
                         //Debug.Log("Collision Point: " + hitInfo.point.ToString());
                     }
-                    
+                    lock (gazeControlLocker)
+                    {
+                        if (virtualPadRelTouchTranslate.x != 0 || virtualPadRelTouchTranslate.y != 0)
+                        {
+                            Vector2 translationByTouch = new Vector2();
+                            translationByTouch.x = virtualPadRelTouchTranslate.x * virtualPad.GetComponent<Collider>().bounds.size.x;
+                            translationByTouch.y = -virtualPadRelTouchTranslate.y * virtualPad.GetComponent<Collider>().bounds.size.y;
+                            Vector3 curPos = virtualPad.transform.position;
+                            Vector3 newPos = new Vector3(curPos.x + translationByTouch.x, curPos.y + translationByTouch.y, curPos.z);
+                            newPos = boundPointToContainer(newPos, virtualPad2DContainerLimit);
+                            virtualPad.transform.Translate(newPos.x - curPos.x, newPos.y - curPos.y, 0);
+                            virtualPadRelTouchTranslate.Set(0, 0);
+                        }
+                    }
                 }
-            }
-        }
-        lock (gazeControlLocker)
-        {
-            if(!canGazeControl && (focusWindowRelTouchTranslate.x != 0 || focusWindowRelTouchTranslate.y != 0))
-            {
-                Vector2 translationByTouch = new Vector2();
-                translationByTouch.x = focusWindowRelTouchTranslate.x * focusWindow.GetComponent<Collider>().bounds.size.x;
-                translationByTouch.y = -focusWindowRelTouchTranslate.y * focusWindow.GetComponent<Collider>().bounds.size.y;
-                focusWindow.transform.Translate(translationByTouch.x, translationByTouch.y, 0);
             }
         }
         //Process UI based on touch input
         UpdateTouchPointersViz(latestTouchEvent);
     }
+    Vector3 boundPointToContainer(Vector3 src,Rect container2D)
+    {
+        Vector3 boundedPoint = new Vector3(src.x, src.y, src.z);
+        if (boundedPoint.x < container2D.xMin)
+        {
+            boundedPoint.x = container2D.x;
+        }
+        else if(boundedPoint.x > container2D.xMax)
+        {
+            boundedPoint.x = container2D.xMax;
+        }
+        if(boundedPoint.y < container2D.yMin)
+        {
+            boundedPoint.y = container2D.yMin;
+        }
+        else if(boundedPoint.y > container2D.yMax)
+        {
+            boundedPoint.y = container2D.yMax;
+        }
+        return boundedPoint;
+    }
     void UpdateTouchPointersViz(TouchEventData latestTouchEvent)
     {
-        Bounds virtualPadArea = focusWindow.GetComponent<Collider>().bounds;
+        Bounds virtualPadArea = virtualPad.GetComponent<Collider>().bounds;
         
         lock(pointerUpdateLock)
         {
             //Update visibility
             for(int i=0;i<MAX_POINTERS;i++)
             {
-                GameObject pointer = GameObject.Find(string.Format("Pointer{0}", i + 1));
+                GameObject pointer = GameObject.Find(string.Format("Finger{0}", i + 1));
+                if(pointer == null)
+                {
+                    continue;
+                }
                 if(i < latestTouchEvent.PointerCount)
                 {
                     //pointer.GetComponent<MeshRenderer>().material = pointerVisMat;
@@ -188,32 +209,44 @@ public class BoardEventListener : MonoBehaviour
         }
     }
 
-    object focusWindowTouchTranslateLock = new object();
-    Vector2 focusWindowRelTouchTranslate = new Vector2();
+    object virtualPadTouchTranslateLock = new object();
+    Vector2 virtualPadRelTouchTranslate = new Vector2();
+    object virtualPadScaleRatioLock = new object();
+    Vector2 virtualPadScaleRatio = new Vector2();
     void HandleTouchEvent(TouchEventData touchEvent)
     {
-        focusWindowRelTouchTranslate.Set(0, 0);
+        
         TouchGestureRecognizer.TouchGesture recognizedGesture = gestureRecognizer.recognizeGesture(touchEvent);
-        if(recognizedGesture.GestureType == TouchGestureRecognizer.TouchGestureType.PAD_TRANSLATING)
+        lock (gazeControlLocker)
+        {
+            canGazeControl = true;
+        }
+        if (recognizedGesture.GestureType == TouchGestureRecognizer.TouchGestureType.PAD_TRANSLATING)
         {
             lock (gazeControlLocker)
             {
                 canGazeControl = false;
             }
             Vector2 eventMetaData = (Vector2)recognizedGesture.MetaData;
-            lock (focusWindowTouchTranslateLock)
+            lock (virtualPadTouchTranslateLock)
             {
-                focusWindowRelTouchTranslate.Set(eventMetaData.x, eventMetaData.y);
+                virtualPadRelTouchTranslate.Set(eventMetaData.x, eventMetaData.y);
             }
             //Debug.Log("Translating Focus Window");
             return;
         }
+        if(recognizedGesture.GestureType == TouchGestureRecognizer.TouchGestureType.PAD_SCALING)
+        {
+            lock(virtualPadScaleRatioLock)
+            {
+                Vector2 scaleRatio = (Vector2)recognizedGesture.MetaData;
+                virtualPadScaleRatio.Set(scaleRatio.x, scaleRatio.y);
+            }
+            return;
+        }
         if(recognizedGesture.GestureType == TouchGestureRecognizer.TouchGestureType.NONE)
         {
-            lock (gazeControlLocker)
-            {
-                canGazeControl = true;
-            }
+            
         }
     }
 }

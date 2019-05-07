@@ -9,7 +9,7 @@ namespace Assets.Script
 {
     public class GlobalData
     {
-        public static string SERVER_ADDR = "192.168.0.100:8080";
+        public static string SERVER_ADDR = "192.168.0.102:8080";
         public static string LoadServerAddress()
         {
             string serverAddr = "";
@@ -38,7 +38,7 @@ namespace Assets.Script
             
             if(serverAddr == "")
             {
-                //serverAddr = SERVER_ADDR;
+                serverAddr = SERVER_ADDR;
             }
             return serverAddr;
         }
