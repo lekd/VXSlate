@@ -90,7 +90,8 @@ public class BoardEventListener : MonoBehaviour
         {
             if(virtualPadScaleRatio.x != 0 && virtualPadScaleRatio.y != 0)
             {
-                virtualPad.transform.localScale = new Vector3(virtualPadScaleRatio.x, virtualPadScaleRatio.y, 1);
+                Vector3 curScale = virtualPad.transform.localScale;
+                virtualPad.transform.localScale = new Vector3(virtualPadScaleRatio.x*curScale.x, virtualPadScaleRatio.y*curScale.y, curScale.z);
                 virtualPadScaleRatio.Set(0, 0);
             }
         }
@@ -118,7 +119,6 @@ public class BoardEventListener : MonoBehaviour
                         Vector3 newPos = hitInfo.point;
                         Vector3 curPos = virtualPad.transform.position;
                         newPos = boundPointToContainer(newPos, virtualPad2DContainerLimit);
-                        //virtualPad.transform.position = new Vector3(hitInfo.point.x, hitInfo.point.y, hitInfo.point.z - 0.02f);
                         lock (gazeControlLocker)
                         {
                             if (canGazeControl)
@@ -128,9 +128,10 @@ public class BoardEventListener : MonoBehaviour
                         }
                         //Debug.Log("Collision Point: " + hitInfo.point.ToString());
                     }
-                    lock (gazeControlLocker)
+                    
+                    if (virtualPadRelTouchTranslate.x != 0 || virtualPadRelTouchTranslate.y != 0)
                     {
-                        if (virtualPadRelTouchTranslate.x != 0 || virtualPadRelTouchTranslate.y != 0)
+                        lock (virtualPadTouchTranslateLock)
                         {
                             Vector2 translationByTouch = new Vector2();
                             translationByTouch.x = virtualPadRelTouchTranslate.x * virtualPad.GetComponent<Collider>().bounds.size.x;
@@ -142,6 +143,8 @@ public class BoardEventListener : MonoBehaviour
                             virtualPadRelTouchTranslate.Set(0, 0);
                         }
                     }
+                    
+                    
                 }
             }
         }
@@ -232,7 +235,6 @@ public class BoardEventListener : MonoBehaviour
             {
                 virtualPadRelTouchTranslate.Set(eventMetaData.x, eventMetaData.y);
             }
-            //Debug.Log("Translating Focus Window");
             return;
         }
         if(recognizedGesture.GestureType == TouchGestureRecognizer.TouchGestureType.PAD_SCALING)
