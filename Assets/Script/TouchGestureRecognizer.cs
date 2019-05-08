@@ -9,7 +9,8 @@ namespace Assets.Script
     public class TouchGestureRecognizer
     {
         private const int TOUCH_REFRESH_RATE = 60;
-        public enum TouchGestureType { PAD_SCALING, PAD_TRANSLATING, FIVE_POINTERS, OBJECT_SCALING, SINGLE_TOUCH,NONE}
+        public enum TouchGestureType { PAD_SCALING, PAD_TRANSLATING, FIVE_POINTERS, OBJECT_SCALING, SINGLE_TAP, LONG_SINGLE_TOUCH, SINGLE_TOUCH_DOWN, SINGLE_TOUCH_MOVE,NONE}
+        RecordedTouch prevSingleTouchDown;
         public class TouchGesture
         {
             private TouchGestureType _gestureType;
@@ -50,6 +51,12 @@ namespace Assets.Script
         public TouchGesture recognizeGesture(TouchEventData curTouchEvent)
         {
             TouchGesture recognizedGesture = new TouchGesture();
+            //if there are more than one fingers, there is no chance for a single tap
+            if(curTouchEvent.PointerCount > 1)
+            {
+                prevSingleTouchDown = null;
+            }
+            //process cases with multi fingers
             if(curTouchEvent.PointerCount == 5 && curTouchEvent.EventType == 0)
             {
                 recognizedGesture.GestureType = TouchGestureType.FIVE_POINTERS;
@@ -119,12 +126,12 @@ namespace Assets.Script
                     float veloYDif = Math.Abs(curTouchEvent.AvaiPointers[0].RelVeloY - curTouchEvent.AvaiPointers[1].RelVeloY);
                     //if(veloXDif/avgVeloX < 0.2 && veloYDif/avgVeloY<0.2)
                     //{
-                        recognizedGesture.GestureType = TouchGestureType.PAD_TRANSLATING;
-                        Vector2 translateVelo = new Vector2();
-                        translateVelo.x = avgVeloX / TOUCH_REFRESH_RATE;
-                        translateVelo.y = avgVeloY / TOUCH_REFRESH_RATE;
-                        recognizedGesture.MetaData = translateVelo;
-                        return recognizedGesture;
+                    recognizedGesture.GestureType = TouchGestureType.PAD_TRANSLATING;
+                    Vector2 translateVelo = new Vector2();
+                    translateVelo.x = avgVeloX / TOUCH_REFRESH_RATE;
+                    translateVelo.y = avgVeloY / TOUCH_REFRESH_RATE;
+                    recognizedGesture.MetaData = translateVelo;
+                    return recognizedGesture;
                     //}
                     //else
                     //{
@@ -136,6 +143,30 @@ namespace Assets.Script
                 {
                     recognizedGesture.GestureType = TouchGestureType.OBJECT_SCALING;
                     return recognizedGesture;
+                }
+            }
+            //process when there is only one finger
+            if(curTouchEvent.EventType == 0 && curTouchEvent.PointerCount == 1)
+            {
+                prevSingleTouchDown = new RecordedTouch();
+                prevSingleTouchDown.TouchPointers.Add(TouchPointerData.Create(curTouchEvent.AvaiPointers[0]));
+                recognizedGesture.GestureType = TouchGestureType.SINGLE_TOUCH_DOWN;
+                recognizedGesture.MetaData = TouchPointerData.Create(curTouchEvent.AvaiPointers[0]);
+                return recognizedGesture;
+            }
+            if(curTouchEvent.EventType == 2 && curTouchEvent.PointerCount == 0)
+            {
+                RecordedTouch recordedTouchUp = new RecordedTouch();
+                if(prevSingleTouchDown != null)
+                {
+                    TimeSpan touchDuration = recordedTouchUp.TimeStamp.Subtract(prevSingleTouchDown.TimeStamp);
+                    if (touchDuration.TotalMilliseconds < 200)
+                    {
+                        recognizedGesture.GestureType = TouchGestureType.SINGLE_TAP;
+                        recognizedGesture.MetaData = new Vector2(prevSingleTouchDown.TouchPointers[0].RelX, prevSingleTouchDown.TouchPointers[0].RelY);
+                        return recognizedGesture;
+                    }
+                    prevSingleTouchDown = null;
                 }
             }
             return recognizedGesture;

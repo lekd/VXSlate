@@ -89,5 +89,11 @@ namespace Assets
             this.RelVeloX = source.RelVeloX;
             this.RelVeloY = source.RelVeloY;
         }
+        public static TouchPointerData Create(TouchPointerData source)
+        {
+            TouchPointerData newPointer = new TouchPointerData();
+            newPointer.Clone(source);
+            return newPointer;
+        }
     }
 }

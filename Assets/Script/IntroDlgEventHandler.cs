@@ -24,7 +24,7 @@ public class IntroDlgEventHandler : MonoBehaviour
     {
         if (serverAddrIF.text.CompareTo("") != 0)
         {
-            GlobalData.SERVER_ADDR = serverAddrIF.text;
+            GlobalUtilities.SERVER_ADDR = serverAddrIF.text;
             SceneManager.LoadScene(1);
         }
     }

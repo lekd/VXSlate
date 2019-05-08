@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Assets.Script
 {
-    public class GlobalData
+    public class GlobalUtilities
     {
         public static string SERVER_ADDR = "192.168.0.102:8080";
         public static string LoadServerAddress()
@@ -27,7 +27,7 @@ namespace Assets.Script
                 {
                     FileStream Fs = File.Create(filePath);
                     StreamWriter sw = new StreamWriter(Fs);
-                    sw.WriteLine(GlobalData.SERVER_ADDR);
+                    sw.WriteLine(GlobalUtilities.SERVER_ADDR);
                     sw.Close();
                 }
                 using (StreamReader sr = File.OpenText(filePath))
@@ -43,5 +43,9 @@ namespace Assets.Script
             return serverAddr;
         }
         
+        public static Vector2 ConvertMobileRelPosToUnityRelPos(Vector2 mobileRelPos)
+        {
+            return new Vector2(mobileRelPos.x - 0.5f, 0.5f - mobileRelPos.y);
+        }
     }
 }

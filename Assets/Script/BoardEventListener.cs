@@ -11,7 +11,7 @@ public class BoardEventListener : MonoBehaviour
 {
     //GameObject board;
     // Start is called before the first frame update
-    const float VIRTUALPAD_DEPTHOFFSET = 0.02f;
+    const float VIRTUALPAD_DEPTHOFFSET = 0.1f;
     const float GAZEPOINTER_DEPTHOFFSET = 0.01f;
     const int MAX_POINTERS = 5;
     public GameObject board;
@@ -19,16 +19,22 @@ public class BoardEventListener : MonoBehaviour
     public GameObject playerCamera;
     public GameObject virtualPad;
     public GameObject gazePointer;
+    public GameObject Finger1;
+    public GameObject Finger2;
+    public GameObject Finger3;
+    public GameObject Finger4;
+    public GameObject Finger5;
+    GameObject[] fingers = null;
     WebSocketSharp.WebSocket wsClient;
     //simple handling of touch pointers for UI updateing
     System.Object pointerUpdateLock = new System.Object();
     TouchEventData latestTouchEvent = new TouchEventData();
-    Material pointerInviMat;
-    Material pointerVisMat;
     bool canGazeControl = true;
     System.Object gazeControlLocker = new System.Object();
 
     TouchGestureRecognizer gestureRecognizer = new TouchGestureRecognizer();
+    TouchGestureRecognizer.TouchGesture latestTouchGesture = null;
+    VirtualPadManager virtualPadManager;
     void Start()
     {
         //StartCoroutine(VRActivator("Cardboard"));
@@ -37,8 +43,12 @@ public class BoardEventListener : MonoBehaviour
         boardBound = board.transform.GetComponent<Collider>().bounds;
         virtualPad = GameObject.Find("VirtualPad");
         gazePointer = GameObject.Find("GazePointer");
-        pointerInviMat = Resources.Load("Materials/TransparentMat", typeof(Material)) as Material;
-        pointerVisMat = Resources.Load("Materials/PointerMarkMat", typeof(Material)) as Material;
+        Finger1.SetActive(false);
+        Finger2.SetActive(false);
+        Finger3.SetActive(false);
+        Finger4.SetActive(false);
+        Finger5.SetActive(false);
+        virtualPadManager = new VirtualPadManager(virtualPad);
         connectWebSocketServer();
     }
     public IEnumerator VRActivator(string deviceName)
@@ -49,11 +59,16 @@ public class BoardEventListener : MonoBehaviour
     }
     void OnApplicationQuit()
     {
-        wsClient.Close();
+        if (wsClient != null)
+        {
+            wsClient.Close();
+            wsClient = null;
+        }
     }
+    #region network-related
     void connectWebSocketServer()
     {
-        wsClient = new WebSocketSharp.WebSocket(string.Format("ws://{0}/main.html", GlobalData.LoadServerAddress()));
+        wsClient = new WebSocketSharp.WebSocket(string.Format("ws://{0}/main.html", GlobalUtilities.LoadServerAddress()));
         wsClient.OnMessage += WsClient_OnMessage;
         wsClient.Connect();
     }
@@ -73,7 +88,7 @@ public class BoardEventListener : MonoBehaviour
                 {
                     latestTouchEvent.Clone(touchEvent);
                 }
-                HandleTouchEvent(touchEvent);
+                latestTouchGesture = HandleTouchGestures(touchEvent);
             }
             catch(Exception ex)
             {
@@ -81,7 +96,8 @@ public class BoardEventListener : MonoBehaviour
             }
         }
     }
-
+    #endregion
+    #region UI-rendering
     // Update is called once per frame
     void Update()
     {
@@ -114,6 +130,7 @@ public class BoardEventListener : MonoBehaviour
                 {
                     //Debug.Log("Hit object: " + hitInfo.collider.name);
                     //gazePointer.transform.position = new Vector3(hitInfo.point.x, hitInfo.point.y, hitInfo.point.z - GAZEPOINTER_DEPTHOFFSET);
+                    //computing new location of the virtual pad
                     if (hitInfo.collider.name.CompareTo("Board") == 0)
                     {
                         Vector3 newPos = hitInfo.point;
@@ -126,7 +143,6 @@ public class BoardEventListener : MonoBehaviour
                                 virtualPad.transform.Translate(new Vector3(newPos.x - curPos.x, newPos.y - curPos.y, newPos.z - VIRTUALPAD_DEPTHOFFSET - curPos.z));
                             }
                         }
-                        //Debug.Log("Collision Point: " + hitInfo.point.ToString());
                     }
                     
                     if (virtualPadRelTouchTranslate.x != 0 || virtualPadRelTouchTranslate.y != 0)
@@ -150,6 +166,11 @@ public class BoardEventListener : MonoBehaviour
         }
         //Process UI based on touch input
         UpdateTouchPointersViz(latestTouchEvent);
+        if (virtualPadManager == null)
+        {
+            virtualPadManager = new VirtualPadManager(virtualPad);
+        }
+        virtualPadManager.ReactToTouchGesture(latestTouchGesture);
     }
     Vector3 boundPointToContainer(Vector3 src,Rect container2D)
     {
@@ -174,49 +195,50 @@ public class BoardEventListener : MonoBehaviour
     }
     void UpdateTouchPointersViz(TouchEventData latestTouchEvent)
     {
+        if(fingers == null)
+        {
+            fingers = new GameObject[] { Finger1, Finger2, Finger3, Finger4, Finger5 };
+        }
         Bounds virtualPadArea = virtualPad.GetComponent<Collider>().bounds;
-        
         lock(pointerUpdateLock)
         {
             //Update visibility
             for(int i=0;i<MAX_POINTERS;i++)
             {
-                GameObject pointer = GameObject.Find(string.Format("Finger{0}", i + 1));
-                if(pointer == null)
+                GameObject finger = fingers[i];
+                if(finger == null)
                 {
                     continue;
                 }
                 if(i < latestTouchEvent.PointerCount)
                 {
-                    //pointer.GetComponent<MeshRenderer>().material = pointerVisMat;
-                    Material[] pMats = pointer.GetComponent<MeshRenderer>().materials;
-                    if(pMats.Length>0)
-                    {
-                        pMats[0] = pointerVisMat;
-                        pointer.GetComponent<MeshRenderer>().materials = pMats;
-                    }
-                    //compute position in virtual pad
-                    Vector3 pos = new Vector3();
-                    pos.x = virtualPadArea.min.x + virtualPadArea.size.x * latestTouchEvent.AvaiPointers[i].RelX;
-                    pos.y = virtualPadArea.max.y - virtualPadArea.size.y * latestTouchEvent.AvaiPointers[i].RelY;
-                    pos.z = virtualPadArea.min.z;
-                    pointer.transform.position = pos;
+                    finger.SetActive(true);
+                    //position finger in virtual pad
+                    /*Vector3 localPos = new Vector3();
+                    localPos.x =  latestTouchEvent.AvaiPointers[i].RelX - 0.5f;
+                    localPos.y =  0.5f - latestTouchEvent.AvaiPointers[i].RelY;
+                    localPos.z = finger.transform.localPosition.z;
+                    finger.transform.localPosition = localPos;*/
+                    Vector2 relPosInPad = GlobalUtilities.ConvertMobileRelPosToUnityRelPos(new Vector2(latestTouchEvent.AvaiPointers[i].RelX, latestTouchEvent.AvaiPointers[i].RelY));
+                    finger.transform.localPosition = new Vector3(relPosInPad.x,relPosInPad.y, finger.transform.localPosition.z);
+
                 }
                 else
                 {
-                    pointer.GetComponent<Renderer>().material = pointerInviMat;
-                    pointer.transform.position = virtualPadArea.min;
+                    //finger.transform.position = virtualPadArea.min;
+                    finger.SetActive(false);
                 }
             }
             
         }
     }
-
+    #endregion
+    #region Touch-event related
     object virtualPadTouchTranslateLock = new object();
     Vector2 virtualPadRelTouchTranslate = new Vector2();
     object virtualPadScaleRatioLock = new object();
     Vector2 virtualPadScaleRatio = new Vector2();
-    void HandleTouchEvent(TouchEventData touchEvent)
+    TouchGestureRecognizer.TouchGesture HandleTouchGestures(TouchEventData touchEvent)
     {
         
         TouchGestureRecognizer.TouchGesture recognizedGesture = gestureRecognizer.recognizeGesture(touchEvent);
@@ -235,7 +257,8 @@ public class BoardEventListener : MonoBehaviour
             {
                 virtualPadRelTouchTranslate.Set(eventMetaData.x, eventMetaData.y);
             }
-            return;
+            Debug.Log("Pad translating");
+            return recognizedGesture;
         }
         if(recognizedGesture.GestureType == TouchGestureRecognizer.TouchGestureType.PAD_SCALING)
         {
@@ -244,11 +267,17 @@ public class BoardEventListener : MonoBehaviour
                 Vector2 scaleRatio = (Vector2)recognizedGesture.MetaData;
                 virtualPadScaleRatio.Set(scaleRatio.x, scaleRatio.y);
             }
-            return;
+            return recognizedGesture;
+        }
+        if(recognizedGesture.GestureType == TouchGestureRecognizer.TouchGestureType.SINGLE_TAP)
+        {
+            Vector2 tapPos = (Vector2)recognizedGesture.MetaData;
         }
         if(recognizedGesture.GestureType == TouchGestureRecognizer.TouchGestureType.NONE)
         {
             
         }
+        return recognizedGesture;
     }
+    #endregion
 }
