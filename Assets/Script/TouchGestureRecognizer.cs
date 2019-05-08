@@ -57,7 +57,7 @@ namespace Assets.Script
                 prevSingleTouchDown = null;
             }
             //process cases with multi fingers
-            if(curTouchEvent.PointerCount == 5 && curTouchEvent.EventType == 0)
+            if(curTouchEvent.PointerCount == 5)// && curTouchEvent.EventType == 0)
             {
                 recognizedGesture.GestureType = TouchGestureType.FIVE_POINTERS;
                 return recognizedGesture;

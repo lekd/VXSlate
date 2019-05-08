@@ -18,12 +18,18 @@ public class BoardEventListener : MonoBehaviour
     Bounds boardBound;
     public GameObject playerCamera;
     public GameObject virtualPad;
+    public GameObject menuManip;
+    public GameObject menuDraw;
     public GameObject gazePointer;
     public GameObject Finger1;
     public GameObject Finger2;
     public GameObject Finger3;
     public GameObject Finger4;
     public GameObject Finger5;
+    public Material menuManipNormalMat;
+    public Material menuManipPressedMat;
+    public Material menuDrawNormalMat;
+    public Material menuDrawPressedMat;
     GameObject[] fingers = null;
     WebSocketSharp.WebSocket wsClient;
     //simple handling of touch pointers for UI updateing
@@ -34,21 +40,22 @@ public class BoardEventListener : MonoBehaviour
 
     TouchGestureRecognizer gestureRecognizer = new TouchGestureRecognizer();
     TouchGestureRecognizer.TouchGesture latestTouchGesture = null;
-    VirtualPadManager virtualPadManager;
+    VirtualPadManager _virtualPadManager;
     void Start()
     {
         //StartCoroutine(VRActivator("Cardboard"));
-        playerCamera = GameObject.Find("Player");
-        board = GameObject.Find("Board");
+        //playerCamera = GameObject.Find("Player");
+        //board = GameObject.Find("Board");
         boardBound = board.transform.GetComponent<Collider>().bounds;
-        virtualPad = GameObject.Find("VirtualPad");
-        gazePointer = GameObject.Find("GazePointer");
+        //virtualPad = GameObject.Find("VirtualPad");
+        //gazePointer = GameObject.Find("GazePointer");
         Finger1.SetActive(false);
         Finger2.SetActive(false);
         Finger3.SetActive(false);
         Finger4.SetActive(false);
         Finger5.SetActive(false);
-        virtualPadManager = new VirtualPadManager(virtualPad);
+        _virtualPadManager = new VirtualPadManager(virtualPad,menuManip,menuDraw);
+        _virtualPadManager.setMenuMaterials(menuManipNormalMat, menuManipPressedMat, menuDrawNormalMat, menuDrawPressedMat);
         connectWebSocketServer();
     }
     public IEnumerator VRActivator(string deviceName)
@@ -145,32 +152,33 @@ public class BoardEventListener : MonoBehaviour
                         }
                     }
                     
+                }
+                lock (virtualPadTouchTranslateLock)
+                {
                     if (virtualPadRelTouchTranslate.x != 0 || virtualPadRelTouchTranslate.y != 0)
                     {
-                        lock (virtualPadTouchTranslateLock)
-                        {
-                            Vector2 translationByTouch = new Vector2();
-                            translationByTouch.x = virtualPadRelTouchTranslate.x * virtualPad.GetComponent<Collider>().bounds.size.x;
-                            translationByTouch.y = -virtualPadRelTouchTranslate.y * virtualPad.GetComponent<Collider>().bounds.size.y;
-                            Vector3 curPos = virtualPad.transform.position;
-                            Vector3 newPos = new Vector3(curPos.x + translationByTouch.x, curPos.y + translationByTouch.y, curPos.z);
-                            newPos = boundPointToContainer(newPos, virtualPad2DContainerLimit);
-                            virtualPad.transform.Translate(newPos.x - curPos.x, newPos.y - curPos.y, 0);
-                            virtualPadRelTouchTranslate.Set(0, 0);
-                        }
+                        Vector2 translationByTouch = new Vector2();
+                        translationByTouch.x = virtualPadRelTouchTranslate.x * virtualPad.GetComponent<Collider>().bounds.size.x;
+                        translationByTouch.y = -virtualPadRelTouchTranslate.y * virtualPad.GetComponent<Collider>().bounds.size.y;
+                        Vector3 curPos = virtualPad.transform.position;
+                        Vector3 newPos = new Vector3(curPos.x + translationByTouch.x, curPos.y + translationByTouch.y, curPos.z);
+                        newPos = boundPointToContainer(newPos, virtualPad2DContainerLimit);
+                        virtualPad.transform.Translate(newPos.x - curPos.x, newPos.y - curPos.y, 0);
+                        virtualPadRelTouchTranslate.Set(0, 0);
                     }
-                    
-                    
                 }
+
             }
         }
         //Process UI based on touch input
         UpdateTouchPointersViz(latestTouchEvent);
-        if (virtualPadManager == null)
+        //virtualPadManager.ReactToTouchGesture(latestTouchGesture);
+        if(_virtualPadManager == null)
         {
-            virtualPadManager = new VirtualPadManager(virtualPad);
+            _virtualPadManager = new VirtualPadManager(virtualPad,menuManip,menuDraw);
+            _virtualPadManager.setMenuMaterials(menuManipNormalMat, menuManipPressedMat, menuDrawNormalMat, menuDrawPressedMat);
         }
-        virtualPadManager.ReactToTouchGesture(latestTouchGesture);
+        _virtualPadManager.ReactToTouchGesture(latestTouchGesture);
     }
     Vector3 boundPointToContainer(Vector3 src,Rect container2D)
     {
@@ -257,7 +265,6 @@ public class BoardEventListener : MonoBehaviour
             {
                 virtualPadRelTouchTranslate.Set(eventMetaData.x, eventMetaData.y);
             }
-            Debug.Log("Pad translating");
             return recognizedGesture;
         }
         if(recognizedGesture.GestureType == TouchGestureRecognizer.TouchGestureType.PAD_SCALING)
