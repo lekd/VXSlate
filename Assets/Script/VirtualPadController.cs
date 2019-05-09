@@ -1,37 +1,41 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class VirtualPadController : MonoBehaviour
 {
     //Public Game Objects
-    public GameObject eventListenner;
-    public GameObject gameCamera;
-    public GameObject gazePoint;
+    public GameObject eventListennerObject;
+    public GameObject gameCameraObject;
+    public GameObject gazePointObject;
 
     // 2D Coordinates of the Center of the Virtual Pad
-    Vector2 center; //Center point of the virtual pad
+    Vector2 center = Vector2.zero; //Center point of the virtual pad
 
-    Vector2 A; // Top left point
-    Vector2 B; // Top right point
-    Vector2 C; // Bottom right point
-    Vector2 D; // Bottom left point
+    Vector2 A = Vector2.zero; // Top left point
+    Vector2 B = Vector2.zero; // Top right point
+    Vector2 C = Vector2.zero; // Bottom right point
+    Vector2 D = Vector2.zero; // Bottom left point
 
     // Variables for timer;
-    float translationTime;
-    Vector2 translationVector;
+    float translationTime = 0f;
+    Vector2 translationVector = Vector2.zero;
 
-    float rotationTime;
-    float rotationAngle;
-    float rotationStartTime;
+    float rotationTime = 0f;
+    float rotationAngle = 0f;
+    float rotationStartTime = 0f;
+
+    Camera gameCamera;
+    Transform gazePoint;
 
     void Start()
     {
-        center = A = B = C = D = Vector2.zero;
+        if(gameCameraObject)
+            gameCamera = gameCameraObject.GetComponent<Camera>();
 
-        translationTime = rotationTime = 0f;
-        translationVector = Vector2.zero;
-        rotationTime = rotationAngle = rotationStartTime = 0;
+        if (gazePointObject)
+            gazePoint = gazePointObject.GetComponent<Transform>();
     }
 
     // Update is called once per frame
@@ -45,9 +49,29 @@ public class VirtualPadController : MonoBehaviour
             translationTime -= Time.deltaTime;
             this.transform.Translate(translationVector * Time.deltaTime);
         }
-        else
+        else if(translationTime < 0)
         {
             translationTime = 0;
+        }
+
+
+        //Update Virtual Pad Following Camera Lookat Vector
+        UpdateVirtualPadBasedOnCamera();
+    }
+
+    private void UpdateVirtualPadBasedOnCamera()
+    {
+        if(gameCamera)
+        {
+            //Vector2 cameraPosition = new Vector2(gameCamera.transform.position.z, gameCamera.transform.position.y);
+            //Vector2 virtualPadPosition = new Vector2(this.transform.position.z, gameCamera.transform.position.y);
+            //Vector2 lookAt = new Vector2(gazePoint.position.z - gameCamera.transform.position.z, gazePoint.position.y - gameCamera.transform.position.z);
+
+            //float angle = Vector2.Angle(virtualPadPosition - cameraPosition, lookAt);
+
+            //float b = (virtualPadPosition - cameraPosition).magnitude * Mathf.Sin(angle) / Mathf.Sin(90 - angle);
+
+            //float x = 
         }
     }
 

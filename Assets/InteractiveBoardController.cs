@@ -17,15 +17,17 @@ public class InteractiveBoardController : MonoBehaviour
         // set center of the virtual pad
         if(virtualPadController != null)
             virtualPadController.SetCenter(Vector2.zero);
+
+
         //translate the virtual pad
 
         if (virtualPadController != null)
-            virtualPadController.Translate(new Vector2(3, 4), 10);
+            virtualPadController.Translate(new Vector2(3, 4), 1.5f);
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 }
