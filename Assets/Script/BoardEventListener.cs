@@ -41,6 +41,7 @@ public class BoardEventListener : MonoBehaviour
     TouchGestureRecognizer gestureRecognizer = new TouchGestureRecognizer();
     TouchGestureRecognizer.TouchGesture latestTouchGesture = null;
     VirtualPadManager _virtualPadManager;
+
     void Start()
     {
         //StartCoroutine(VRActivator("Cardboard"));
@@ -125,9 +126,12 @@ public class BoardEventListener : MonoBehaviour
         virtualPad2DContainerLimit.yMin = boardBound.min.y + fwBound.size.y / 2;
         virtualPad2DContainerLimit.xMax = boardBound.max.x - fwBound.size.x / 2;
         virtualPad2DContainerLimit.yMax = boardBound.max.y - fwBound.size.y / 2;
+
         RaycastHit hitInfo;
+
         //Ray ray = Camera.main.ScreenPointToRay(camScreenCenter);
         Ray ray = new Ray(gazePointer.transform.position, gazePointer.transform.position - playerCamera.transform.position);
+
         //check current gaze
         if(Physics.Raycast(ray, out hitInfo))
         {
@@ -170,8 +174,10 @@ public class BoardEventListener : MonoBehaviour
 
             }
         }
+
         //Process UI based on touch input
         UpdateTouchPointersViz(latestTouchEvent);
+
         //virtualPadManager.ReactToTouchGesture(latestTouchGesture);
         if(_virtualPadManager == null)
         {
