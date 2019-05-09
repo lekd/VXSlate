@@ -845,7 +845,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3f869dba0667ea48bbd476a53b775e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  eventListennerObject: {fileID: 0}
+  eventListenerObject: {fileID: 795212890}
   gameCameraObject: {fileID: 2092491067}
   gazePointObject: {fileID: 1554097519}
   boardObject: {fileID: 1865788402}
@@ -854,6 +854,12 @@ MonoBehaviour:
   finger3: {fileID: 370161765}
   finger4: {fileID: 1773726217}
   finger5: {fileID: 1329799695}
+  menuManip: {fileID: 839929607}
+  menuDraw: {fileID: 1503147308}
+  menuManipNormalMat: {fileID: 2100000, guid: 6c0abd247cca0b54294a23c2837831db, type: 2}
+  menuManipPressedMat: {fileID: 2100000, guid: 6c073058f2973d844981aa31b93ce195, type: 2}
+  menuDrawNormalMat: {fileID: 2100000, guid: fe1fdeb5232b34847a1b21a0c33af6d9, type: 2}
+  menuDrawPressedMat: {fileID: 2100000, guid: 6bf4821f9573d3b46a2a30a19bab31da, type: 2}
 --- !u!1001 &1108488499
 PrefabInstance:
   m_ObjectHideFlags: 0
