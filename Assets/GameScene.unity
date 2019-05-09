@@ -362,6 +362,49 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &795212890
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 795212892}
+  - component: {fileID: 795212891}
+  m_Layer: 0
+  m_Name: TabletTouchEventManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &795212891
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 795212890}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a14136a1f41286d40aee16292a137e38, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &795212892
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 795212890}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 197.3565, y: 348.7163, z: 381.6171}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &801418712
 GameObject:
   m_ObjectHideFlags: 0
@@ -802,9 +845,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3f869dba0667ea48bbd476a53b775e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  eventListenner: {fileID: 263427947}
-  gameCamera: {fileID: 2092491067}
-  gazePoint: {fileID: 1554097519}
+  eventListennerObject: {fileID: 0}
+  gameCameraObject: {fileID: 2092491067}
+  gazePointObject: {fileID: 1554097519}
+  boardObject: {fileID: 1865788402}
+  finger1: {fileID: 934791698}
+  finger2: {fileID: 1229382090}
+  finger3: {fileID: 370161765}
+  finger4: {fileID: 1773726217}
+  finger5: {fileID: 1329799695}
 --- !u!1001 &1108488499
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1299,7 +1348,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1554097519}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 14}
+  m_LocalPosition: {x: 0, y: 0, z: 13}
   m_LocalScale: {x: 0.16862212, y: 0.19048077, z: 0.010000001}
   m_Children: []
   m_Father: {fileID: 2092491071}
