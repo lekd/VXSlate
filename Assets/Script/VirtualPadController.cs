@@ -41,20 +41,20 @@ public class VirtualPadController : MonoBehaviour
     GestureRecognizedEventCallback gestureRecognizedCallback = null;
     PointerReceivedEventCallback pointerReceivedCallback = null;
 
-    public enum VirtualPadState { OBJECT_MANIP, DRAW, MENU_SELECTION }
+    public enum EditMode { OBJECT_MANIP, DRAW, MENU_SELECTION }
 
-    VirtualPadState _currentState;
+    EditMode _currentMode;
 
-    public VirtualPadState CurrentState
+    public EditMode CurrentMode
     {
         get
         {
-            return _currentState;
+            return _currentMode;
         }
 
         set
         {
-            _currentState = value;
+            _currentMode = value;
         }
     }
 
@@ -64,7 +64,7 @@ public class VirtualPadController : MonoBehaviour
     CriticVar padRotationByPointers = new CriticVar();
     void Start()
     {
-        _currentState = VirtualPadState.OBJECT_MANIP;
+        _currentMode = EditMode.OBJECT_MANIP;
         if (gameCameraObject)
         {
             gameCamera = gameCameraObject.GetComponent<Camera>();
@@ -240,7 +240,7 @@ public class VirtualPadController : MonoBehaviour
     }
     void gestureRecognizedHandler(TouchGestureRecognizer.TouchGesture recognizedGesture)
     {
-        if(_currentState == VirtualPadState.MENU_SELECTION)
+        if(_currentMode == EditMode.MENU_SELECTION)
         {
 
         }
