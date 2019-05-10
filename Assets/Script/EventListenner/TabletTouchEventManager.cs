@@ -10,6 +10,7 @@ public class TabletTouchEventManager : MonoBehaviour, IGeneralPointerEventListen
     WebSocketSharp.WebSocket wsClient;
     TouchGestureRecognizer gestureRecognizer = new TouchGestureRecognizer();
     event PointerReceivedEventCallback pointerReceivedListener;
+
     // Start is called before the first frame update
     void Start()
     {
