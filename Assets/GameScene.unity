@@ -478,6 +478,7 @@ GameObject:
   - component: {fileID: 839929611}
   - component: {fileID: 839929610}
   - component: {fileID: 839929609}
+  - component: {fileID: 839929612}
   m_Layer: 0
   m_Name: Menu_Manip
   m_TagString: Untagged
@@ -558,6 +559,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 839929607}
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &839929612
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 839929607}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 099c355e7cbf4684d9e1a0b2a60ff33a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parentObject: {fileID: 1105813822}
+  normalStateMat: {fileID: 2100000, guid: 6c0abd247cca0b54294a23c2837831db, type: 2}
+  pressedStateMat: {fileID: 2100000, guid: 6c073058f2973d844981aa31b93ce195, type: 2}
 --- !u!1 &934791698
 GameObject:
   m_ObjectHideFlags: 0
@@ -826,10 +842,6 @@ MonoBehaviour:
   finger5: {fileID: 1329799695}
   menuManip: {fileID: 839929607}
   menuDraw: {fileID: 1503147308}
-  menuManipNormalMat: {fileID: 2100000, guid: 6c0abd247cca0b54294a23c2837831db, type: 2}
-  menuManipPressedMat: {fileID: 2100000, guid: 6c073058f2973d844981aa31b93ce195, type: 2}
-  menuDrawNormalMat: {fileID: 2100000, guid: fe1fdeb5232b34847a1b21a0c33af6d9, type: 2}
-  menuDrawPressedMat: {fileID: 2100000, guid: 6bf4821f9573d3b46a2a30a19bab31da, type: 2}
 --- !u!1001 &1108488499
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1217,6 +1229,7 @@ GameObject:
   - component: {fileID: 1503147312}
   - component: {fileID: 1503147311}
   - component: {fileID: 1503147310}
+  - component: {fileID: 1503147313}
   m_Layer: 0
   m_Name: Menu_Draw
   m_TagString: Untagged
@@ -1297,6 +1310,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1503147308}
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1503147313
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1503147308}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 099c355e7cbf4684d9e1a0b2a60ff33a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parentObject: {fileID: 1105813822}
+  normalStateMat: {fileID: 2100000, guid: fe1fdeb5232b34847a1b21a0c33af6d9, type: 2}
+  pressedStateMat: {fileID: 2100000, guid: 6bf4821f9573d3b46a2a30a19bab31da, type: 2}
 --- !u!1 &1554097519
 GameObject:
   m_ObjectHideFlags: 0

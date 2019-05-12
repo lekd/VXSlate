@@ -69,7 +69,7 @@ namespace Assets.Script
                 stayStillSingleTouchDown = null;
             }
             if(curTouchEvent.PointerCount == 1 && 
-                (Math.Abs(curTouchEvent.AvaiPointers[0].RelVeloX)>0.0001 || Math.Abs(curTouchEvent.AvaiPointers[0].RelVeloY) > 0.0001))
+                (Math.Abs(curTouchEvent.AvaiPointers[0].RelVeloX)>0.1 || Math.Abs(curTouchEvent.AvaiPointers[0].RelVeloY) > 0.1))
             {
                 stayStillSingleTouchDown = null;
             }
@@ -83,14 +83,7 @@ namespace Assets.Script
             //recognizing scaling virtual pad gesture
             if(curTouchEvent.PointerCount == 3 && curTouchEvent.EventType == 1)
             {
-                if(recognizePadScalingGesture(curTouchEvent.AvaiPointers,out recognizedGesture))
-                {
-                    
-                }
-                else
-                {
-
-                }
+                bool isScalingPad = recognizePadScalingGesture(curTouchEvent.AvaiPointers, out recognizedGesture);
                 informGestureRecognizedEvent(recognizedGesture);
             }
             //recognizing pad translating gesture
@@ -116,10 +109,27 @@ namespace Assets.Script
                     }
                 }
                 //two fingers moving in opposite direction => object scaling
-                if(curTouchEvent.AvaiPointers[0].RelVeloX * curTouchEvent.AvaiPointers[1].RelVeloX < 0
-                    || curTouchEvent.AvaiPointers[0].RelVeloY * curTouchEvent.AvaiPointers[1].RelVeloY < 0)
+                else if(curTouchEvent.AvaiPointers[0].RelVeloX * curTouchEvent.AvaiPointers[1].RelVeloX < 0
+                    && curTouchEvent.AvaiPointers[0].RelVeloY * curTouchEvent.AvaiPointers[1].RelVeloY < 0)
                 {
                     recognizedGesture.GestureType = TouchGestureType.OBJECT_SCALING;
+                    Vector2 futurePointer1 = new Vector2();
+                    futurePointer1.x = curTouchEvent.AvaiPointers[0].RelX + curTouchEvent.AvaiPointers[0].RelVeloX * TOUCH_REFRESH_RATE;
+                    futurePointer1.y = curTouchEvent.AvaiPointers[0].RelY + curTouchEvent.AvaiPointers[0].RelVeloY * TOUCH_REFRESH_RATE;
+                    Vector2 futurePointer2 = new Vector2();
+                    futurePointer2.x = curTouchEvent.AvaiPointers[1].RelX + curTouchEvent.AvaiPointers[1].RelVeloX * TOUCH_REFRESH_RATE;
+                    futurePointer2.y = curTouchEvent.AvaiPointers[1].RelY + curTouchEvent.AvaiPointers[1].RelVeloY * TOUCH_REFRESH_RATE;
+                    Vector2 curPointersDif = new Vector2(curTouchEvent.AvaiPointers[1].RelX - curTouchEvent.AvaiPointers[0].RelX,
+                                                        curTouchEvent.AvaiPointers[1].RelY - curTouchEvent.AvaiPointers[0].RelY);
+                    double curPointersDist = Math.Sqrt(curPointersDif.x * curPointersDif.x + curPointersDif.y * curPointersDif.y);
+                    Vector2 futurePointersDif = new Vector2(futurePointer2.x - futurePointer1.x, futurePointer2.y - futurePointer1.y);
+                    double futurePointersDist = Math.Sqrt(futurePointersDif.x * futurePointersDif.x + futurePointersDif.y * futurePointersDif.y);
+                    Vector2 scaleRatio = new Vector2((float)(futurePointersDist / curPointersDist), (float)(futurePointersDist / curPointersDist));
+                    Vector2[] gestureData = new Vector2[3];
+                    gestureData[0] = scaleRatio;
+                    gestureData[1] = new Vector2(curTouchEvent.AvaiPointers[0].RelX, curTouchEvent.AvaiPointers[0].RelY);
+                    gestureData[2] = new Vector2(curTouchEvent.AvaiPointers[1].RelX, curTouchEvent.AvaiPointers[1].RelY);
+                    recognizedGesture.MetaData = gestureData;
                     informGestureRecognizedEvent(recognizedGesture);
                     return;
                 }
@@ -130,11 +140,22 @@ namespace Assets.Script
                 stayStillSingleTouchDown = new RecordedTouch();
                 stayStillSingleTouchDown.TouchPointers.Add(TouchPointerData.Create(curTouchEvent.AvaiPointers[0]));
                 recognizedGesture.GestureType = TouchGestureType.SINGLE_TOUCH_DOWN;
-                recognizedGesture.MetaData = TouchPointerData.Create(curTouchEvent.AvaiPointers[0]);
+                //recognizedGesture.MetaData =  TouchPointerData.Create(curTouchEvent.AvaiPointers[0]);
+                recognizedGesture.MetaData = new Vector2(curTouchEvent.AvaiPointers[0].RelX, curTouchEvent.AvaiPointers[0].RelY);
                 informGestureRecognizedEvent(recognizedGesture);
                 return ;
             }
-            if(curTouchEvent.EventType == 2 && curTouchEvent.PointerCount == 0)
+            if (curTouchEvent.EventType == 1 && curTouchEvent.PointerCount == 1)
+            {
+                stayStillSingleTouchDown = new RecordedTouch();
+                stayStillSingleTouchDown.TouchPointers.Add(TouchPointerData.Create(curTouchEvent.AvaiPointers[0]));
+                recognizedGesture.GestureType = TouchGestureType.SINGLE_TOUCH_MOVE;
+                //recognizedGesture.MetaData =  TouchPointerData.Create(curTouchEvent.AvaiPointers[0]);
+                recognizedGesture.MetaData = new Vector2(curTouchEvent.AvaiPointers[0].RelX, curTouchEvent.AvaiPointers[0].RelY);
+                informGestureRecognizedEvent(recognizedGesture);
+                return;
+            }
+            if (curTouchEvent.EventType == 2 && curTouchEvent.PointerCount == 0)
             {
                 //first inform a non gesture for client to process if needed
                 TouchGesture non_gesture = new TouchGesture();
@@ -143,7 +164,7 @@ namespace Assets.Script
                 if(stayStillSingleTouchDown != null)
                 {
                     TimeSpan touchDuration = recordedTouchUp.TimeStamp.Subtract(stayStillSingleTouchDown.TimeStamp);
-                    if (touchDuration.TotalMilliseconds < 200)
+                    if (touchDuration.TotalMilliseconds < 500)
                     {
                         recognizedGesture.GestureType = TouchGestureType.SINGLE_TAP;
                         recognizedGesture.MetaData = new Vector2(stayStillSingleTouchDown.TouchPointers[0].RelX, stayStillSingleTouchDown.TouchPointers[0].RelY);

@@ -23,11 +23,6 @@ public class VirtualPadController : MonoBehaviour
     public GameObject menuDraw;
     GameObject[] fingers;
 
-    public Material menuManipNormalMat;
-    public Material menuManipPressedMat;
-    public Material menuDrawNormalMat;
-    public Material menuDrawPressedMat;
-
     Bounds boardObjectBound;
 
     // Variables for timer;
@@ -37,6 +32,7 @@ public class VirtualPadController : MonoBehaviour
     Camera gameCamera;
     Transform gazePoint;
     IGeneralPointerEventListener eventTouchListener;
+    MenuItemListener[] menuItems = new MenuItemListener[2];
     
     GestureRecognizedEventCallback gestureRecognizedCallback = null;
     PointerReceivedEventCallback pointerReceivedCallback = null;
@@ -44,7 +40,6 @@ public class VirtualPadController : MonoBehaviour
     public enum EditMode { OBJECT_MANIP, DRAW, MENU_SELECTION }
 
     EditMode _currentMode;
-
     public EditMode CurrentMode
     {
         get
@@ -57,11 +52,13 @@ public class VirtualPadController : MonoBehaviour
             _currentMode = value;
         }
     }
-
-    CriticVar curAvaiPointers = new CriticVar();
+    
     CriticVar padTranslationByPointers = new CriticVar();
     CriticVar padScaleByPointers = new CriticVar();
     CriticVar padRotationByPointers = new CriticVar();
+    Rect boardFlatBound = new Rect();
+    Rect padFlatBound = new Rect();
+    Vector2 localPadFlatCenter = new Vector2();
     void Start()
     {
         _currentMode = EditMode.OBJECT_MANIP;
@@ -78,16 +75,21 @@ public class VirtualPadController : MonoBehaviour
         {
             eventTouchListener = eventListenerObject.GetComponent<TabletTouchEventManager>();
         }
-        pointerReceivedCallback = this.pointerReceivedHandler;
         gestureRecognizedCallback = this.gestureRecognizedHandler;
         if(eventTouchListener != null)
         {
-            eventTouchListener.SetTouchReceivedEventListener(pointerReceivedCallback);
             eventTouchListener.SetGestureRecognizedListener(gestureRecognizedCallback);
         }
-
+        menuItems[0] = menuManip.GetComponent<MenuItemListener>();
+        menuItems[0].menuSelectedListener += VirtualPadController_menuSelectedListener;
+        menuItems[0].CorrespondingMode = EditMode.OBJECT_MANIP;
+        menuItems[1] = menuDraw.GetComponent<MenuItemListener>();
+        menuItems[1].menuSelectedListener += VirtualPadController_menuSelectedListener;
+        menuItems[1].CorrespondingMode = EditMode.DRAW;
 
         boardObjectBound = boardObject.GetComponent<Collider>().bounds;
+        boardFlatBound.min = new Vector2(boardObjectBound.min.x, boardObjectBound.min.y);
+        boardFlatBound.max = new Vector2(boardFlatBound.max.x, boardFlatBound.max.y);
         fingers = new GameObject[] { finger1, finger2, finger3, finger4, finger5 };
         for(int i=0; i< fingers.Length; i++)
         {
@@ -100,25 +102,12 @@ public class VirtualPadController : MonoBehaviour
 
         setMenuActiveness(false);
     }
-
     // Update is called once per frame
     void Update()
     {
-        /*Debug.Log(center);
-
-        // Translate the pad to a new position
-        if(translationTime > 0)
-        {
-            translationTime -= Time.deltaTime;
-            this.transform.Translate(translationVector * Time.deltaTime);
-        }
-        else if(translationTime < 0)
-        {
-            translationTime = 0;
-        }*/
-
+        
         //Update virtual pad scale
-        lock(padScaleByPointers.AccessLock)
+        lock (padScaleByPointers.AccessLock)
         {
             Vector2 scaleRatio = (Vector2)padScaleByPointers.CriticData;
             if(scaleRatio.x != 0 && scaleRatio.y != 0)
@@ -155,6 +144,18 @@ public class VirtualPadController : MonoBehaviour
                 padTranslationByPointers.CriticData = new Vector2(0, 0);
             }
         }
+        if (_currentMode == EditMode.MENU_SELECTION)
+        {
+            setMenuActiveness(true);
+        }
+        else
+        {
+            setMenuActiveness(false);
+        }
+        //update current size of the virtual flat boundary
+        padFlatBound.min = new Vector2(gameObject.GetComponent<Collider>().bounds.min.x, gameObject.GetComponent<Collider>().bounds.min.y);
+        padFlatBound.max = new Vector2(gameObject.GetComponent<Collider>().bounds.max.x, gameObject.GetComponent<Collider>().bounds.max.y);
+        localPadFlatCenter.Set(gameObject.transform.localPosition.x, gameObject.transform.localPosition.y);
     }
 
     private void UpdateVirtualPadBasedOnCamera(Rect board2DBound)
@@ -188,6 +189,7 @@ public class VirtualPadController : MonoBehaviour
         {
             fingers = new GameObject[] { finger1, finger2, finger3, finger4, finger5 };
         }
+        CriticVar curAvaiPointers = eventTouchListener.getCurrentAvaiPointers();
         lock (curAvaiPointers.AccessLock)
         {
             if(curAvaiPointers.CriticData == null)
@@ -219,34 +221,36 @@ public class VirtualPadController : MonoBehaviour
     }
     private void setMenuActiveness(bool isActive)
     {
-        if(menuManip)
-        {
-            menuManip.GetComponent<MeshRenderer>().material = menuManipNormalMat;
-            menuManip.SetActive(isActive);
-        }
-        if(menuDraw)
-        {
-            menuDraw.GetComponent<MeshRenderer>().material = menuDrawNormalMat;
-            menuDraw.SetActive(isActive);
-        }
+        menuManip.SetActive(isActive);
+        menuDraw.SetActive(isActive);
     }
     #region handle touch/pointer data
-    void pointerReceivedHandler(TouchEventData touchEvent)
-    {
-        lock(curAvaiPointers.AccessLock)
-        {
-            curAvaiPointers.CriticData = touchEvent.AvaiPointers;
-        }
-    }
     void gestureRecognizedHandler(TouchGestureRecognizer.TouchGesture recognizedGesture)
     {
         if(_currentMode == EditMode.MENU_SELECTION)
         {
-
+            if (recognizedGesture.GestureType == TouchGestureRecognizer.TouchGestureType.NONE
+                || recognizedGesture.GestureType == TouchGestureRecognizer.TouchGestureType.SINGLE_TOUCH_DOWN
+                || recognizedGesture.GestureType == TouchGestureRecognizer.TouchGestureType.SINGLE_TAP)
+            {
+                if(recognizedGesture.GestureType != TouchGestureRecognizer.TouchGestureType.NONE)
+                {
+                    Vector2 rawLocalTouchPos = (Vector2)recognizedGesture.MetaData;
+                    recognizedGesture.MetaData = GlobalUtilities.ConvertMobileRelPosToUnityRelPos(rawLocalTouchPos);
+                }
+                for (int i = 0; i < menuItems.Length; i++)
+                {
+                    menuItems[i].HandlePointerGesture(recognizedGesture);
+                }
+            }
         }
         else
         {
-            if(recognizedGesture.GestureType == TouchGestureRecognizer.TouchGestureType.PAD_TRANSLATING)
+            if (recognizedGesture.GestureType == TouchGestureRecognizer.TouchGestureType.FIVE_POINTERS)
+            {
+                _currentMode = EditMode.MENU_SELECTION;
+            }
+            else if (recognizedGesture.GestureType == TouchGestureRecognizer.TouchGestureType.PAD_TRANSLATING)
             {
                 Vector2 eventMetaData = (Vector2)recognizedGesture.MetaData;
                 lock (padTranslationByPointers.AccessLock)
@@ -262,6 +266,14 @@ public class VirtualPadController : MonoBehaviour
                 }
             }
         }
+    }
+    private void VirtualPadController_menuSelectedListener(EditMode selectedMode)
+    {
+        _currentMode = selectedMode;
+    }
+    private Vector2 toLocalPosInBoard(Vector2 localPosInPad)
+    {
+        return new Vector2();
     }
     #endregion
 }

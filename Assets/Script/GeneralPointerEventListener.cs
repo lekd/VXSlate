@@ -10,6 +10,6 @@ namespace Assets.Script
     public interface IGeneralPointerEventListener
     {
         void SetGestureRecognizedListener(GestureRecognizedEventCallback eventRecognizedListener);
-        void SetTouchReceivedEventListener(PointerReceivedEventCallback touchEventListener);
+        CriticVar getCurrentAvaiPointers();
     }
 }

@@ -182,13 +182,13 @@
      <Compile Include="Assets\Script\GlobalUtilities.cs" />
      <Compile Include="Assets\Script\InteractiveBoardController.cs" />
      <Compile Include="Assets\Script\IntroDlgEventHandler.cs" />
+     <Compile Include="Assets\Script\MenuItemListener.cs" />
      <Compile Include="Assets\Script\RecordedTouch.cs" />
      <Compile Include="Assets\Script\TabletTouchEventManager.cs" />
      <Compile Include="Assets\Script\TouchEventData.cs" />
      <Compile Include="Assets\Script\TouchGestureRecognizer.cs" />
      <Compile Include="Assets\Script\TouchPointerData.cs" />
      <Compile Include="Assets\Script\VirtualPadController.cs" />
-     <Compile Include="Assets\Script\VirtualPadManager.cs" />
      <None Include="Assets\GoogleVR\Shaders\GvrUIOverlayFont.shader" />
      <None Include="Assets\GoogleVR\Shaders\GvrAdditiveOverlay.shader" />
      <None Include="Assets\Resources\VRSlateServerAddress.txt" />

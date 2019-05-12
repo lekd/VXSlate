@@ -10,9 +10,17 @@ public class TabletTouchEventManager : MonoBehaviour, IGeneralPointerEventListen
     WebSocketSharp.WebSocket wsClient;
     TouchGestureRecognizer gestureRecognizer = new TouchGestureRecognizer();
     event PointerReceivedEventCallback pointerReceivedListener;
+    CriticVar _pointersData;
+
+    public CriticVar getCurrentAvaiPointers()
+    {
+        return _pointersData;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
+        _pointersData = new CriticVar();
         connectWebSocketServer();
     }
     void connectWebSocketServer()
@@ -38,7 +46,10 @@ public class TabletTouchEventManager : MonoBehaviour, IGeneralPointerEventListen
                 gestureRecognizer.RecognizeGesture(touchEvent);
                 //string decodedMsg = "From JSON: ";
                 //decodedMsg += string.Format("Event type:{0};Pointers count: {1};AvaiPointers:{2}", touchEvent.EventType, touchEvent.PointerCount, touchEvent.AvaiPointers.Length);
-                
+                lock(_pointersData.AccessLock)
+                {
+                    _pointersData.CriticData = touchEvent.AvaiPointers;
+                }
             }
             catch (Exception ex)
             {
@@ -59,9 +70,5 @@ public class TabletTouchEventManager : MonoBehaviour, IGeneralPointerEventListen
     {
         gestureRecognizer.setGestureRecognizedListener(eventRecognizedCallback);
     }
-
-    public void SetTouchReceivedEventListener(PointerReceivedEventCallback touchEventListener)
-    {
-        pointerReceivedListener += touchEventListener;
-    }
+    
 }
