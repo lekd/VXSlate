@@ -191,6 +191,7 @@
      <Compile Include="Assets\Script\Models\TouchEventData.cs" />
      <Compile Include="Assets\Script\Models\TouchGesture.cs" />
      <Compile Include="Assets\Script\Models\TouchPointerData.cs" />
+     <Compile Include="Assets\Script\TestGame\SimpleCharacter.cs" />
      <Compile Include="Assets\Script\TestGame\SimpleGame.cs" />
      <None Include="Assets\GoogleVR\Shaders\GvrUIOverlayFont.shader" />
      <None Include="Assets\GoogleVR\Shaders\GvrAdditiveOverlay.shader" />

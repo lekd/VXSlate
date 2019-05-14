@@ -1,26 +1,38 @@
-﻿using System.Collections;
+﻿using Assets.Script;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class SimpleGame : MonoBehaviour
 {
     public GameObject remoteControllerObj;
-    public Texture2D blankBackgroud;
-    public Texture2D dummyCharacterTexture;
-    Texture2D mainGameTexture;
+    public GameObject gameCharacterObj;
     Vector2 gameSize = new Vector2();
     // Start is called before the first frame update
+    IRemoteController remoteController;
+    SimpleCharacter gameCharacter;
     void Start()
     {
-
-        gameSize.x = gameObject.transform.GetComponent<Collider>().bounds.size.x;
-        gameSize.y = gameObject.transform.GetComponent<Collider>().bounds.size.y;
-        mainGameTexture = new Texture2D(Mathf.RoundToInt(gameSize.x), Mathf.RoundToInt(gameSize.y));
+        gameCharacterObj.transform.localPosition.Set(0, 0, -0.00001f);
+        remoteController = remoteControllerObj.GetComponent<IRemoteController>();
+        if(remoteController != null)
+        {
+            GestureRecognizedEventCallback gestureRecognizedHandler = this.handleControlGesture;
+            remoteController.setGestureRecognizedCallback(gestureRecognizedHandler);
+        }
+        gameCharacter = gameCharacterObj.GetComponent<SimpleCharacter>();
     }
 
     // Update is called once per frame
     void Update()
     {
         
+    }
+    void handleControlGesture(TouchGesture gesture)
+    {
+        if(gameCharacter != null)
+        {
+            gameCharacter.handleGesture(gesture);
+        }
     }
 }

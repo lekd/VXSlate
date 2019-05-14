@@ -7,7 +7,7 @@ using Assets.Script;
 
 namespace Assets.Script
 {
-    public enum GestureType { PAD_SCALING, PAD_TRANSLATING, FIVE_POINTERS, OBJECT_SCALING, SINGLE_TAP, SINGLE_TOUCH_DOWN, SINGLE_TOUCH_MOVE, NONE }
+    public enum GestureType { PAD_SCALING, PAD_TRANSLATING, FIVE_POINTERS, OBJECT_SCALING, SINGLE_TAP, SINGLE_TOUCH_DOWN, SINGLE_TOUCH_MOVE, SINGLE_LONG_TOUCH, NONE }
     public interface IGestureRecognizer
     {
         void setGestureRecognizedListener(GestureRecognizedEventCallback listenerCallback);
@@ -86,11 +86,11 @@ namespace Assets.Script
                 {
                     recognizedGesture.GestureType = GestureType.OBJECT_SCALING;
                     Vector2 futurePointer1 = new Vector2();
-                    futurePointer1.x = curTouchEvent.AvaiPointers[0].RelX + curTouchEvent.AvaiPointers[0].RelVeloX * TOUCH_REFRESH_RATE;
-                    futurePointer1.y = curTouchEvent.AvaiPointers[0].RelY + curTouchEvent.AvaiPointers[0].RelVeloY * TOUCH_REFRESH_RATE;
+                    futurePointer1.x = curTouchEvent.AvaiPointers[0].RelX + curTouchEvent.AvaiPointers[0].RelVeloX/TOUCH_REFRESH_RATE;
+                    futurePointer1.y = curTouchEvent.AvaiPointers[0].RelY + curTouchEvent.AvaiPointers[0].RelVeloY/TOUCH_REFRESH_RATE;
                     Vector2 futurePointer2 = new Vector2();
-                    futurePointer2.x = curTouchEvent.AvaiPointers[1].RelX + curTouchEvent.AvaiPointers[1].RelVeloX * TOUCH_REFRESH_RATE;
-                    futurePointer2.y = curTouchEvent.AvaiPointers[1].RelY + curTouchEvent.AvaiPointers[1].RelVeloY * TOUCH_REFRESH_RATE;
+                    futurePointer2.x = curTouchEvent.AvaiPointers[1].RelX + curTouchEvent.AvaiPointers[1].RelVeloX/TOUCH_REFRESH_RATE;
+                    futurePointer2.y = curTouchEvent.AvaiPointers[1].RelY + curTouchEvent.AvaiPointers[1].RelVeloY/TOUCH_REFRESH_RATE;
                     Vector2 curPointersDif = new Vector2(curTouchEvent.AvaiPointers[1].RelX - curTouchEvent.AvaiPointers[0].RelX,
                                                         curTouchEvent.AvaiPointers[1].RelY - curTouchEvent.AvaiPointers[0].RelY);
                     double curPointersDist = Math.Sqrt(curPointersDif.x * curPointersDif.x + curPointersDif.y * curPointersDif.y);
@@ -123,6 +123,21 @@ namespace Assets.Script
                 //recognizedGesture.MetaData =  TouchPointerData.Create(curTouchEvent.AvaiPointers[0]);
                 recognizedGesture.MetaData = new Vector2(curTouchEvent.AvaiPointers[0].RelX, curTouchEvent.AvaiPointers[0].RelY);
                 informGestureRecognizedEvent(recognizedGesture);
+                if(stayStillSingleTouchDown != null)
+                {
+                    TouchPointerData initTouch = stayStillSingleTouchDown.TouchPointers[0];
+                    TimeSpan durationSinceInitTouch = System.DateTime.Now - stayStillSingleTouchDown.TimeStamp;
+                    if(durationSinceInitTouch.TotalMilliseconds > 1000 &&
+                        Math.Abs(initTouch.RelX - curTouchEvent.AvaiPointers[0].RelX)<0.05
+                        && Math.Abs(initTouch.RelY - curTouchEvent.AvaiPointers[0].RelY)<0.05)
+                    {
+                        TouchGesture longTouchGesture = new TouchGesture();
+                        longTouchGesture.GestureType = GestureType.SINGLE_LONG_TOUCH;
+                        longTouchGesture.MetaData = new Vector2(curTouchEvent.AvaiPointers[0].RelX, curTouchEvent.AvaiPointers[0].RelY);
+                        informGestureRecognizedEvent(longTouchGesture);
+                        stayStillSingleTouchDown = null;
+                    }
+                }
                 return;
             }
             if (curTouchEvent.EventType == 2 && curTouchEvent.PointerCount == 0)

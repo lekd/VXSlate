@@ -157,6 +157,7 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
             return;
         }
 
+        
         RaycastHit hitInfo;
         Ray camRay = new Ray(gazePointObject.transform.position, gazePointObject.transform.position - gameCamera.transform.position);
         if (Physics.Raycast(camRay, out hitInfo))
@@ -264,12 +265,17 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                 return;
             }
             if(recognizedGesture.GestureType == GestureType.SINGLE_TOUCH_DOWN
-                || recognizedGesture.GestureType == GestureType.SINGLE_TOUCH_MOVE)
+                || recognizedGesture.GestureType == GestureType.SINGLE_TOUCH_MOVE
+                || recognizedGesture.GestureType == GestureType.SINGLE_LONG_TOUCH)
             {
                 Vector2 rawTouchLocalPos = (Vector2)recognizedGesture.MetaData;
                 Vector2 localPosOnPad = GlobalUtilities.ConvertMobileRelPosToUnityRelPos(rawTouchLocalPos);
                 Vector2 localPosOnBoard = toLocalPosOnBoard(localPosOnPad);
                 recognizedGesture.MetaData = localPosOnBoard;
+                if(recognizedGesture.GestureType == GestureType.SINGLE_LONG_TOUCH)
+                {
+                    Debug.Log("Long touch at: " + localPosOnBoard.ToString());
+                }
             }
             else if(recognizedGesture.GestureType == GestureType.OBJECT_SCALING)
             {
