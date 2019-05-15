@@ -41,12 +41,17 @@ public class SimpleCharacter : MonoBehaviour
     }
     public void handleGesture(TouchGesture gesture)
     {
+        //raised when there are Touch-up or touch-canceled event on tablet and there are no touch left
         if (gesture.GestureType == GestureType.NONE)
         {
             _isBeingSelected = false;
         }
         else if(gesture.GestureType == GestureType.SINGLE_TOUCH_DOWN)
         {
+            //meta data of SINGLE_TOUCH_DOWN including 1 Vector2 value
+            //which is the local position on the board of the single touch (-0.5<=x,y<=0.5, (0,0) is the center of the board)
+            //noted that this touch point is calculated in relation to the location of the virtual pad on the board
+            //hence when the pad moves by gaze, this touch point will be also updated accordingly
             Vector2 localTouchPos = (Vector2)gesture.MetaData;
             if (_local2DBounds.Contains(localTouchPos))
             {
@@ -60,6 +65,10 @@ public class SimpleCharacter : MonoBehaviour
         }
         else if(gesture.GestureType == GestureType.SINGLE_TOUCH_MOVE)
         {
+            //meta data of SINGLE_TOUCH_MOVE including 1 Vector2 value
+            //which is the local position on the board of the single touch (-0.5<=x,y<=0.5, (0,0) is the center of the board)
+            //noted that this touch point is calculated in relation to the location of the virtual pad on the board
+            //hence when the pad moves by gaze, this touch point will be also updated accordingly
             Vector2 localTouchPos = (Vector2)gesture.MetaData;
             Debug.Log(string.Format("Local touch pos on board: ({0},{1})", localTouchPos.x, localTouchPos.y));
             if(_isBeingSelected)
@@ -69,10 +78,12 @@ public class SimpleCharacter : MonoBehaviour
         }
         else if(gesture.GestureType == GestureType.OBJECT_SCALING)
         {
-            //get meta data of object scaling gesture, including
+            //get meta data of object scaling gesture, including 3 Vector2 values
             // 0: scale ratios in two direction
-            // 1: finger1's local position to the board
-            // 2: finger2's local position to the board
+            // 1: finger1's local position to the board (-0.5<=x,y<=0.5, (0,0) is the center of the board)
+            // 2: finger2's local position to the board (-0.5<=x,y<=0.5, (0,0) is the center of the board)
+            //noted that these touch points are calculated in relation to the location of the virtual pad on the board
+            //hence when the pad moves by gaze, these touch points will be also updated accordingly
             Vector2[] scaleData = (Vector2[])gesture.MetaData;
             if(_local2DBounds.Contains(scaleData[1]) && _local2DBounds.Contains(scaleData[2]))
             {
