@@ -8,6 +8,7 @@ public class SimpleCharacter : MonoBehaviour
     public GameObject gameContainerObj;
     Vector2 local2DTranslate = new Vector2(0, 0);
     Vector2 local2DScale = new Vector2(1,1);
+    float rotation = 0;
     Rect _local2DBounds = new Rect();
     bool _isBeingSelected = false;
     Vector2 prevLocalTouch = new Vector2(0, 0);
@@ -36,7 +37,8 @@ public class SimpleCharacter : MonoBehaviour
             //Debug.Log("Object scaled at ratio: " + string.Format("({0},{1})", local2DScale.x, local2DScale.y));
             local2DScale.Set(1, 1);
         }
-        
+        gameObject.transform.Rotate(0, rotation, 0);
+        rotation = 0;
         _local2DBounds = getLocal2DBoundOfCharacter(gameObject, gameContainerObj);
     }
     public void handleGesture(TouchGesture gesture)
@@ -70,7 +72,7 @@ public class SimpleCharacter : MonoBehaviour
             //noted that this touch point is calculated in relation to the location of the virtual pad on the board
             //hence when the pad moves by gaze, this touch point will be also updated accordingly
             Vector2 localTouchPos = (Vector2)gesture.MetaData;
-            Debug.Log(string.Format("Local touch pos on board: ({0},{1})", localTouchPos.x, localTouchPos.y));
+            //Debug.Log(string.Format("Local touch pos on board: ({0},{1})", localTouchPos.x, localTouchPos.y));
             if(_isBeingSelected)
             {
                 local2DTranslate = localTouchPos - prevLocalTouch;
@@ -88,6 +90,22 @@ public class SimpleCharacter : MonoBehaviour
             if(_local2DBounds.Contains(scaleData[1]) && _local2DBounds.Contains(scaleData[2]))
             {
                 local2DScale.Set(scaleData[0].x, scaleData[0].y);
+            }
+        }
+        else if (gesture.GestureType == GestureType.OBJECT_ROTATING)
+        {
+            //get meta data of object rotating gesture, including 3 Vector2 values
+            // 0: rotation angle, Vector2 values store the same rotation values
+            // 1: finger1's local position to the board (-0.5<=x,y<=0.5, (0,0) is the center of the board)
+            // 2: finger2's local position to the board (-0.5<=x,y<=0.5, (0,0) is the center of the board)
+            //noted that these touch points are calculated in relation to the location of the virtual pad on the board
+            //hence when the pad moves by gaze, these touch points will be also updated accordingly
+            Vector2[] rotData = (Vector2[])gesture.MetaData;
+            Debug.Log("RotationAngle: " + rotData[0].x.ToString());
+            if (_local2DBounds.Contains(rotData[1]) && _local2DBounds.Contains(rotData[2]))
+            {
+                rotation = rotData[0].x;
+                
             }
         }
     }

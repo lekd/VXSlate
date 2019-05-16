@@ -7,7 +7,7 @@ using Assets.Script;
 
 namespace Assets.Script
 {
-    public enum GestureType { PAD_SCALING, PAD_TRANSLATING, FIVE_POINTERS, OBJECT_SCALING, SINGLE_TAP, SINGLE_TOUCH_DOWN, SINGLE_TOUCH_MOVE, SINGLE_LONG_TOUCH, NONE }
+    public enum GestureType { PAD_SCALING, PAD_TRANSLATING, FIVE_POINTERS, OBJECT_SCALING, OBJECT_ROTATING, SINGLE_TAP, SINGLE_TOUCH_DOWN, SINGLE_TOUCH_MOVE, SINGLE_LONG_TOUCH, NONE }
     public interface IGestureRecognizer
     {
         void setGestureRecognizedListener(GestureRecognizedEventCallback listenerCallback);
@@ -20,6 +20,7 @@ namespace Assets.Script
         
         RecordedTouch stayStillSingleTouchDown;
         event GestureRecognizedEventCallback gestureRecognizedListener;
+        Vector2 prevTwoPointersVector = new Vector2(0, 0);
         public void setGestureRecognizedListener(GestureRecognizedEventCallback listenerCallback)
         {
             gestureRecognizedListener += listenerCallback;
@@ -44,6 +45,10 @@ namespace Assets.Script
                 (Math.Abs(curTouchEvent.AvaiPointers[0].RelVeloX)>0.1 || Math.Abs(curTouchEvent.AvaiPointers[0].RelVeloY) > 0.1))
             {
                 stayStillSingleTouchDown = null;
+            }
+            if(curTouchEvent.PointerCount != 2)
+            {
+                prevTwoPointersVector.Set(0, 0);
             }
             //process cases with multi fingers
             if(curTouchEvent.PointerCount == 5)// && curTouchEvent.EventType == 0)
@@ -80,30 +85,61 @@ namespace Assets.Script
                         return;
                     }
                 }
-                //two fingers moving in opposite direction => object scaling
-                else if(curTouchEvent.AvaiPointers[0].RelVeloX * curTouchEvent.AvaiPointers[1].RelVeloX < 0
-                    && curTouchEvent.AvaiPointers[0].RelVeloY * curTouchEvent.AvaiPointers[1].RelVeloY < 0)
+                else
                 {
-                    recognizedGesture.GestureType = GestureType.OBJECT_SCALING;
-                    Vector2 futurePointer1 = new Vector2();
-                    futurePointer1.x = curTouchEvent.AvaiPointers[0].RelX + curTouchEvent.AvaiPointers[0].RelVeloX/TOUCH_REFRESH_RATE;
-                    futurePointer1.y = curTouchEvent.AvaiPointers[0].RelY + curTouchEvent.AvaiPointers[0].RelVeloY/TOUCH_REFRESH_RATE;
-                    Vector2 futurePointer2 = new Vector2();
-                    futurePointer2.x = curTouchEvent.AvaiPointers[1].RelX + curTouchEvent.AvaiPointers[1].RelVeloX/TOUCH_REFRESH_RATE;
-                    futurePointer2.y = curTouchEvent.AvaiPointers[1].RelY + curTouchEvent.AvaiPointers[1].RelVeloY/TOUCH_REFRESH_RATE;
-                    Vector2 curPointersDif = new Vector2(curTouchEvent.AvaiPointers[1].RelX - curTouchEvent.AvaiPointers[0].RelX,
-                                                        curTouchEvent.AvaiPointers[1].RelY - curTouchEvent.AvaiPointers[0].RelY);
-                    double curPointersDist = Math.Sqrt(curPointersDif.x * curPointersDif.x + curPointersDif.y * curPointersDif.y);
-                    Vector2 futurePointersDif = new Vector2(futurePointer2.x - futurePointer1.x, futurePointer2.y - futurePointer1.y);
-                    double futurePointersDist = Math.Sqrt(futurePointersDif.x * futurePointersDif.x + futurePointersDif.y * futurePointersDif.y);
-                    Vector2 scaleRatio = new Vector2((float)(futurePointersDist / curPointersDist), (float)(futurePointersDist / curPointersDist));
-                    Vector2[] gestureData = new Vector2[3];
-                    gestureData[0] = scaleRatio;
-                    gestureData[1] = new Vector2(curTouchEvent.AvaiPointers[0].RelX, curTouchEvent.AvaiPointers[0].RelY);
-                    gestureData[2] = new Vector2(curTouchEvent.AvaiPointers[1].RelX, curTouchEvent.AvaiPointers[1].RelY);
-                    recognizedGesture.MetaData = gestureData;
-                    informGestureRecognizedEvent(recognizedGesture);
+                    //first, always recognize if there is any rotation
+                    Vector2 curBetweenPointerVector = new Vector2(curTouchEvent.AvaiPointers[1].RelX - curTouchEvent.AvaiPointers[0].RelX,
+                                                                   curTouchEvent.AvaiPointers[1].RelY - curTouchEvent.AvaiPointers[0].RelY);
+                    if (!prevTwoPointersVector.Equals(new Vector2(0,0)))
+                    {
+                        double prevAngle = Math.Atan2(prevTwoPointersVector.y, prevTwoPointersVector.x);
+                        double curAngle = Math.Atan2(curBetweenPointerVector.y, curBetweenPointerVector.x);
+                        float rotChange = (float)((curAngle - prevAngle) * 180 / Math.PI) % 360;
+                        if (rotChange < -180)
+                        {
+                            rotChange += 360.0f;
+                        }
+                        if (rotChange > 180)
+                        {
+                            rotChange -= 360.0f;
+                        }
+                        Vector2 rotation = new Vector2(rotChange, rotChange);
+                        recognizedGesture = new TouchGesture();
+                        recognizedGesture.GestureType = GestureType.OBJECT_ROTATING;
+                        Vector2[] metaData = new Vector2[3];
+                        metaData[0] = rotation;
+                        metaData[1] = new Vector2(curTouchEvent.AvaiPointers[0].RelX, curTouchEvent.AvaiPointers[0].RelY);
+                        metaData[2] = new Vector2(curTouchEvent.AvaiPointers[1].RelX, curTouchEvent.AvaiPointers[1].RelY);
+                        recognizedGesture.MetaData = metaData;
+                        informGestureRecognizedEvent(recognizedGesture);
+                    }
+                    prevTwoPointersVector = curBetweenPointerVector;
+                    //two fingers moving in opposite direction => object scaling
+                    if (curTouchEvent.AvaiPointers[0].RelVeloX * curTouchEvent.AvaiPointers[1].RelVeloX < 0
+                    && curTouchEvent.AvaiPointers[0].RelVeloY * curTouchEvent.AvaiPointers[1].RelVeloY < 0)
+                    {
+                        recognizedGesture = new TouchGesture();
+                        recognizedGesture.GestureType = GestureType.OBJECT_SCALING;
+                        Vector2 futurePointer1 = new Vector2();
+                        futurePointer1.x = curTouchEvent.AvaiPointers[0].RelX + curTouchEvent.AvaiPointers[0].RelVeloX/TOUCH_REFRESH_RATE;
+                        futurePointer1.y = curTouchEvent.AvaiPointers[0].RelY + curTouchEvent.AvaiPointers[0].RelVeloY/TOUCH_REFRESH_RATE;
+                        Vector2 futurePointer2 = new Vector2();
+                        futurePointer2.x = curTouchEvent.AvaiPointers[1].RelX + curTouchEvent.AvaiPointers[1].RelVeloX/TOUCH_REFRESH_RATE;
+                        futurePointer2.y = curTouchEvent.AvaiPointers[1].RelY + curTouchEvent.AvaiPointers[1].RelVeloY/TOUCH_REFRESH_RATE;
+                        Vector2 curPointersDif = new Vector2(curTouchEvent.AvaiPointers[1].RelX - curTouchEvent.AvaiPointers[0].RelX,
+                                                            curTouchEvent.AvaiPointers[1].RelY - curTouchEvent.AvaiPointers[0].RelY);
+                        double curPointersDist = Math.Sqrt(curPointersDif.x * curPointersDif.x + curPointersDif.y * curPointersDif.y);
+                        Vector2 futurePointersDif = new Vector2(futurePointer2.x - futurePointer1.x, futurePointer2.y - futurePointer1.y);
+                        double futurePointersDist = Math.Sqrt(futurePointersDif.x * futurePointersDif.x + futurePointersDif.y * futurePointersDif.y);
+                        Vector2 scaleRatio = new Vector2((float)(futurePointersDist / curPointersDist), (float)(futurePointersDist / curPointersDist));
+                        Vector2[] gestureData = new Vector2[3];
+                        gestureData[0] = scaleRatio;
+                        gestureData[1] = new Vector2(curTouchEvent.AvaiPointers[0].RelX, curTouchEvent.AvaiPointers[0].RelY);
+                        gestureData[2] = new Vector2(curTouchEvent.AvaiPointers[1].RelX, curTouchEvent.AvaiPointers[1].RelY);
+                        recognizedGesture.MetaData = gestureData;
+                        informGestureRecognizedEvent(recognizedGesture);
                     return;
+                    }
                 }
             }
             //process when there is only one finger

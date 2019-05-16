@@ -277,7 +277,8 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                     Debug.Log("Long touch at: " + localPosOnBoard.ToString());
                 }
             }
-            else if(recognizedGesture.GestureType == GestureType.OBJECT_SCALING)
+            else if(recognizedGesture.GestureType == GestureType.OBJECT_SCALING
+                || recognizedGesture.GestureType == GestureType.OBJECT_ROTATING)
             {
                 Vector2[] gestureData = (Vector2[])recognizedGesture.MetaData;
                 for(int i=1; i < gestureData.Length; i++)
