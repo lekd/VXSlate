@@ -37,8 +37,11 @@ public class SimpleCharacter : MonoBehaviour
             //Debug.Log("Object scaled at ratio: " + string.Format("({0},{1})", local2DScale.x, local2DScale.y));
             local2DScale.Set(1, 1);
         }
-        gameObject.transform.Rotate(0, rotation, 0);
-        rotation = 0;
+                
+        //gameObject.transform.Rotate(0, rotation, 0);
+        gameObject.transform.RotateAround(gameObject.transform.position, Vector3.forward, 1.23f);
+        //rotation = 0;
+        
         _local2DBounds = getLocal2DBoundOfCharacter(gameObject, gameContainerObj);
     }
     public void handleGesture(TouchGesture gesture)
