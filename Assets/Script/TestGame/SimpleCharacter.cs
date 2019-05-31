@@ -39,8 +39,8 @@ public class SimpleCharacter : MonoBehaviour
         }
                 
         //gameObject.transform.Rotate(0, rotation, 0);
-        gameObject.transform.RotateAround(gameObject.transform.position, Vector3.forward, 1.23f);
-        //rotation = 0;
+        gameObject.transform.RotateAround(gameObject.transform.position, Vector3.forward, -rotation);
+        rotation = 0;
         
         _local2DBounds = getLocal2DBoundOfCharacter(gameObject, gameContainerObj);
     }
@@ -104,7 +104,7 @@ public class SimpleCharacter : MonoBehaviour
             //noted that these touch points are calculated in relation to the location of the virtual pad on the board
             //hence when the pad moves by gaze, these touch points will be also updated accordingly
             Vector2[] rotData = (Vector2[])gesture.MetaData;
-            Debug.Log("RotationAngle: " + rotData[0].x.ToString());
+            //Debug.Log("RotationAngle: " + rotData[0].x.ToString());
             if (_local2DBounds.Contains(rotData[1]) && _local2DBounds.Contains(rotData[2]))
             {
                 rotation = rotData[0].x;

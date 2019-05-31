@@ -178,6 +178,7 @@
      <Compile Include="Assets\GoogleVR\Scripts\Utilities\Internal\SuppressMemoryAllocationErrorAttribute.cs" />
      <Compile Include="Assets\GoogleVR\Scripts\Video\GvrVideoPlayerTexture.cs" />
      <Compile Include="Assets\Script\Controllers\GeneralPointerEventListener.cs" />
+     <Compile Include="Assets\Script\Controllers\HandStreamDecoder.cs" />
      <Compile Include="Assets\Script\Controllers\InteractiveBoardController.cs" />
      <Compile Include="Assets\Script\Controllers\IntroDlgEventHandler.cs" />
      <Compile Include="Assets\Script\Controllers\IRemoteController.cs" />

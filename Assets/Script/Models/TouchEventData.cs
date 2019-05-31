@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Assets.Script;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -54,6 +55,7 @@ namespace Assets
                 _avaiPointers = value;
             }
         }
+        
         public static TouchEventData ParseToucEventFromJsonString(string jsonStr)
         {
             return JsonConvert.DeserializeObject<TouchEventData>(jsonStr);
@@ -69,6 +71,40 @@ namespace Assets
                 AvaiPointers[i].Clone(source.AvaiPointers[i]);
             }
         }
-        
+        public static TouchEventData ParseTouchEventFromBytes(byte[] byteData, int startingIndex)
+        {
+            TouchEventData touchEventData = new TouchEventData();
+            byte[] buffer = new byte[4];
+            int offset = startingIndex;
+            Array.Copy(byteData, offset, buffer, 0, buffer.Length);
+            touchEventData.EventType = GlobalUtilities.ByteArray2Int(buffer);
+            offset += buffer.Length;
+            Array.Copy(byteData, offset, buffer, 0, buffer.Length);
+            touchEventData.PointerCount = GlobalUtilities.ByteArray2Int(buffer);
+            offset += buffer.Length;
+            List<TouchPointerData> pointersList = new List<TouchPointerData>();
+            for(int i=0; i< touchEventData.PointerCount; i++)
+            {
+                byte[] pointerBytes = new byte[TouchPointerData.BYTE_SIZE];
+                Array.Copy(byteData, offset, pointerBytes, 0, pointerBytes.Length);
+                TouchPointerData pointer = TouchPointerData.parseFromBytes(pointerBytes);
+                pointersList.Add(pointer);
+                offset += TouchPointerData.BYTE_SIZE;
+            }
+            touchEventData.AvaiPointers = pointersList.ToArray<TouchPointerData>();
+  
+            return touchEventData;
+        }
+        public string toString()
+        {
+            string str = "";
+            str += string.Format("EventType: {0};", _eventType);
+            str += string.Format("PointerCount: {0};", _pointerCount);
+            for(int i=0; i< _pointerCount; i++)
+            {
+                str += _avaiPointers[i].toString() + ";";
+            }
+            return str;
+        }
     }
 }

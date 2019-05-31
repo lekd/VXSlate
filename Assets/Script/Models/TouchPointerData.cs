@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Assets.Script;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -94,6 +95,35 @@ namespace Assets
             TouchPointerData newPointer = new TouchPointerData();
             newPointer.Clone(source);
             return newPointer;
+        }
+        public string toString()
+        {
+            string str = string.Format("ID:{0},VelX:{1},VelY:{2},RelVelX:{3},RelVelY:{4}",
+                                        _id, _relX, _relY, _relVeloX, _relVeloY);
+            return str;
+        }
+        public const int BYTE_SIZE = 20;
+        public static TouchPointerData parseFromBytes(byte[] byteData)
+        {
+            byte[] buffer = new byte[4];
+            TouchPointerData pointer = new TouchPointerData();
+            int offset = 0;
+            Array.Copy(byteData, offset, buffer, 0, 4);
+            pointer.Id = GlobalUtilities.ByteArray2Int(buffer);
+            offset += 4;
+            Array.Copy(byteData, offset, buffer, 0, 4);
+            pointer.RelX = GlobalUtilities.ByteArray2Float(buffer);
+            offset += 4;
+            Array.Copy(byteData, offset, buffer, 0, 4);
+            pointer.RelY = GlobalUtilities.ByteArray2Float(buffer);
+            offset += 4;
+            Array.Copy(byteData, offset, buffer, 0, 4);
+            pointer.RelVeloX = GlobalUtilities.ByteArray2Float(buffer);
+            offset += 4;
+            Array.Copy(byteData, offset, buffer, 0, 4);
+            pointer.RelVeloY = GlobalUtilities.ByteArray2Float(buffer);
+            offset += 4;
+            return pointer;
         }
     }
 }

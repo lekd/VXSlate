@@ -9,12 +9,13 @@ namespace Assets.Script
 {
     public class GlobalUtilities
     {
-        public static string SERVER_ADDR = "192.168.0.102:8080";
+        public static string SERVER_ADDR = "192.168.0.103:8080";
+        public static string HAND_STREAM_ADDR = "192.168.0.101:4040";
         public static string LoadServerAddress()
         {
             string serverAddr = "";
-            string filePath = "/Assets/Resources/VRSlateServerAddress.txt";
-            if(Application.platform == RuntimePlatform.WindowsEditor)
+            string filePath = "./Assets/Resources/VRSlateServerAddress.txt";
+            /*if(Application.platform == RuntimePlatform.W)
             {
                 filePath = "/Assets/Resources/VRSlateServerAddress.txt";
                 TextAsset serverAddrTxt = (TextAsset)Resources.Load("VRSlateServerAddress", typeof(TextAsset));
@@ -39,10 +40,45 @@ namespace Assets.Script
             if(serverAddr == "")
             {
                 serverAddr = SERVER_ADDR;
+            }*/
+            /*using (StreamReader fileReader = new StreamReader(filePath))
+            {
+                serverAddr = fileReader.ReadLine();
+                fileReader.Close();
             }
+            if(serverAddr == "")
+            {
+                serverAddr = SERVER_ADDR;
+            }*/
+            TextAsset addressesTxt = (TextAsset)Resources.Load("VRSlateServerAddress", typeof(TextAsset));
+            string allText = addressesTxt.text;
+            char[] separators = {'\n' };
+            string[] componentStrs = allText.Split(separators, StringSplitOptions.RemoveEmptyEntries);
+            serverAddr = componentStrs[0];
             return serverAddr;
         }
         
+        public static string LoadHandStreamAddress()
+        {
+            string handStreamAddr = "";
+            /*string filePath = "./Assets/Resources/VRSlateServerAddress.txt";
+            using (StreamReader fileReader = new StreamReader(filePath))
+            {
+                fileReader.ReadLine();
+                handStreamAddr = fileReader.ReadLine();
+                fileReader.Close();
+            }
+            if (handStreamAddr == "")
+            {
+                handStreamAddr = HAND_STREAM_ADDR;
+            }*/
+            TextAsset addressesTxt = (TextAsset)Resources.Load("VRSlateServerAddress", typeof(TextAsset));
+            string allText = addressesTxt.text;
+            char[] separators = { '\n' };
+            string[] componentStrs = allText.Split(separators, StringSplitOptions.RemoveEmptyEntries);
+            handStreamAddr = componentStrs[1];
+            return handStreamAddr;
+        }
         public static Vector2 ConvertMobileRelPosToUnityRelPos(Vector2 mobileRelPos)
         {
             return new Vector2(mobileRelPos.x - 0.5f, 0.5f - mobileRelPos.y);
@@ -67,6 +103,31 @@ namespace Assets.Script
                 boundedPoint.y = container2D.yMax;
             }
             return boundedPoint;
+        }
+        static public int ByteArray2Int(byte[] byteData)
+        {
+            //if(!BitConverter.IsLittleEndian)
+            //{
+                Array.Reverse(byteData);
+            //}
+            return BitConverter.ToInt32(byteData,0);
+        }
+        static public float ByteArray2Float(byte[] byteData)
+        {
+            //if (!BitConverter.IsLittleEndian)
+            //{
+                Array.Reverse(byteData);
+            //}
+            return BitConverter.ToSingle(byteData, 0);
+        }
+        static public string getValuesString(byte[] byteData)
+        {
+            string str = "";
+            for(int i=0; i< byteData.Length; i++)
+            {
+                str += string.Format("{0} ", (int)(byteData[i]));
+            }
+            return str;
         }
     }
 }
