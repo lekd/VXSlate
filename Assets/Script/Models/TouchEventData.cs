@@ -1,5 +1,4 @@
 ﻿using Assets.Script;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -56,10 +55,6 @@ namespace Assets
             }
         }
         
-        public static TouchEventData ParseToucEventFromJsonString(string jsonStr)
-        {
-            return JsonConvert.DeserializeObject<TouchEventData>(jsonStr);
-        }
         public void Clone(TouchEventData source)
         {
             this.EventType = source.EventType;

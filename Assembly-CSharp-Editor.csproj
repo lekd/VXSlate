@@ -318,9 +318,6 @@
  <Reference Include="Google.ProtocolBuffers">
  <HintPath>D:/Unity stuffs/Unity Projects/VXSlate/Assets/GoogleVR/Plugins/Google.ProtocolBuffers.dll</HintPath>
  </Reference>
- <Reference Include="Newtonsoft.Json">
- <HintPath>D:/Unity stuffs/Unity Projects/VXSlate/Assets/JsonDotNet/Assemblies/Standalone/Newtonsoft.Json.dll</HintPath>
- </Reference>
  <Reference Include="websocket-sharp">
  <HintPath>D:/Unity stuffs/Unity Projects/VXSlate/Assets/Plugins/websocket-sharp.dll</HintPath>
  </Reference>

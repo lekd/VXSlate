@@ -54,7 +54,6 @@ public class TabletTouchEventManager : MonoBehaviour, IGeneralPointerEventListen
             {
                 _pointersData.CriticData = touchEvent.AvaiPointers;
             }
-            //Debug.Log(touchEvent.toString());
         }
         /*
         if (e.IsText)
