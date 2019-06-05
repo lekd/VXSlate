@@ -44,8 +44,9 @@ public class SimpleCharacter : MonoBehaviour
         
         _local2DBounds = getLocal2DBoundOfCharacter(gameObject, gameContainerObj);
     }
-    public void handleGesture(TouchGesture gesture)
+    public bool handleGesture(TouchGesture gesture)
     {
+        bool characterHandled = false;
         //raised when there are Touch-up or touch-canceled event on tablet and there are no touch left
         if (gesture.GestureType == GestureType.NONE)
         {
@@ -62,11 +63,13 @@ public class SimpleCharacter : MonoBehaviour
             {
                 _isBeingSelected = true;
                 prevLocalTouch = localTouchPos;
+                characterHandled = true;
             }
             else
             {
                 _isBeingSelected = false;
             }
+            
         }
         else if(gesture.GestureType == GestureType.SINGLE_TOUCH_MOVE)
         {
@@ -79,7 +82,9 @@ public class SimpleCharacter : MonoBehaviour
             if(_isBeingSelected)
             {
                 local2DTranslate = localTouchPos - prevLocalTouch;
+                characterHandled = true;
             }
+            
         }
         else if(gesture.GestureType == GestureType.OBJECT_SCALING)
         {
@@ -93,7 +98,9 @@ public class SimpleCharacter : MonoBehaviour
             if(_local2DBounds.Contains(scaleData[1]) && _local2DBounds.Contains(scaleData[2]))
             {
                 local2DScale.Set(scaleData[0].x, scaleData[0].y);
+                characterHandled = true;
             }
+            
         }
         else if (gesture.GestureType == GestureType.OBJECT_ROTATING)
         {
@@ -108,9 +115,11 @@ public class SimpleCharacter : MonoBehaviour
             if (_local2DBounds.Contains(rotData[1]) && _local2DBounds.Contains(rotData[2]))
             {
                 rotation = rotData[0].x;
-                
+                characterHandled = true;
             }
+            
         }
+        return characterHandled;
     }
     public Rect getLocal2DBoundOfCharacter(GameObject characterObj,GameObject containerObj)
     {
