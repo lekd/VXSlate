@@ -22,8 +22,8 @@ public class SimpleGame : MonoBehaviour
         remoteController = remoteControllerObj.GetComponent<IRemoteController>();
         if(remoteController != null)
         {
-            GestureRecognizedEventCallback gestureRecognizedHandler = this.handleControlGesture;
-            remoteController.setGestureRecognizedCallback(gestureRecognizedHandler);
+            remoteController.setGestureRecognizedCallback(this.handleControlGesture);
+            remoteController.setModeSwitchedCallback(this.handleEditModeChanged);
         }
         gameCharacter = gameCharacterObj.GetComponent<SimpleCharacter>();
         paintColors[0] = new Color(1, 0, 0);
@@ -42,12 +42,16 @@ public class SimpleGame : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(hasThingToDraw)
+        /*if(hasThingToDraw)
         {
             drawOnTexture(screenTexture, drawnPoint.X, drawnPoint.Y);
             hasThingToDraw = false;
             gameObject.GetComponent<Renderer>().material.mainTexture = screenTexture;
-        }
+        }*/
+    }
+    void handleEditModeChanged(EditMode mode)
+    {
+        Debug.Log("Selected mode: " + mode.ToString());
     }
     void handleControlGesture(TouchGesture gesture)
     {
@@ -56,17 +60,17 @@ public class SimpleGame : MonoBehaviour
         {
             handledByCharacter = gameCharacter.handleGesture(gesture);
         }
-        if(!handledByCharacter)
+        /*if(!handledByCharacter)
         {
             if(gesture.GestureType == GestureType.SINGLE_TOUCH_DOWN
                 || gesture.GestureType == GestureType.SINGLE_TOUCH_MOVE)
             {
                 hasThingToDraw = true;
                 Vector2 localTouchPos = (Vector2)gesture.MetaData;
-                drawnPoint.X = (int)((localTouchPos.x + 0.5) * screenTexture.width);
-                drawnPoint.Y = (int)((localTouchPos.y + 0.5) * screenTexture.height);
+                drawnPoint.X = (int)((localTouchPos.x) * screenTexture.width);
+                drawnPoint.Y = (int)((localTouchPos.y) * screenTexture.height);
             }
-        }
+        }*/
     }
     void drawOnTexture(Texture2D tex, int posX, int posY)
     {

@@ -33,6 +33,7 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
     GestureRecognizedEventCallback gestureRecognizedListener = null;
     event GestureRecognizedEventCallback gestureRecognizedBroadcaster = null;
     event MenuItemListener.EditModeSelectedCallBack editModeChangedListener = null;
+    
 
     EditMode _currentMode;
     public EditMode CurrentMode
@@ -221,6 +222,10 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
     {
         gestureRecognizedBroadcaster += gestureRecognizedListener;
     }
+    public void setModeSwitchedCallback(MenuItemListener.EditModeSelectedCallBack modeChangeListener)
+    {
+        editModeChangedListener += modeChangeListener;
+    }
     void gestureRecognizedHandler(TouchGesture recognizedGesture)
     {
         if(_currentMode == EditMode.MENU_SELECTION)
@@ -300,6 +305,10 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
     private void VirtualPadController_menuSelectedListener(EditMode selectedMode)
     {
         _currentMode = selectedMode;
+        if(editModeChangedListener != null)
+        {
+            editModeChangedListener(selectedMode);
+        }
     }
     private Vector2 toLocalPosOnBoard(Vector2 localPosOnPad)
     {
