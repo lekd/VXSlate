@@ -214,6 +214,13 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
     }
     private void setMenuActiveness(bool isActive)
     {
+        if(isActive == false)
+        {
+            for(int i=0;i<menuItems.Length; i++)
+            {
+                menuItems[i].off();
+            }
+        }
         menuManip.SetActive(isActive);
         menuDraw.SetActive(isActive);
     }
@@ -226,8 +233,14 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
     {
         editModeChangedListener += modeChangeListener;
     }
+    bool isMultiTouch = false;
+    TouchGesture prevMultiTouchGesture;
     void gestureRecognizedHandler(TouchGesture recognizedGesture)
     {
+        if(recognizedGesture.GestureType == GestureType.NONE)
+        {
+            isMultiTouch = false;
+        }
         if(_currentMode == EditMode.MENU_SELECTION)
         {
             if (recognizedGesture.GestureType == GestureType.NONE
@@ -239,9 +252,12 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                     Vector2 rawLocalTouchPos = (Vector2)recognizedGesture.MetaData;
                     recognizedGesture.MetaData = GlobalUtilities.ConvertMobileRelPosToUnityRelPos(rawLocalTouchPos);
                 }
-                for (int i = 0; i < menuItems.Length; i++)
+                if (!isMultiTouch)
                 {
-                    menuItems[i].HandlePointerGesture(recognizedGesture);
+                    for (int i = 0; i < menuItems.Length; i++)
+                    {
+                        menuItems[i].HandlePointerGesture(recognizedGesture);
+                    }
                 }
             }
         }
@@ -250,6 +266,8 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
             if (recognizedGesture.GestureType == GestureType.FIVE_POINTERS)
             {
                 _currentMode = EditMode.MENU_SELECTION;
+                prevMultiTouchGesture = recognizedGesture;
+                isMultiTouch = true;
                 return;
             }
             else if (recognizedGesture.GestureType == GestureType.PAD_TRANSLATING)
@@ -259,6 +277,8 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                 {
                     padTranslationByPointers.CriticData = eventMetaData;
                 }
+                isMultiTouch = true;
+                prevMultiTouchGesture = recognizedGesture;
                 return;
             }
             else if(recognizedGesture.GestureType == GestureType.PAD_SCALING)
@@ -267,26 +287,36 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                 {
                     padScaleByPointers.CriticData = recognizedGesture.MetaData;
                 }
+                isMultiTouch = true;
+                prevMultiTouchGesture = recognizedGesture;
                 return;
             }
-            if(recognizedGesture.GestureType == GestureType.SINGLE_TOUCH_DOWN
-                || recognizedGesture.GestureType == GestureType.SINGLE_TOUCH_MOVE
-                || recognizedGesture.GestureType == GestureType.SINGLE_LONG_TOUCH)
+
+            if (recognizedGesture.GestureType == GestureType.SINGLE_TOUCH_DOWN
+            || recognizedGesture.GestureType == GestureType.SINGLE_TOUCH_MOVE
+            || recognizedGesture.GestureType == GestureType.SINGLE_LONG_TOUCH)
             {
-                Vector2 rawTouchLocalPos = (Vector2)recognizedGesture.MetaData;
-                Vector2 localPosOnPad = GlobalUtilities.ConvertMobileRelPosToUnityRelPos(rawTouchLocalPos);
-                Vector2 localPosOnBoard = toLocalPosOnBoard(localPosOnPad);
-                recognizedGesture.MetaData = localPosOnBoard;
-                if(recognizedGesture.GestureType == GestureType.SINGLE_LONG_TOUCH)
+                if (!isMultiTouch)
                 {
-                    Debug.Log("Long touch at: " + localPosOnBoard.ToString());
+                    Vector2 rawTouchLocalPos = (Vector2)recognizedGesture.MetaData;
+                    Vector2 localPosOnPad = GlobalUtilities.ConvertMobileRelPosToUnityRelPos(rawTouchLocalPos);
+                    Vector2 localPosOnBoard = toLocalPosOnBoard(localPosOnPad);
+                    recognizedGesture.MetaData = localPosOnBoard;
+                    if (recognizedGesture.GestureType == GestureType.SINGLE_LONG_TOUCH)
+                    {
+                        Debug.Log("Long touch at: " + localPosOnBoard.ToString());
+                    }
+                    if (gestureRecognizedBroadcaster != null)
+                    {
+                        gestureRecognizedBroadcaster(recognizedGesture);
+                    }
                 }
             }
-            else if(recognizedGesture.GestureType == GestureType.OBJECT_SCALING
+            else if (recognizedGesture.GestureType == GestureType.OBJECT_SCALING
                 || recognizedGesture.GestureType == GestureType.OBJECT_ROTATING)
             {
                 Vector2[] gestureData = (Vector2[])recognizedGesture.MetaData;
-                for(int i=1; i < gestureData.Length; i++)
+                for (int i = 1; i < gestureData.Length; i++)
                 {
                     Vector2 rawTouchLocalPos = gestureData[i];
                     Vector2 localPosOnPad = GlobalUtilities.ConvertMobileRelPosToUnityRelPos(rawTouchLocalPos);
@@ -294,12 +324,22 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                     gestureData[i].Set(localPosOnBoard.x, localPosOnBoard.y);
                 }
                 recognizedGesture.MetaData = gestureData;
+                isMultiTouch = true;
+                if (prevMultiTouchGesture!= null && !TouchGestureRecognizer.isGestureTypeRelatedPad(prevMultiTouchGesture.GestureType))
+                {
+                    if (gestureRecognizedBroadcaster != null)
+                    {
+                        gestureRecognizedBroadcaster(recognizedGesture);
+                    }
+                }
+                prevMultiTouchGesture = recognizedGesture;
             }
-            //broadcast the recognized gesture
-            if(gestureRecognizedBroadcaster != null)
+            else if(recognizedGesture.GestureType == GestureType.NONE)
             {
-                gestureRecognizedBroadcaster(recognizedGesture);
+                prevMultiTouchGesture = null;
             }
+            
+            
         }
     }
     private void VirtualPadController_menuSelectedListener(EditMode selectedMode)

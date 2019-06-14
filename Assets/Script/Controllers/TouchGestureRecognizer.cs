@@ -32,7 +32,6 @@ namespace Assets.Script
                 gestureRecognizedListener(recognizedGesture);
             }
         }
-        
         public void RecognizeGesture(TouchEventData curTouchEvent)
         {
             TouchGesture recognizedGesture = new TouchGesture();
@@ -58,13 +57,13 @@ namespace Assets.Script
                 return;
             }
             //recognizing scaling virtual pad gesture
-            if(curTouchEvent.PointerCount == 3 && curTouchEvent.EventType == 1)
+            else if(curTouchEvent.PointerCount == 3 && curTouchEvent.EventType == 1)
             {
                 bool isScalingPad = recognizePadScalingGesture(curTouchEvent.AvaiPointers, out recognizedGesture);
                 informGestureRecognizedEvent(recognizedGesture);
             }
             //recognizing pad translating gesture
-            if(curTouchEvent.PointerCount == 2)
+            else if(curTouchEvent.PointerCount == 2)
             {
                 //two fingers moving in the same direction => translating the virtual pad
                 if(curTouchEvent.AvaiPointers[0].RelVeloX* curTouchEvent.AvaiPointers[1].RelVeloX>0
@@ -85,7 +84,7 @@ namespace Assets.Script
                         return;
                     }
                 }
-                else
+                else 
                 {
                     //first, always recognize if there is any rotation
                     Vector2 curBetweenPointerVector = new Vector2(curTouchEvent.AvaiPointers[1].RelX - curTouchEvent.AvaiPointers[0].RelX,
@@ -138,12 +137,12 @@ namespace Assets.Script
                         gestureData[2] = new Vector2(curTouchEvent.AvaiPointers[1].RelX, curTouchEvent.AvaiPointers[1].RelY);
                         recognizedGesture.MetaData = gestureData;
                         informGestureRecognizedEvent(recognizedGesture);
-                    return;
                     }
+                    return;
                 }
             }
             //process when there is only one finger
-            if(curTouchEvent.EventType == 0 && curTouchEvent.PointerCount == 1)
+            else if(curTouchEvent.EventType == 0 && curTouchEvent.PointerCount == 1)
             {
                 stayStillSingleTouchDown = new RecordedTouch();
                 stayStillSingleTouchDown.TouchPointers.Add(TouchPointerData.Create(curTouchEvent.AvaiPointers[0]));
@@ -153,13 +152,13 @@ namespace Assets.Script
                 informGestureRecognizedEvent(recognizedGesture);
                 return ;
             }
-            if (curTouchEvent.EventType == 1 && curTouchEvent.PointerCount == 1)
+            else if (curTouchEvent.EventType == 1 && curTouchEvent.PointerCount == 1 )
             {
                 recognizedGesture.GestureType = GestureType.SINGLE_TOUCH_MOVE;
                 //recognizedGesture.MetaData =  TouchPointerData.Create(curTouchEvent.AvaiPointers[0]);
                 recognizedGesture.MetaData = new Vector2(curTouchEvent.AvaiPointers[0].RelX, curTouchEvent.AvaiPointers[0].RelY);
                 informGestureRecognizedEvent(recognizedGesture);
-                if(stayStillSingleTouchDown != null)
+                /*if (stayStillSingleTouchDown != null)
                 {
                     TouchPointerData initTouch = stayStillSingleTouchDown.TouchPointers[0];
                     TimeSpan durationSinceInitTouch = System.DateTime.Now - stayStillSingleTouchDown.TimeStamp;
@@ -173,10 +172,10 @@ namespace Assets.Script
                         informGestureRecognizedEvent(longTouchGesture);
                         stayStillSingleTouchDown = null;
                     }
-                }
+                }*/
                 return;
             }
-            if (curTouchEvent.EventType == 2 && curTouchEvent.PointerCount == 0)
+            else if (curTouchEvent.EventType == 2 && curTouchEvent.PointerCount == 0)
             {
                 //first inform a non gesture for client to process if needed
                 TouchGesture non_gesture = new TouchGesture();
@@ -246,6 +245,13 @@ namespace Assets.Script
                 recognizedGesture.MetaData = scaleRatio;
                 return true;
             }
+        }
+
+        public static bool isGestureTypeRelatedPad(GestureType gestureType)
+        {
+            return (gestureType == GestureType.FIVE_POINTERS ||
+                    gestureType == GestureType.PAD_SCALING ||
+                    gestureType == GestureType.PAD_TRANSLATING);
         }
     }
 }

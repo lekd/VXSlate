@@ -55,6 +55,10 @@ public class MenuItemListener : MonoBehaviour
             gameObject.GetComponent<MeshRenderer>().material = normalStateMat;
         }
     }
+    public void off()
+    {
+        gameObject.GetComponent<MeshRenderer>().material = normalStateMat;
+    }
     public void HandlePointerGesture(TouchGesture gesture)
     {
         if(gesture.GestureType == GestureType.NONE)
