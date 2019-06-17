@@ -235,6 +235,7 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
     }
     bool isMultiTouch = false;
     TouchGesture prevMultiTouchGesture;
+    TouchGesture latestSingleTouchDown = null;
     void gestureRecognizedHandler(TouchGesture recognizedGesture)
     {
         if(recognizedGesture.GestureType == GestureType.NONE)
@@ -268,6 +269,7 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                 _currentMode = EditMode.MENU_SELECTION;
                 prevMultiTouchGesture = recognizedGesture;
                 isMultiTouch = true;
+                latestSingleTouchDown = null;
                 return;
             }
             else if (recognizedGesture.GestureType == GestureType.PAD_TRANSLATING)
@@ -279,6 +281,7 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                 }
                 isMultiTouch = true;
                 prevMultiTouchGesture = recognizedGesture;
+                latestSingleTouchDown = null;
                 return;
             }
             else if(recognizedGesture.GestureType == GestureType.PAD_SCALING)
@@ -289,6 +292,7 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                 }
                 isMultiTouch = true;
                 prevMultiTouchGesture = recognizedGesture;
+                latestSingleTouchDown = null;
                 return;
             }
 
@@ -298,17 +302,59 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
             {
                 if (!isMultiTouch)
                 {
-                    Vector2 rawTouchLocalPos = (Vector2)recognizedGesture.MetaData;
+                    Vector2 rawTouchLocalPos;// = (Vector2)recognizedGesture.MetaData;
+                    if(recognizedGesture.GestureType != GestureType.SINGLE_TOUCH_MOVE)
+                    {
+                        rawTouchLocalPos = (Vector2)recognizedGesture.MetaData;
+                    }
+                    else
+                    {
+                        Vector2[] singleTouchMoveData = (Vector2[])recognizedGesture.MetaData;
+                        rawTouchLocalPos = singleTouchMoveData[0];
+                    }
                     Vector2 localPosOnPad = GlobalUtilities.ConvertMobileRelPosToUnityRelPos(rawTouchLocalPos);
                     Vector2 localPosOnBoard = toLocalPosOnBoard(localPosOnPad);
                     recognizedGesture.MetaData = localPosOnBoard;
-                    if (recognizedGesture.GestureType == GestureType.SINGLE_LONG_TOUCH)
+                    if(recognizedGesture.GestureType == GestureType.SINGLE_TOUCH_DOWN)
                     {
-                        Debug.Log("Long touch at: " + localPosOnBoard.ToString());
+                        latestSingleTouchDown = recognizedGesture;
                     }
-                    if (gestureRecognizedBroadcaster != null)
+                    else if (recognizedGesture.GestureType == GestureType.SINGLE_LONG_TOUCH)
                     {
-                        gestureRecognizedBroadcaster(recognizedGesture);
+                        //Debug.Log("Long touch at: " + localPosOnBoard.ToString());
+                        if (gestureRecognizedBroadcaster != null)
+                        {
+                            if (latestSingleTouchDown != null)
+                            {
+                                gestureRecognizedBroadcaster(latestSingleTouchDown);
+                                latestSingleTouchDown = null;
+                            }
+                            //gestureRecognizedBroadcaster(recognizedGesture);
+                        }
+                    }
+                    else
+                    {
+                        if(latestSingleTouchDown != null)
+                        {
+                            Vector2 latestTouchDownPos = (Vector2)latestSingleTouchDown.MetaData;
+                            Vector2 curTouchPos = (Vector2)recognizedGesture.MetaData;
+                            if(Math.Abs(latestTouchDownPos.x - curTouchPos.x)>=0.01 || Math.Abs(latestTouchDownPos.y - curTouchPos.y) >= 0.01)
+                            {
+                                if (gestureRecognizedBroadcaster != null)
+                                {
+                                    gestureRecognizedBroadcaster(latestSingleTouchDown);
+                                    latestSingleTouchDown = null;
+                                    gestureRecognizedBroadcaster(recognizedGesture);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (gestureRecognizedBroadcaster != null)
+                            {
+                                gestureRecognizedBroadcaster(recognizedGesture);
+                            }
+                        }
                     }
                 }
             }
@@ -329,6 +375,11 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                 {
                     if (gestureRecognizedBroadcaster != null)
                     {
+                        if (latestSingleTouchDown != null)
+                        {
+                            gestureRecognizedBroadcaster(latestSingleTouchDown);
+                            latestSingleTouchDown = null;
+                        }
                         gestureRecognizedBroadcaster(recognizedGesture);
                     }
                 }

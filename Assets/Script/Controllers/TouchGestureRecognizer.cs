@@ -156,13 +156,17 @@ namespace Assets.Script
             {
                 recognizedGesture.GestureType = GestureType.SINGLE_TOUCH_MOVE;
                 //recognizedGesture.MetaData =  TouchPointerData.Create(curTouchEvent.AvaiPointers[0]);
-                recognizedGesture.MetaData = new Vector2(curTouchEvent.AvaiPointers[0].RelX, curTouchEvent.AvaiPointers[0].RelY);
+                //recognizedGesture.MetaData = new Vector2(curTouchEvent.AvaiPointers[0].RelX, curTouchEvent.AvaiPointers[0].RelY);
+                Vector2[] singleTouchMoveData = new Vector2[2];
+                singleTouchMoveData[0] = new Vector2(curTouchEvent.AvaiPointers[0].RelX, curTouchEvent.AvaiPointers[0].RelY);
+                singleTouchMoveData[1] = new Vector2(curTouchEvent.AvaiPointers[0].RelVeloX, curTouchEvent.AvaiPointers[0].RelVeloY);
+                recognizedGesture.MetaData = singleTouchMoveData;
                 informGestureRecognizedEvent(recognizedGesture);
-                /*if (stayStillSingleTouchDown != null)
+                if (stayStillSingleTouchDown != null)
                 {
                     TouchPointerData initTouch = stayStillSingleTouchDown.TouchPointers[0];
                     TimeSpan durationSinceInitTouch = System.DateTime.Now - stayStillSingleTouchDown.TimeStamp;
-                    if(durationSinceInitTouch.TotalMilliseconds > 1000 &&
+                    if(durationSinceInitTouch.TotalMilliseconds > 500 &&
                         Math.Abs(initTouch.RelX - curTouchEvent.AvaiPointers[0].RelX)<0.05
                         && Math.Abs(initTouch.RelY - curTouchEvent.AvaiPointers[0].RelY)<0.05)
                     {
@@ -172,7 +176,7 @@ namespace Assets.Script
                         informGestureRecognizedEvent(longTouchGesture);
                         stayStillSingleTouchDown = null;
                     }
-                }*/
+                }
                 return;
             }
             else if (curTouchEvent.EventType == 2 && curTouchEvent.PointerCount == 0)
