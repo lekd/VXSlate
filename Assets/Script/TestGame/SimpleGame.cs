@@ -16,6 +16,8 @@ public class SimpleGame : MonoBehaviour
     Color[] paintColors = new Color[1];
     Point2D drawnPoint = new Point2D();
     bool hasThingToDraw = false;
+    EditMode gameMode;
+    Vector3 screenSize = new Vector3();
     void Start()
     {
         gameCharacterObj.transform.localPosition.Set(0, 0, -0.00001f);
@@ -37,6 +39,8 @@ public class SimpleGame : MonoBehaviour
             screenTexture.LoadImage(imgData);
         }
         Debug.Log(string.Format("ScreenTexture size: ({0},{1})", screenTexture.width, screenTexture.height));
+        gameMode = EditMode.OBJECT_MANIP;
+        screenSize = gameObject.GetComponent<Collider>().bounds.size;
     }
 
     // Update is called once per frame
@@ -52,13 +56,40 @@ public class SimpleGame : MonoBehaviour
     void handleEditModeChanged(EditMode mode)
     {
         Debug.Log("Selected mode: " + mode.ToString());
+        gameMode = mode;
     }
+    bool hasTouchDown = false;
     void handleControlGesture(TouchGesture gesture)
     {
-        bool handledByCharacter = false;
-        if(gameCharacter != null)
+        if (gameMode == EditMode.OBJECT_MANIP)
         {
-            handledByCharacter = gameCharacter.handleGesture(gesture);
+            bool handledByCharacter = false;
+            if (gameCharacter != null)
+            {
+                handledByCharacter = gameCharacter.handleGesture(gesture);
+            }
+        }
+        else if(gameMode == EditMode.DRAW)
+        {
+            if(gesture.GestureType == GestureType.SINGLE_TOUCH_DOWN || gesture.GestureType == GestureType.SINGLE_TOUCH_MOVE)
+            {
+                Vector2 local2DPos = (Vector2)gesture.MetaData;
+                Vector2 abs2DPos = new Vector2(local2DPos.x*screenSize.x,local2DPos.y*screenSize.y);
+               
+                if (gesture.GestureType == GestureType.SINGLE_TOUCH_DOWN)
+                {
+                    hasTouchDown = true;
+                    Debug.Log(string.Format("Drawing at ({0},{1})", abs2DPos.x, abs2DPos.y));
+                }
+                if(hasTouchDown && gesture.GestureType == GestureType.SINGLE_TOUCH_MOVE)
+                {
+                    Debug.Log(string.Format("Drawing at ({0},{1})", abs2DPos.x, abs2DPos.y));
+                }
+            }
+            else if(gesture.GestureType == GestureType.NONE)
+            {
+                hasTouchDown = false;
+            }
         }
         /*if(!handledByCharacter)
         {

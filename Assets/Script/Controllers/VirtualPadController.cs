@@ -302,8 +302,8 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
             {
                 if (!isMultiTouch)
                 {
-                    Vector2 rawTouchLocalPos;// = (Vector2)recognizedGesture.MetaData;
-                    if(recognizedGesture.GestureType != GestureType.SINGLE_TOUCH_MOVE)
+                    Vector2 rawTouchLocalPos = (Vector2)recognizedGesture.MetaData;
+                    /*if(recognizedGesture.GestureType != GestureType.SINGLE_TOUCH_MOVE)
                     {
                         rawTouchLocalPos = (Vector2)recognizedGesture.MetaData;
                     }
@@ -311,7 +311,7 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                     {
                         Vector2[] singleTouchMoveData = (Vector2[])recognizedGesture.MetaData;
                         rawTouchLocalPos = singleTouchMoveData[0];
-                    }
+                    }*/
                     Vector2 localPosOnPad = GlobalUtilities.ConvertMobileRelPosToUnityRelPos(rawTouchLocalPos);
                     Vector2 localPosOnBoard = toLocalPosOnBoard(localPosOnPad);
                     recognizedGesture.MetaData = localPosOnBoard;
@@ -388,6 +388,10 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
             else if(recognizedGesture.GestureType == GestureType.NONE)
             {
                 prevMultiTouchGesture = null;
+                if (gestureRecognizedBroadcaster != null)
+                {
+                    gestureRecognizedBroadcaster(recognizedGesture);
+                }
             }
             
             
