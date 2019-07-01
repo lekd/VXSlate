@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace BoardGame
 {
-    class Piece
+    public class Piece
     {
         GameObject _gameObject;
         string _name;

@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace BoardGame
 {
-    class Pixel
+    public class Pixel
     {
         int _x;
         int _y;

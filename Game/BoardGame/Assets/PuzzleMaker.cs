@@ -8,8 +8,7 @@ using UnityEngine.UI;
 
 public class PuzzleMaker : MonoBehaviour
 {
-    bool _isInit = false;
-    bool _startTimer = false;
+    public bool _isInit = false;
 
     private const float _coefficientCoverterPixelToM = 3779.5275590551f;
 
@@ -49,15 +48,13 @@ public class PuzzleMaker : MonoBehaviour
 
     List<Texture2D> _listOfTextiles;
     List<Piece> _gridPieces;
-    List<Piece> _puzzlePieces;
+    public List<Piece> _puzzlePieces;
 
     Texture2D _mainTexture;
 
     float _overlapThreshold = 0.02f; //in meters
     int _differentZThreshold = 10;
     
-    Piece _selectedPiece = null;
-
     float _differentScale = 0.1f;
     int _numberOfScale = 10;
     Vector3 _standardPieceScale = Vector3.zero;
@@ -65,9 +62,7 @@ public class PuzzleMaker : MonoBehaviour
 
     float _differentAngle = 4;
     int _numberOfRotation = 80;
-    Vector3 _standardRotation = Vector3.zero;
-
-    bool isMouseDown = false;       
+    Vector3 _standardRotation = Vector3.zero; 
 
     Color _startPointsColor = new Color(255, 0, 0);
     Color _linePointsColor = new Color(255, 255, 0);
@@ -78,7 +73,9 @@ public class PuzzleMaker : MonoBehaviour
 
     Vector2 _firstGridPixelPosition = Vector2.zero;
     float _mainPuzzleTextureRatio = 1;
-    List<Pixel> _sketchedPixels;
+
+    public List<Pixel> _sketchedPixels;
+
     int _sketchedBrush = 5;
     GameObject _puzzleDoneObject;
 
@@ -89,16 +86,13 @@ public class PuzzleMaker : MonoBehaviour
     //Status notification
 
     GameObject _canvasObject;
-    GameObject _statusObject;
+    public GameObject _statusObject;
 
-    public Font _statusFont;
+    public Font _statusFont;   
 
-    [Header("Experiment log")]
-    public string _participantID;
-    public int _textureID = 1;
-    public bool _isExperimentStarted = false;
-    public bool _isExperimentFinished = false;
-    public float _prepareTime = 3; //in seconds
+    public GameObject _startButtonObject;
+
+    List<GameObject> _listOfGameObjects;
 
     [Header("Stage")]
     public bool isPuzzledDone = false;
@@ -109,11 +103,6 @@ public class PuzzleMaker : MonoBehaviour
     public bool isInEndPoints = false;
     public bool isSketchingOnTrack = false;
     public bool isSketchDoneSucessfully = false;
-
-
-    GameObject _startButtonObject;
-
-    List<GameObject> _listOfGameObjects;
 
 
     // Start is called before the first frame update
@@ -141,108 +130,108 @@ public class PuzzleMaker : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (_startTimer && _prepareTime > 0)
-        {
-            _statusObject.GetComponent<Text>().text = "ARE YOU READY?\n" + ((int)_prepareTime + 1).ToString();
-            _statusObject.GetComponent<Text>().font = _statusFont;
-            _statusObject.GetComponent<Text>().color = Color.blue;
-            _statusObject.GetComponent<Text>().fontSize = 28;
-            _statusObject.GetComponent<Text>().alignment = TextAnchor.MiddleCenter;
+        //if (_startTimer && _prepareTime > 0)
+        //{
+        //    _statusObject.GetComponent<Text>().text = "ARE YOU READY?\n" + ((int)_prepareTime + 1).ToString();
+        //    _statusObject.GetComponent<Text>().font = _statusFont;
+        //    _statusObject.GetComponent<Text>().color = Color.blue;
+        //    _statusObject.GetComponent<Text>().fontSize = 28;
+        //    _statusObject.GetComponent<Text>().alignment = TextAnchor.MiddleCenter;
 
-            _prepareTime -= Time.deltaTime;
-        }
+        //    _prepareTime -= Time.deltaTime;
+        //}
 
-        if(_prepareTime < 0 && !_isExperimentStarted && _isInit)
-        {
-            _prepareTime = 0;
-            _isExperimentStarted = true;
-            _startTimer = false;
+        //if(_prepareTime < 0 && !_isExperimentStarted && _isInit)
+        //{
+        //    _prepareTime = 0;
+        //    _isExperimentStarted = true;
+        //    _startTimer = false;
 
-            foreach(var e in _listOfGameObjects)
-            {
-                e.SetActive(true);
-            }
+        //    foreach(var e in _listOfGameObjects)
+        //    {
+        //        e.SetActive(true);
+        //    }
 
-            Debug.Log("Experiment Started!");
+        //    Debug.Log("Experiment Started!");
 
-            _statusObject.GetComponent<Text>().text = "Experiment Started!";
-            _statusObject.GetComponent<Text>().font = _statusFont;
-            _statusObject.GetComponent<Text>().color = Color.black;
-            _statusObject.GetComponent<Text>().fontSize = 4;
-            _statusObject.GetComponent<Text>().alignment = TextAnchor.LowerCenter;
-        }
+        //    _statusObject.GetComponent<Text>().text = "Experiment Started!";
+        //    _statusObject.GetComponent<Text>().font = _statusFont;
+        //    _statusObject.GetComponent<Text>().color = Color.black;
+        //    _statusObject.GetComponent<Text>().fontSize = 4;
+        //    _statusObject.GetComponent<Text>().alignment = TextAnchor.LowerCenter;
+        //}
 
-        OnMouseDown();
-        OnMouseUp();
+        //OnMouseDown();
+        //OnMouseUp();
 
-        if (_isExperimentStarted && _isInit)
-        {            
-            if(!_isExperimentFinished)
-            {
-                UpdatePiecePosition();
-                HighlightGridPiece();
+        //if (_isExperimentStarted && _isInit)
+        //{            
+        //    if(!_isExperimentFinished)
+        //    {
+        //        UpdatePiecePosition();
+        //        HighlightGridPiece();
 
-                if (!isPuzzledDone && CheckPuzzlesDone())
-                {
-                    isPuzzledDone = CheckPuzzlesDone();
-                }
+        //        if (!isPuzzledDone && CheckPuzzlesDone())
+        //        {
+        //            isPuzzledDone = CheckPuzzlesDone();
+        //        }
 
-                if (isPuzzledDone && !isSketchStarted)
-                {
-                    isSketchStarted = true;
+        //        if (isPuzzledDone && !isSketchStarted)
+        //        {
+        //            isSketchStarted = true;
 
-                    if (_sketchedPixels == null)
-                        _sketchedPixels = new List<Pixel>();
+        //            if (_sketchedPixels == null)
+        //                _sketchedPixels = new List<Pixel>();
 
-                    _statusObject.GetComponent<Text>().color = Color.green;
-                    _statusObject.GetComponent<Text>().text = "Puzzle grid is done!\nPlease start sketching from RED to BLUE point.";
-                }
+        //            _statusObject.GetComponent<Text>().color = Color.green;
+        //            _statusObject.GetComponent<Text>().text = "Puzzle grid is done!\nPlease start sketching from RED to BLUE point.";
+        //        }
 
-                CheckSketch();
+        //        CheckSketch();
 
-                if (Input.GetKeyDown(KeyCode.DownArrow) && _selectedPiece != null)
-                {
-                    _selectedPiece = PuzzlePieceScaleDown(_selectedPiece);
+        //        if (Input.GetKeyDown(KeyCode.DownArrow) && _selectedPiece != null)
+        //        {
+        //            _selectedPiece = PuzzlePieceScaleDown(_selectedPiece);
 
-                    Debug.Log("Puzzle piece is scaled down!");
-                    _statusObject.GetComponent<Text>().text = "Puzzle piece is scaled down!";
-                }
+        //            Debug.Log("Puzzle piece is scaled down!");
+        //            _statusObject.GetComponent<Text>().text = "Puzzle piece is scaled down!";
+        //        }
 
-                if (Input.GetKeyUp(KeyCode.UpArrow) && _selectedPiece != null)
-                {
-                    _selectedPiece = PuzzlePieceScaleUp(_selectedPiece);
+        //        if (Input.GetKeyUp(KeyCode.UpArrow) && _selectedPiece != null)
+        //        {
+        //            _selectedPiece = PuzzlePieceScaleUp(_selectedPiece);
 
-                    Debug.Log("Puzzle piece is scaled up!");
-                    _statusObject.GetComponent<Text>().text = "Puzzle piece is scaled up!";
-                }
+        //            Debug.Log("Puzzle piece is scaled up!");
+        //            _statusObject.GetComponent<Text>().text = "Puzzle piece is scaled up!";
+        //        }
 
-                if (Input.GetKeyDown(KeyCode.LeftArrow) && _selectedPiece != null)
-                {
-                    _selectedPiece = PuzzlePieceRotateLeft(_selectedPiece);
+        //        if (Input.GetKeyDown(KeyCode.LeftArrow) && _selectedPiece != null)
+        //        {
+        //            _selectedPiece = PuzzlePieceRotateLeft(_selectedPiece);
 
-                    Debug.Log("Puzzle piece is rotated left!");
-                    _statusObject.GetComponent<Text>().text = "Puzzle piece is rotated left!";
-                }
+        //            Debug.Log("Puzzle piece is rotated left!");
+        //            _statusObject.GetComponent<Text>().text = "Puzzle piece is rotated left!";
+        //        }
 
-                if (Input.GetKeyUp(KeyCode.RightArrow) && _selectedPiece != null)
-                {
-                    _selectedPiece = PuzzlePieceRotateRight(_selectedPiece);
+        //        if (Input.GetKeyUp(KeyCode.RightArrow) && _selectedPiece != null)
+        //        {
+        //            _selectedPiece = PuzzlePieceRotateRight(_selectedPiece);
 
-                    Debug.Log("Puzzle piece is rotated right!");
-                    _statusObject.GetComponent<Text>().text = "Puzzle piece is rotated right!";
-                }
-            }
-            else
-            {
-                _statusObject.GetComponent<Text>().color = Color.blue;
-                _statusObject.GetComponent<Text>().alignment = TextAnchor.MiddleCenter;
-                _statusObject.GetComponent<Text>().fontSize = 10;
-                _statusObject.GetComponent<Text>().text = "THE TASK IS FINISHED!\nPlease take off the HMD.";
-            }
-        }
+        //            Debug.Log("Puzzle piece is rotated right!");
+        //            _statusObject.GetComponent<Text>().text = "Puzzle piece is rotated right!";
+        //        }
+        //    }
+        //    else
+        //    {
+        //        _statusObject.GetComponent<Text>().color = Color.blue;
+        //        _statusObject.GetComponent<Text>().alignment = TextAnchor.MiddleCenter;
+        //        _statusObject.GetComponent<Text>().fontSize = 10;
+        //        _statusObject.GetComponent<Text>().text = "THE TASK IS FINISHED!\nPlease take off the HMD.";
+        //    }
+        //}
     }
 
-    private void Init()
+    public void Init(int _textureID, float _prepareTime)
     {
         _listOfGameObjects = new List<GameObject>();
 
@@ -652,172 +641,36 @@ public class PuzzleMaker : MonoBehaviour
             {
                 e.SetActive(false);
             }
-
-            _isExperimentStarted = false;
+            //_isExperimentStarted = false;
         }
 
         _isInit = true;
     }
 
-    private void CheckSketch()
+    public void CheckSketch()
     {    
-        if(isPuzzledDone && isMouseDown)
+        if(CheckPointPixelColor(_startPointsColor, _linePointsColor, _endPointsColor))
         {
-            //if (CheckPointPixelColor(_startPointsColor) && !isInStartPoints)
-            //{
-            //    isInStartPoints = true;
-            //    isInEndPoints = false;
-            //    isInLinePoints = false;
-            //    Debug.Log("IN START POINTS");
-            //} else if (CheckPointPixelColor(_linePointsColor) && !isInLinePoints)
-            //{
-            //    isInStartPoints = false;
-            //    isInEndPoints = false;
-            //    isInLinePoints = true;
-            //    Debug.Log("IN LINE POINTS");
-            //}
-            //else if((!isInStartPoints && !isInLinePoints) || ((!CheckPointPixelColor(_startPointsColor) && !isInStartPoints) && (!CheckPointPixelColor(_linePointsColor) && isInLinePoints)))
-            //{
-            //    Debug.Log("======================");
-            //}
-
-            
-
-            //if (!isSketchStarted)
-            //{
-            //    isSketchStarted = true;
-            //}
-            //else
-            //{
-            //    if (!isInStartPoints && CheckPointPixelColor(_startPointsColor))
-            //    {
-            //        isInStartPoints = true;
-            //        isInLinePoints = false;
-            //        isInEndPoints = false;
-
-            //        Debug.Log("IN START POINTS");
-            //    }
-            //    else if (isInStartPoints && !CheckPointPixelColor(_startPointsColor))
-            //    {
-            //        if (!isInLinePoints && CheckPointPixelColor(_linePointsColor))
-            //        {
-            //            isInStartPoints = true;
-            //            isInLinePoints = true;
-            //            isInEndPoints = false;
-
-            //            Debug.Log("IN LINE POINTS");
-            //        }
-            //        else if (isInLinePoints && !CheckPointPixelColor(_linePointsColor))
-            //        {
-            //            if (!isInEndPoints && CheckPointPixelColor(_endPointsColor))
-            //            {
-            //                isInStartPoints = true;
-            //                isInEndPoints = true;
-            //                isInLinePoints = true;
-
-            //                Debug.Log("IN END POINTS");
-            //            }
-            //            else if (isInStartPoints && isInLinePoints && isInEndPoints)
-            //            {
-            //                isSketchDoneSucessfully = true;
-            //                Debug.Log("Sketch is successfully done!");
-
-            //                _statusObject.GetComponent<Text>().text = "Sketch is successfully done!";
-            //                _isExperimentFinished = true;
-            //            }
-            //        }
-            //    }
-
-            //    if(CheckPointPixelColor(_startPointsColor) || CheckPointPixelColor(_linePointsColor) || CheckPointPixelColor(_endPointsColor))
-            //    {
-            //        _statusObject.GetComponent<Text>().text = "Sketching...";
-            //        _statusObject.GetComponent<Text>().color = Color.black;
-            //    }
-            //    else
-            //    {
-
-            //        isSketchingOnTrack = false;
-            //        Debug.Log("Please keep sketching on track!");
-            //        _statusObject.GetComponent<Text>().color = Color.red;
-            //        _statusObject.GetComponent<Text>().text = "Please keep sketching on track!";
-            //    }
-            //}
-
-            if(CheckPointPixelColor(_startPointsColor, _linePointsColor, _endPointsColor))
+            if (!isSketchDoneSucessfully)
             {
-                if (!isSketchDoneSucessfully)
-                {
-                    _statusObject.GetComponent<Text>().text = "Sketching...";
-                    _statusObject.GetComponent<Text>().color = Color.black;
-                }
-                else
-                {
-                    Debug.Log("Sketch is successfully done!");
-
-                    _statusObject.GetComponent<Text>().text = "Sketch is successfully done!";
-                    _isExperimentFinished = true;
-                }
+                _statusObject.GetComponent<Text>().text = "Sketching...";
+                _statusObject.GetComponent<Text>().color = Color.black;
             }
             else
             {
-                isSketchingOnTrack = false;
-                //Debug.Log("Please keep sketching on track!");
-                _statusObject.GetComponent<Text>().color = Color.red;
-                _statusObject.GetComponent<Text>().text = "Please keep sketching on track!";
+                Debug.Log("Sketch is successfully done!");
+                isSketchDoneSucessfully = true;
+                _statusObject.GetComponent<Text>().text = "Sketch is successfully done!";
             }
-
-            //if (isSketchStarted)
-            //{
-            //    if (!isInStartPoints && CheckPointPixelColor(_startPointsColor))
-            //    {
-            //        isInStartPoints = true;
-            //        isInLinePoints = false;
-            //        isInEndPoints = false;
-
-            //        Debug.Log("IN START POINTS");
-            //    }
-            //    else if (isInStartPoints && !CheckPointPixelColor(_startPointsColor))
-            //    {                   
-            //        if (!isInLinePoints && CheckPointPixelColor(_linePointsColor))
-            //        {
-            //            isInStartPoints = true;
-            //            isInLinePoints = true;
-            //            isInEndPoints = false;
-
-            //            Debug.Log("IN LINE POINTS");
-            //        }
-            //        else if (isInLinePoints && !CheckPointPixelColor(_linePointsColor))
-            //        {
-            //            if (!isInEndPoints && CheckPointPixelColor(_endPointsColor))
-            //            {
-            //                isInStartPoints = true;
-            //                isInEndPoints = true;
-            //                isInLinePoints = true;
-
-            //                Debug.Log("IN END POINTS");
-            //            }
-            //            else if(isInStartPoints && isInLinePoints && isInEndPoints)
-            //            {
-            //                isSketchDoneSucessfully = true;
-            //                Debug.Log("Sketch is successfully done!");
-            //            }
-            //            else
-            //            {
-            //                isInStartPoints = false;
-            //                isInEndPoints = false;
-            //                isInLinePoints = false;
-
-            //                ResetTexture();
-
-            //                _puzzleDoneObject.gameObject.GetComponent<Renderer>().material.mainTexture = _mainPuzzleTexture;
-
-            //                Debug.Log("Sketch is suddenly failed!");
-            //            }
-            //        }
-            //    }               
-            //}
         }
+        else
+        {
+            isSketchingOnTrack = false;
+            //Debug.Log("Please keep sketching on track!");
+            _statusObject.GetComponent<Text>().color = Color.red;
+            _statusObject.GetComponent<Text>().text = "Please keep sketching on track!";
         }
+    }
 
     bool CheckPointPixelColor(Color color)
     {
@@ -1134,7 +987,7 @@ public class PuzzleMaker : MonoBehaviour
         return tex;
     }
 
-    private bool CheckPuzzlesDone()
+    public bool CheckPuzzlesDone()
     {
         foreach (var gridPiece in _gridPieces)
         {
@@ -1159,46 +1012,38 @@ public class PuzzleMaker : MonoBehaviour
         return true;
     }
 
-    private void UpdatePiecePosition()
+    public void UpdatePiecePosition(Piece _selectedPiece)
     {
-        if(isMouseDown && _selectedPiece != null)
+        RaycastHit hitInfo = new RaycastHit();
+
+        bool hit = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo);
+
+        bool flag = false;
+
+        Piece gridPieceOverlapped = null;
+
+        foreach (var gridPiece in _gridPieces)
         {
-            RaycastHit hitInfo = new RaycastHit();
-
-            bool hit = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo);
-
-            bool flag = false;
-
-            Piece gridPieceOverlapped = null;
-
-            foreach (var gridPiece in _gridPieces)
+            if ((new Vector3(hitInfo.point.x, hitInfo.point.y, _selectedPiece.GameObject.transform.position.z) - gridPiece.GameObject.transform.position).magnitude < 0.02f)
             {
-                if ((new Vector3(hitInfo.point.x, hitInfo.point.y, _selectedPiece.GameObject.transform.position.z) - gridPiece.GameObject.transform.position).magnitude < 0.02f)
-                {
-                    flag = true;
-                    gridPieceOverlapped = gridPiece;
+                flag = true;
+                gridPieceOverlapped = gridPiece;
 
-                    break;
-                }
+                break;
             }
-
-            if (!flag)
-            {
-                _selectedPiece.GameObject.transform.position = new Vector3(hitInfo.point.x, hitInfo.point.y, _selectedPiece.GameObject.transform.position.z);
-            }
-            else
-                _selectedPiece.GameObject.transform.position = new Vector3(gridPieceOverlapped.GameObject.transform.position.x,
-                                                                           gridPieceOverlapped.GameObject.transform.position.y,
-                                                                           _selectedPiece.GameObject.transform.position.z);
-
-            //if(_selectedPiece != null)
-            //{
-            //    Debug.Log(_selectedPiece.Name + ": " + _selectedPiece.GameObject.transform.position.ToString());
-            //}
         }
+
+        if (!flag)
+        {
+            _selectedPiece.GameObject.transform.position = new Vector3(hitInfo.point.x, hitInfo.point.y, _selectedPiece.GameObject.transform.position.z);
+        }
+        else
+            _selectedPiece.GameObject.transform.position = new Vector3(gridPieceOverlapped.GameObject.transform.position.x,
+                                                                        gridPieceOverlapped.GameObject.transform.position.y,
+                                                                        _selectedPiece.GameObject.transform.position.z);
     }
 
-    private void HighlightGridPiece()
+    public void HighlightGridPiece()
     {
 
         foreach (var gridPiece in _gridPieces)
@@ -1221,125 +1066,7 @@ public class PuzzleMaker : MonoBehaviour
         }
     }
 
-    private void OnMouseDown()
-    {
-        if (_isExperimentStarted)
-        {        
-            if(Input.GetMouseButton(0))
-            {
-                //For testing
-                isPuzzledDone = true;
-
-                RaycastHit hitInfo1 = new RaycastHit();
-
-                bool hit1 = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo1);
-
-                //if (InStartPoints(ConvertPositionToPixelPosition(new Vector2(hitInfo1.point.x, hitInfo1.point.y))))
-                //    Debug.Log("IN START POINTS");
-
-                //if (InLinePoints(ConvertPositionToPixelPosition(new Vector2(hitInfo1.point.x, hitInfo1.point.y))))
-                //    Debug.Log("IN LINE POINTS");
-
-                if (!isMouseDown)
-                {
-                    Debug.Log("OnMouseDown");                    
-
-                    if (!isPuzzledDone)
-                    {
-                        RaycastHit hitInfo = new RaycastHit();
-
-                        bool hit = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo);
-
-                        if (hit)
-                        {
-                            if (_selectedPiece != null && _selectedPiece.GameObject.name == hitInfo.transform.gameObject.name)
-                            {
-                                _selectedPiece.IsSelected = false;
-                                _selectedPiece.GameObject.GetComponent<Renderer>().material.mainTexture = _selectedPiece.Original;
-
-                                _selectedPiece = null;
-                            }
-                            else
-                            {
-                                for (int i = 0; i < _puzzlePieces.Count; i++)
-                                {
-                                    if (_puzzlePieces[i].GameObject.name == hitInfo.transform.gameObject.name)
-                                    {
-                                        float z = 0;
-
-                                        Piece piece = _puzzlePieces[i];
-
-                                        //Reset previous puzzle
-                                        if (_selectedPiece != null)
-                                        {
-                                            _selectedPiece.IsSelected = false;
-                                            _selectedPiece.GameObject.GetComponent<Renderer>().material.mainTexture = _selectedPiece.Original;
-                                        }
-
-                                        z = _puzzlePieces[0].GameObject.transform.position.z;
-
-                                        for (int j = 0; j < i; j++)
-                                        {
-                                            _puzzlePieces[j].GameObject.transform.position = new Vector3(_puzzlePieces[j].GameObject.transform.position.x,
-                                                                                                         _puzzlePieces[j].GameObject.transform.position.y,
-                                                                                                         _puzzlePieces[j + 1].GameObject.transform.position.z);
-                                        }
-
-                                        // Highlight new puzzle
-                                        piece.IsSelected = true;
-                                        piece.GameObject.GetComponent<Renderer>().material.mainTexture = piece.Highlighted;
-
-                                        if (z != 0)
-                                            piece.GameObject.transform.position = new Vector3(piece.GameObject.transform.position.x,
-                                                                                              piece.GameObject.transform.position.y,
-                                                                                              z);
-
-                                        _selectedPiece = piece;
-
-                                        _puzzlePieces = SortPieces(_puzzlePieces);
-
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (_selectedPiece != null)
-                        {
-                            _selectedPiece.IsSelected = false;
-                            _selectedPiece.GameObject.GetComponent<Renderer>().material.mainTexture = _selectedPiece.Original;
-                        }
-
-
-                    }
-
-                    isMouseDown = true;
-                }                
-            }                     
-        }
-        else
-        {
-            if (Input.GetMouseButton(0))
-            {
-                RaycastHit hitInfo = new RaycastHit();
-
-                bool hit = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo);
-                
-                if (hit && _startButtonObject.gameObject.name == hitInfo.transform.gameObject.name)
-                {
-                    Init();
-
-                    _startButtonObject.SetActive(false);
-                    _startTimer = true;
-
-                    Debug.Log("Timer started! Counting down...");
-                }                    
-            }
-        }
-    }
-
+    
     Vector2 ConvertPositionToPixelPosition(Vector2 position)
     {
         Vector2 ret = Vector2.zero;
@@ -1382,20 +1109,7 @@ public class PuzzleMaker : MonoBehaviour
         return false;
     }
 
-    private void OnMouseUp()
-    {
-        if (!Input.GetMouseButton(0) && isMouseDown == true)
-        {
-            isMouseDown = false;
-
-            //if(isSketchStarted && !isSketchDoneSucessfully)
-            //{
-            //    ResetTexture();
-            //}
-
-            Debug.Log("OnMouseUp");
-        }
-    }
+    
 
     private void ResetTexture()
     {
@@ -1414,57 +1128,9 @@ public class PuzzleMaker : MonoBehaviour
         }
     }
 
-    private void OnMouseDrag()
-    {
-        if (_isExperimentStarted && _isInit)
-        {
-            Debug.Log("OnMouseDrag");
+   
 
-            RaycastHit hitInfo = new RaycastHit();
-
-            bool hit = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo);
-            
-            if (hit)
-            {
-                if (_selectedPiece != null)
-                {
-                    _selectedPiece.IsSelected = false;
-                    _selectedPiece.GameObject.GetComponent<Renderer>().material.mainTexture = _selectedPiece.Original;
-                }
-
-                foreach (var piece in _puzzlePieces)
-                {
-                    if (piece.GameObject.name == hitInfo.transform.gameObject.name)
-                    {
-                        if (_selectedPiece != null && _selectedPiece.GameObject.name == hitInfo.transform.gameObject.name)
-                        {
-                            _selectedPiece.IsSelected = false;
-                            _selectedPiece.GameObject.GetComponent<Renderer>().material.mainTexture = _selectedPiece.Original;
-
-                            _selectedPiece = null;
-                        }
-                        else
-                        {
-                            piece.IsSelected = true;
-                            piece.GameObject.GetComponent<Renderer>().material.mainTexture = piece.Highlighted;
-
-                            _selectedPiece = piece;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                if (_selectedPiece != null)
-                {
-                    _selectedPiece.IsSelected = false;
-                    _selectedPiece = null;
-                }
-            }
-        }
-    }
-
-    List<Piece> SortPieces(List<Piece> list)
+    public List<Piece> SortPieces(List<Piece> list)
     {
         for(int i = 0; i < list.Count - 1; i++)
         {
@@ -1561,21 +1227,21 @@ public class PuzzleMaker : MonoBehaviour
         return new Vector3(standardScale.x + scaleSpace * time, standardScale.y + scaleSpace * time, standardScale.z);
     }
 
-    Piece PuzzlePieceRotateLeft(Piece piece)
+    public Piece PuzzlePieceRotateLeft(Piece piece)
     {
         piece.GameObject.transform.Rotate(Vector3.forward, _differentAngle);
 
         return piece;
     }
 
-    Piece PuzzlePieceRotateRight(Piece piece)
+    public Piece PuzzlePieceRotateRight(Piece piece)
     {
         piece.GameObject.transform.Rotate(Vector3.forward, (-1) * _differentAngle);
 
         return piece;
     }
 
-    Piece PuzzlePieceScaleUp(Piece piece)
+    public Piece PuzzlePieceScaleUp(Piece piece)
     {
         piece.CurrentScaleLevel += _differentScale;
         piece.GameObject.transform.localScale = new Vector3(_standardPieceScale.x * piece.CurrentScaleLevel,
@@ -1585,7 +1251,7 @@ public class PuzzleMaker : MonoBehaviour
         return piece;
     }
 
-    Piece PuzzlePieceScaleDown(Piece piece)
+    public Piece PuzzlePieceScaleDown(Piece piece)
     {
         piece.CurrentScaleLevel -= _differentScale;
 
@@ -1610,6 +1276,14 @@ public class PuzzleMaker : MonoBehaviour
         float y = x * currentScale.y / currentScale.x;
         float z = currentScale.z;
         return new Vector3(x, y, z);
+    }
+
+    public void SetObjectsActive(bool isActive)
+    {
+        foreach (var e in _listOfGameObjects)
+        {
+            e.SetActive(isActive);
+        }
     }
 
     private void OnApplicationQuit()
