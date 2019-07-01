@@ -631,8 +631,6 @@ public class PuzzleMaker : MonoBehaviour
         _statusObject.GetComponent<RectTransform>().localPosition = new Vector3(0, 0.75f, 0);
 
         _listOfGameObjects.Add(_largeScreenObject);
-        //_listOfGameObjects.Add(_canvasObject);
-        //_listOfGameObjects.Add(_statusObject);
         _listOfGameObjects.Add(_puzzleDoneObject);
 
         if (_prepareTime > 0)
@@ -641,7 +639,6 @@ public class PuzzleMaker : MonoBehaviour
             {
                 e.SetActive(false);
             }
-            //_isExperimentStarted = false;
         }
 
         _isInit = true;
@@ -666,118 +663,10 @@ public class PuzzleMaker : MonoBehaviour
         else
         {
             isSketchingOnTrack = false;
-            //Debug.Log("Please keep sketching on track!");
             _statusObject.GetComponent<Text>().color = Color.red;
             _statusObject.GetComponent<Text>().text = "Please keep sketching on track!";
         }
     }
-
-    bool CheckPointPixelColor(Color color)
-    {
-        bool isSameColor  = false;
-               
-        RaycastHit hit;
-
-        if (!Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit))
-            return false;
-
-        Renderer rend = hit.transform.GetComponent<Renderer>();
-        MeshCollider mesh = hit.collider as MeshCollider;
-
-        if (rend == null || rend.sharedMaterial == null || rend.sharedMaterial.mainTexture == null || mesh == null)
-            return false;
-
-        if (!hit.transform.name.Contains("Puzzle Done"))
-            return false;
-
-        Texture2D texture2D = rend.material.mainTexture as Texture2D;
-
-        Vector2 pixelUV = hit.textureCoord;
-
-        pixelUV.x *= texture2D.width;
-        pixelUV.y *= texture2D.height;
-
-        Color32 c;
-        c = _drawPuzzleTexture.GetPixel((int)pixelUV.x, (int)pixelUV.y);//texture2D.GetPixel((int)pixelUV.x, (int)pixelUV.y);
-
-        float difR = c.r - color.r;
-        float difG = c.g - color.g;
-        float difB = c.b - color.b;
-
-        //if (c.r == 0 && c.g == 0 && c.b == 0)
-        //{
-        //    bool flag = false;
-
-        //    foreach (var p in _sketchedPixels)
-        //    {
-        //        if(p.X == (int) pixelUV.x && p.Y == (int) pixelUV.y)
-        //        {
-        //            //isSketchingOnTrack = true;
-        //            flag = true;
-        //            break;
-        //        }
-        //    }
-
-        //    if(!flag)
-        //    {
-        //        isSketchingOnTrack = false;
-        //        isSameColor = false;
-        //    }
-        //}
-        //else 
-        if (difR < 20 && difR > -20 &&
-            difG < 20 && difG > -20 &&
-            difB < 20 && difB > -20)
-        {
-            isSameColor = true;
-            isSketchingOnTrack = true; 
-            //hit.transform.GetComponent<Renderer>().material.mainTexture = BrushSketchLines(texture2D, (int)pixelUV.x, (int)pixelUV.y);
-        }
-        else
-        {
-            //isSketchingOnTrack = false;
-            isSameColor = false;
-        }
-
-        hit.transform.GetComponent<Renderer>().material.mainTexture = BrushSketchLines(texture2D, (int)pixelUV.x, (int)pixelUV.y);
-
-        //if (_previous2DPoint != new Vector2(1000000, 1000000))
-        //{
-        int signX = 1;
-        int signY = 1;
-        int difX = (int)pixelUV.x - (int)_previous2DPoint.x;
-
-        if ((int)pixelUV.x < _previous2DPoint.x)
-        {
-            signX = (-1);
-        }
-
-        int difY = (int)pixelUV.y - (int)_previous2DPoint.y;
-        if ((int)pixelUV.y < _previous2DPoint.y)
-        {
-            signY = (-1);
-        }
-
-        //    for (int i = 1; i < difX * signX - 1; i++)
-        //    {
-        //        for (int j = 1; j < difY * signY - 1; j++)
-        //        {
-        //            BrushSketchLines(texture2D, (int)_previous2DPoint.x + i * signX, (int)_previous2DPoint.y + j * signY);
-        //        }
-        //    }
-        //}
-        if ((_previous2DPoint - pixelUV).magnitude > 4)
-            Debug.Log((_previous2DPoint - pixelUV).magnitude +
-                      "," +
-                      difX +
-                      "," +
-                      difY);
-
-        _previous2DPoint = new Vector2((int)pixelUV.x, (int)pixelUV.y);
-
-        return isSameColor;
-    }
-
     bool CheckPointPixelColor(Color startColor, Color lineColor, Color endColor)
     {
         bool ret = true;
