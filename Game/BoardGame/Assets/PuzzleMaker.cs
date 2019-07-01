@@ -569,7 +569,7 @@ public class PuzzleMaker : MonoBehaviour
                 Debug.Log("Init finished!");
 
                 //For testing
-                _puzzleDoneObject.SetActive(true);
+                /*_puzzleDoneObject.SetActive(true);
                 foreach (var grid in _gridPieces)
                 {
                     foreach (var puzzle in _puzzlePieces)
@@ -585,7 +585,7 @@ public class PuzzleMaker : MonoBehaviour
                             puzzle.GameObject.SetActive(false);
                         }
                     }
-                }
+                }*/
 
 
                 _listOfGameObjects.Add(sampleScreenObject);
