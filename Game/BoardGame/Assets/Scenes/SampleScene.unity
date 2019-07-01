@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 170076734}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -294,11 +294,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _largeScreenObject: {fileID: 0}
   _screenMaterial: {fileID: 2100000, guid: e908e89e918dee5468d443ee0cd06022, type: 2}
-  _mainPuzzleTexture: {fileID: 2800000, guid: 941196776a02cd04bb3116c496d4b1c3, type: 3}
+  _puzzle1O: {fileID: 2800000, guid: 60285f7aea92b934e9cccff60ddbb87e, type: 3}
+  _puzzle1L: {fileID: 2800000, guid: 441b27734cedfd64cb9ece71333f8e51, type: 3}
+  _puzzle2O: {fileID: 2800000, guid: 9485571002e0c94478ff948a6539d773, type: 3}
+  _puzzle2L: {fileID: 2800000, guid: 75422f0c866c2cd4fada274295100740, type: 3}
+  _startButtonTexture: {fileID: 2800000, guid: eef9bc0f3ce2186468416101a598ae68, type: 3}
   _gridPieceTexture: {fileID: 2800000, guid: 48b8100379888e148adc6ca96f78871b, type: 3}
   _gridWidth: 3
   _gridHeight: 2
   _sampleMaterial: {fileID: 2100000, guid: e405d180a0ada954f8dff494f3ccb943, type: 2}
+  _statusFont: {fileID: 12800000, guid: 98aa98edf24376443bee35901a03a4ce, type: 3}
+  _participantID: 
+  _textureID: 1
+  _isExperimentStarted: 0
+  _isExperimentFinished: 0
+  _prepareTime: 3
+  isPuzzledDone: 0
+  isSketchStarted: 0
+  isInStartPoints: 0
+  isInLinePoints: 0
+  isInEndPoints: 0
+  isSketchingOnTrack: 0
+  isSketchDoneSucessfully: 0
 --- !u!4 &1110497006
 Transform:
   m_ObjectHideFlags: 0
