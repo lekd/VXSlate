@@ -82,6 +82,7 @@ public class ExperimentManager : MonoBehaviour
                 if (!_puzzleMaker.isPuzzledDone && _puzzleMaker.CheckPuzzlesDone())
                 {
                     _puzzleMaker.isPuzzledDone = true;
+                    _puzzleMaker._puzzleDoneObject.SetActive(true);
                 }
 
                 if (_puzzleMaker.isPuzzledDone && !_puzzleMaker.isSketchStarted)
@@ -150,7 +151,7 @@ public class ExperimentManager : MonoBehaviour
             if (Input.GetMouseButton(0))
             {
                 //For testing
-                _puzzleMaker.isPuzzledDone = true;
+                //_puzzleMaker.isPuzzledDone = true;
 
                 RaycastHit hitInfo1 = new RaycastHit();
 

@@ -77,7 +77,7 @@ public class PuzzleMaker : MonoBehaviour
     public List<Pixel> _sketchedPixels;
 
     int _sketchedBrush = 5;
-    GameObject _puzzleDoneObject;
+    public GameObject _puzzleDoneObject;
 
     //For sketch
     Vector2 _previous2DPoint = new Vector2(1000000, 1000000); 
@@ -631,7 +631,6 @@ public class PuzzleMaker : MonoBehaviour
         _statusObject.GetComponent<RectTransform>().localPosition = new Vector3(0, 0.75f, 0);
 
         _listOfGameObjects.Add(_largeScreenObject);
-        _listOfGameObjects.Add(_puzzleDoneObject);
 
         if (_prepareTime > 0)
         {
