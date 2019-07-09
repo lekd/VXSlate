@@ -158,8 +158,8 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
             return;
         }
 
-        
-        RaycastHit hitInfo;
+
+        /*RaycastHit hitInfo;
         Ray camRay = new Ray(gazePointObject.transform.position, gazePointObject.transform.position - gameCamera.transform.position);
         if (Physics.Raycast(camRay, out hitInfo))
         {
@@ -173,7 +173,38 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                     gameObject.transform.Translate(new Vector3(newPadPos.x - curPadPos.x, newPadPos.y - curPadPos.y, newPadPos.z - curPadPos.z + VIRTUALPAD_DEPTHOFFSET));
                 }
             }
+        }*/
+        int hittableLayerMask = 1 << 8;
+        RaycastHit[] allHits;
+        Ray camRay = new Ray(gazePointObject.transform.position, gazePointObject.transform.position - gameCamera.transform.position);
+        allHits = Physics.RaycastAll(camRay, 1000, hittableLayerMask);
+        if (allHits != null && allHits.Length>0)
+        {
+            bool isHittingPad = false;
+            for (int i = 0; i < allHits.Length; i++)
+            {
+                if(allHits[i].collider.name.CompareTo(gameObject.name) == 0)
+                {
+                    isHittingPad = true;
+                    break;
+                }
+            }
+            if(!isHittingPad)
+            {
+                for (int i = 0; i < allHits.Length; i++)
+                {
+                    if (allHits[i].collider.name.CompareTo(boardObject.name) == 0)
+                    {
+                        Vector3 hitPos = allHits[i].point;
+                        Vector3 curPadPos = gameObject.transform.position;
+                        Vector3 newPadPos = GlobalUtilities.boundPointToContainer(hitPos, board2DBound);
+                        gameObject.transform.Translate(new Vector3(newPadPos.x - curPadPos.x, newPadPos.y - curPadPos.y, newPadPos.z - curPadPos.z + VIRTUALPAD_DEPTHOFFSET));
+                        break;
+                    }
+                }
+            }
         }
+        
     }
 
     private void UpdateFingersBasedOnTouch()

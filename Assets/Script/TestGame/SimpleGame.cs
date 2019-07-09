@@ -68,6 +68,11 @@ public class SimpleGame : MonoBehaviour
             {
                 handledByCharacter = gameCharacter.handleGesture(gesture);
             }
+            if(gesture.GestureType == GestureType.SINGLE_TOUCH_MOVE)
+            {
+                Vector2 localTouchPos = (Vector2)gesture.MetaData;
+                Debug.Log(string.Format("Finger move at: ({0},{1})", localTouchPos.x, localTouchPos.y));
+            }
         }
         else if(gameMode == EditMode.DRAW)
         {

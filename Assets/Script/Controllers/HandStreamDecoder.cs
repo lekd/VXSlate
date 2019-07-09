@@ -97,7 +97,7 @@ public class HandStreamDecoder : MonoBehaviour
             if (timer > frameInterval)
             {
                 handVisTexture.LoadImage(handFrameStream.GetBuffer());
-                handVisTexture.alphaIsTransparency = true;
+                //handVisTexture.alphaIsTransparency = true;
                 mainHandMaterial.mainTexture = handVisTexture;
                 updateFrame = false;
                 timer = timer % frameInterval;

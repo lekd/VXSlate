@@ -30,10 +30,21 @@ public class TabletTouchEventManager : MonoBehaviour, IGeneralPointerEventListen
     }
     void connectWebSocketServer()
     {
-        wsClient = new WebSocketSharp.WebSocket(string.Format("ws://{0}/main.html", GlobalUtilities.LoadServerAddress()));
+        //wsClient = new WebSocketSharp.WebSocket(string.Format("ws://{0}/main.html", GlobalUtilities.LoadServerAddress()));
+        Uri wsUri = new Uri("ws://127.0.0.1:8080/main.html",UriKind.Absolute);
+        wsClient = new WebSocketSharp.WebSocket(wsUri.AbsoluteUri);
+        //wsClient = new WebSocketSharp.WebSocket(string.Format("ws://{0}", GlobalUtilities.LoadServerAddress()));
         wsClient.OnMessage += WsClient_OnMessage;
+        wsClient.OnOpen += WsClient_OnOpen;
+        Debug.Log("Start connecting to " + wsClient.Url.AbsoluteUri);
         wsClient.Connect();
     }
+
+    private void WsClient_OnOpen(object sender, EventArgs e)
+    {
+        Debug.Log("Connected to websocket server");
+    }
+
     private void WsClient_OnMessage(object sender, WebSocketSharp.MessageEventArgs e)
     {
         //return;
