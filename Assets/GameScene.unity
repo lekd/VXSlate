@@ -943,7 +943,7 @@ GameObject:
   - component: {fileID: 1105813825}
   - component: {fileID: 1105813824}
   - component: {fileID: 1105813827}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: VirtualPad
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2078,7 +2078,7 @@ GameObject:
   - component: {fileID: 1865788406}
   - component: {fileID: 1865788404}
   - component: {fileID: 1865788405}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: InteractiveBoard
   m_TagString: Untagged
   m_Icon: {fileID: 0}
