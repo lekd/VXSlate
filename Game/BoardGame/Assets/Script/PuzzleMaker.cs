@@ -289,14 +289,14 @@ public class PuzzleMaker : MonoBehaviour
                 Debug.LogWarning("Missing screen material!", _screenMaterial);
             }
 
-            _largeScreenCenter = new Vector2(_largeScreenWidth / 2, _largeScreenHeight / 2);
-
             Debug.LogWarning("Large screen object is missed! A random object is generated.", _largeScreenObject);
         }
 
 
         if (_mainPuzzleTexture != null)
         {
+            _largeScreenCenter = new Vector2(_largeScreenWidth / 2, _largeScreenHeight / 2);
+
             _marginSize = _largeScreenWidth * _percentageForMargins;
 
             Vector2 _mainTextureArea = new Vector2(0.4f * (_largeScreenWidth - 4 * _marginSize), _largeScreenHeight - 2 * _marginSize);
@@ -399,8 +399,13 @@ public class PuzzleMaker : MonoBehaviour
 
                 float _gridPieceWidth = _mainTextureArea.x / _x;
                 float _gridPieceHeight = _mainTextureArea.y / _y;
+                //Vector2 _firstGridPosition = new Vector2(_largeScreenObject.transform.position.x - ConvertPixelsToMeters(_largeScreenCenter.x - _marginSize - _gridPieceWidth / 2),
+                //                                         _largeScreenObject.transform.position.y + ConvertPixelsToMeters(_largeScreenCenter.y - _marginSize - _gridPieceHeight / 2));
+
                 Vector2 _firstGridPosition = new Vector2(_largeScreenObject.transform.position.x - ConvertPixelsToMeters(_largeScreenCenter.x - _marginSize - _gridPieceWidth / 2),
-                                                         _largeScreenObject.transform.position.y + ConvertPixelsToMeters(_largeScreenCenter.y - _marginSize - _gridPieceHeight / 2));
+                                                         _largeScreenObject.transform.position.y + ConvertPixelsToMeters((_y/2)* _gridPieceHeight - _gridPieceHeight / 2));
+                
+
 
                 _firstGridPixelPosition = new Vector2(_largeScreenObject.transform.position.x - ConvertPixelsToMeters(_largeScreenCenter.x - _marginSize),
                                                       _largeScreenObject.transform.position.y - ConvertPixelsToMeters(_largeScreenCenter.y - _marginSize));
@@ -1005,11 +1010,15 @@ public class PuzzleMaker : MonoBehaviour
         if (_puzzleDoneObject != null)
         {
             Texture2D texture2D = _puzzleDoneObject.gameObject.GetComponent<Renderer>().material.mainTexture as Texture2D;
-            foreach (var p in _sketchedPixels)
-            {
-                texture2D.SetPixel(p.X, p.Y, p.PreviousColor);
-            }
 
+            if(_sketchedPixels != null)
+            {
+                foreach (var p in _sketchedPixels)
+                {
+                    texture2D.SetPixel(p.X, p.Y, p.PreviousColor);
+                }
+            }
+            
             texture2D.Apply();
             _sketchedPixels.Clear();
             _puzzleDoneObject.gameObject.GetComponent<Renderer>().material.mainTexture = texture2D;
