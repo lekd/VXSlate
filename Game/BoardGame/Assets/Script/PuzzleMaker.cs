@@ -34,15 +34,15 @@ public class PuzzleMaker : MonoBehaviour
     float _percentageForMargins = 0.05f;
     float _marginSize = 0;
     
+    // Puzzle Grid
     int _x = 4; // number of collumn
     int _y = 4; // number of rows
 
     Vector2 _largeScreenCenter; //in pixel
     Vector2 _sampleScreenCenter; //in pixel
-
-    // Puzzle Grid
-    public float _gridWidth = 3f;
-    public float _gridHeight = 2f;
+        
+    //public float _gridWidth = 3f;
+    //public float _gridHeight = 2f;
      
     public Material _sampleMaterial;
 
@@ -77,18 +77,18 @@ public class PuzzleMaker : MonoBehaviour
     public List<Pixel> _sketchedPixels;
 
     int _sketchedBrush = 5;
-    public GameObject _puzzleDoneObject;
 
     //For sketch
-    Vector2 _previous2DPoint = new Vector2(1000000, 1000000); 
-
+    Vector2 _previous2DPoint = new Vector2(1000000, 1000000);
+       
+    public Font _statusFont;
 
     //Status notification
+    [Header("For Experiment Access")]
+    public GameObject _puzzleDoneObject;
 
     GameObject _canvasObject;
     public GameObject _statusObject;
-
-    public Font _statusFont;   
 
     public GameObject _startButtonObject;
 
@@ -593,9 +593,10 @@ public class PuzzleMaker : MonoBehaviour
                 }*/
 
 
+                _listOfGameObjects.Add(_largeScreenObject);
                 _listOfGameObjects.Add(sampleScreenObject);
-                _listOfGameObjects.Add(puzzleMasterObject);
-                _listOfGameObjects.Add(gridMasterObject);
+                //_listOfGameObjects.Add(puzzleMasterObject);
+                //_listOfGameObjects.Add(gridMasterObject);
                 _listOfGameObjects.Add(puzzleAreaObject);
             }
             else
@@ -639,10 +640,15 @@ public class PuzzleMaker : MonoBehaviour
 
         if (_prepareTime > 0)
         {
-            foreach (var e in _listOfGameObjects)
-            {
-                e.SetActive(false);
-            }
+            SetObjectsTransparency(0.5f);
+            //foreach (var e in _listOfGameObjects)
+            //{
+            //    e.SetActive(false);
+            //}
+        }
+        else
+        {
+            SetObjectsTransparency(1f);
         }
 
         _isInit = true;
@@ -1017,10 +1023,11 @@ public class PuzzleMaker : MonoBehaviour
                 {
                     texture2D.SetPixel(p.X, p.Y, p.PreviousColor);
                 }
+
+                _sketchedPixels.Clear();
             }
             
             texture2D.Apply();
-            _sketchedPixels.Clear();
             _puzzleDoneObject.gameObject.GetComponent<Renderer>().material.mainTexture = texture2D;
         }
     }
@@ -1175,11 +1182,14 @@ public class PuzzleMaker : MonoBehaviour
         return new Vector3(x, y, z);
     }
 
-    public void SetObjectsActive(bool isActive)
+    public void SetObjectsTransparency(float transparentLevel)
     {
+        if (transparentLevel > 1)
+            transparentLevel = 1;
+
         foreach (var e in _listOfGameObjects)
         {
-            e.SetActive(isActive);
+            e.GetComponent<MeshRenderer>().material.color = new Color(1.0f, 1.0f, 1.0f, transparentLevel);
         }
     }
 

@@ -1,4 +1,5 @@
 ﻿using BoardGame;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,7 +7,9 @@ using UnityEngine.UI;
 
 public class ExperimentManager : MonoBehaviour
 {
+    [Header("Objects Mapping")]
     public GameObject _puzzleMakerObject;
+    public GameObject _eventListennerObject;
 
     [Header("Experiment log")]
     public string _participantID;
@@ -20,17 +23,27 @@ public class ExperimentManager : MonoBehaviour
     bool isMouseDown = false;
 
     PuzzleMaker _puzzleMaker;
+    EventListenner _eventListenner;
     Piece _selectedPiece = null;
     // Start is called before the first frame update
     void Start()
     {
-        if(_puzzleMakerObject == null)
+        if (_puzzleMakerObject == null)
         {
             Debug.LogWarning("Missing Puzzle Maker Object!", _puzzleMakerObject);
         }
         else
         {
             _puzzleMaker = _puzzleMakerObject.GetComponent<PuzzleMaker>();
+        }
+
+        if (_eventListennerObject == null)
+        {
+            Debug.LogWarning("Missing Puzzle Maker Object!", _puzzleMakerObject);
+        }
+        else
+        {
+            _eventListenner = _eventListennerObject.GetComponent<EventListenner>();
         }
     }
 
@@ -54,7 +67,7 @@ public class ExperimentManager : MonoBehaviour
             _isExperimentStarted = true;
             _startTimer = false;
 
-            _puzzleMaker.SetObjectsActive(true);
+            _puzzleMaker.SetObjectsTransparency(0.5f);
 
             Debug.Log("Experiment Started!");
 
@@ -65,11 +78,15 @@ public class ExperimentManager : MonoBehaviour
             _puzzleMaker. _statusObject.GetComponent<Text>().alignment = TextAnchor.LowerCenter;
         }
 
-        OnMouseDown();
-        OnMouseUp();
+        //OnMouseDown();
+        //OnMouseUp();
+
+        CheckEvents();
 
         if (_isExperimentStarted && _puzzleMaker._isInit)
         {
+            
+
             if (!_isExperimentFinished)
             {
                 if (isMouseDown && _selectedPiece != null)
@@ -144,120 +161,140 @@ public class ExperimentManager : MonoBehaviour
         }
     }
 
-    private void OnMouseDown()
+    private void CheckEvents()
     {
-        if (_isExperimentStarted)
+        if(_eventListenner.CLICKDOWN)
         {
-            if (Input.GetMouseButton(0))
+            if (_isExperimentStarted)
             {
-                //For testing
-                //_puzzleMaker.isPuzzledDone = true;
-
-                RaycastHit hitInfo1 = new RaycastHit();
-
-                bool hit1 = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo1);
-
-                //if (InStartPoints(ConvertPositionToPixelPosition(new Vector2(hitInfo1.point.x, hitInfo1.point.y))))
-                //    Debug.Log("IN START POINTS");
-
-                //if (InLinePoints(ConvertPositionToPixelPosition(new Vector2(hitInfo1.point.x, hitInfo1.point.y))))
-                //    Debug.Log("IN LINE POINTS");
-
-                if (!isMouseDown)
+                if (Input.GetMouseButton(0))
                 {
-                    Debug.Log("OnMouseDown");
+                    //For testing
+                    //_puzzleMaker.isPuzzledDone = true;
 
-                    if (!_puzzleMaker.isPuzzledDone)
+                    RaycastHit hitInfo1 = new RaycastHit();
+
+                    bool hit1 = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo1);
+
+                    //if (InStartPoints(ConvertPositionToPixelPosition(new Vector2(hitInfo1.point.x, hitInfo1.point.y))))
+                    //    Debug.Log("IN START POINTS");
+
+                    //if (InLinePoints(ConvertPositionToPixelPosition(new Vector2(hitInfo1.point.x, hitInfo1.point.y))))
+                    //    Debug.Log("IN LINE POINTS");
+
+                    if (!isMouseDown)
                     {
-                        RaycastHit hitInfo = new RaycastHit();
+                        Debug.Log("OnMouseDown");
 
-                        bool hit = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo);
-
-                        if (hit)
+                        if (!_puzzleMaker.isPuzzledDone)
                         {
-                            if (_selectedPiece != null && _selectedPiece.GameObject.name == hitInfo.transform.gameObject.name)
-                            {
-                                _selectedPiece.IsSelected = false;
-                                _selectedPiece.GameObject.GetComponent<Renderer>().material.mainTexture = _selectedPiece.Original;
+                            RaycastHit hitInfo = new RaycastHit();
 
-                                _selectedPiece = null;
-                            }
-                            else
+                            bool hit = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo);
+
+                            if (hit)
                             {
-                                for (int i = 0; i < _puzzleMaker._puzzlePieces.Count; i++)
+                                if (_selectedPiece != null && _selectedPiece.GameObject.name == hitInfo.transform.gameObject.name)
                                 {
-                                    if (_puzzleMaker._puzzlePieces[i].GameObject.name == hitInfo.transform.gameObject.name)
+                                    _selectedPiece.IsSelected = false;
+                                    _selectedPiece.GameObject.GetComponent<Renderer>().material.mainTexture = _selectedPiece.Original;
+
+                                    _selectedPiece = null;
+                                }
+                                else
+                                {
+                                    for (int i = 0; i < _puzzleMaker._puzzlePieces.Count; i++)
                                     {
-                                        float z = 0;
-
-                                        Piece piece = _puzzleMaker._puzzlePieces[i];
-
-                                        //Reset previous puzzle
-                                        if (_selectedPiece != null)
+                                        if (_puzzleMaker._puzzlePieces[i].GameObject.name == hitInfo.transform.gameObject.name)
                                         {
-                                            _selectedPiece.IsSelected = false;
-                                            _selectedPiece.GameObject.GetComponent<Renderer>().material.mainTexture = _selectedPiece.Original;
+                                            float z = 0;
+
+                                            Piece piece = _puzzleMaker._puzzlePieces[i];
+
+                                            //Reset previous puzzle
+                                            if (_selectedPiece != null)
+                                            {
+                                                _selectedPiece.IsSelected = false;
+                                                _selectedPiece.GameObject.GetComponent<Renderer>().material.mainTexture = _selectedPiece.Original;
+                                            }
+
+                                            z = _puzzleMaker._puzzlePieces[0].GameObject.transform.position.z;
+
+                                            for (int j = 0; j < i; j++)
+                                            {
+                                                _puzzleMaker._puzzlePieces[j].GameObject.transform.position = new Vector3(_puzzleMaker._puzzlePieces[j].GameObject.transform.position.x,
+                                                                                                                         _puzzleMaker._puzzlePieces[j].GameObject.transform.position.y,
+                                                                                                                         _puzzleMaker._puzzlePieces[j + 1].GameObject.transform.position.z);
+                                            }
+
+                                            // Highlight new puzzle
+                                            piece.IsSelected = true;
+                                            piece.GameObject.GetComponent<Renderer>().material.mainTexture = piece.Highlighted;
+
+                                            if (z != 0)
+                                                piece.GameObject.transform.position = new Vector3(piece.GameObject.transform.position.x,
+                                                                                                  piece.GameObject.transform.position.y,
+                                                                                                  z);
+
+                                            _selectedPiece = piece;
+
+                                            _puzzleMaker._puzzlePieces = _puzzleMaker.SortPieces(_puzzleMaker._puzzlePieces);
+
+                                            break;
                                         }
-
-                                        z = _puzzleMaker._puzzlePieces[0].GameObject.transform.position.z;
-
-                                        for (int j = 0; j < i; j++)
-                                        {
-                                            _puzzleMaker._puzzlePieces[j].GameObject.transform.position = new Vector3(_puzzleMaker._puzzlePieces[j].GameObject.transform.position.x,
-                                                                                                                     _puzzleMaker._puzzlePieces[j].GameObject.transform.position.y,
-                                                                                                                     _puzzleMaker._puzzlePieces[j + 1].GameObject.transform.position.z);
-                                        }
-
-                                        // Highlight new puzzle
-                                        piece.IsSelected = true;
-                                        piece.GameObject.GetComponent<Renderer>().material.mainTexture = piece.Highlighted;
-
-                                        if (z != 0)
-                                            piece.GameObject.transform.position = new Vector3(piece.GameObject.transform.position.x,
-                                                                                              piece.GameObject.transform.position.y,
-                                                                                              z);
-
-                                        _selectedPiece = piece;
-
-                                        _puzzleMaker._puzzlePieces = _puzzleMaker.SortPieces(_puzzleMaker._puzzlePieces);
-
-                                        break;
                                     }
                                 }
                             }
                         }
-                    }
-                    else
-                    {
-                        if (_selectedPiece != null)
+                        else
                         {
-                            _selectedPiece.IsSelected = false;
-                            _selectedPiece.GameObject.GetComponent<Renderer>().material.mainTexture = _selectedPiece.Original;
+                            if (_selectedPiece != null)
+                            {
+                                _selectedPiece.IsSelected = false;
+                                _selectedPiece.GameObject.GetComponent<Renderer>().material.mainTexture = _selectedPiece.Original;
+                            }
+
+
                         }
 
-
+                        isMouseDown = true;
                     }
-
-                    isMouseDown = true;
                 }
             }
-        }
-        else
-        {
-            if (Input.GetMouseButton(0))
+            else
             {
-                RaycastHit hitInfo = new RaycastHit();
+                if(_eventListenner._isMouse)
+                { 
+                    RaycastHit hitInfo = new RaycastHit();
 
-                bool hit = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo);
+                    bool hit = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo);
 
-                if (hit && _puzzleMaker._startButtonObject.gameObject.name == hitInfo.transform.gameObject.name)
+                    if (hit && _puzzleMaker._startButtonObject.gameObject.name == hitInfo.transform.gameObject.name)
+                    {
+                        _puzzleMaker.Init(_textureID, _prepareTime);
+
+                        _puzzleMaker._startButtonObject.SetActive(false);
+                        _startTimer = true;
+
+                        Debug.Log("Timer started! Counting down...");
+                    }
+                }
+
+                if(_eventListenner._isTablet)
                 {
-                    _puzzleMaker.Init(_textureID, _prepareTime);
+                    Vector2 startButtonV2 = new Vector2(_puzzleMaker._startButtonObject.gameObject.transform.position.x,
+                                                        _puzzleMaker._startButtonObject.gameObject.transform.position.y);
 
-                    _puzzleMaker._startButtonObject.SetActive(false);
-                    _startTimer = true;
+                    if ((startButtonV2 - _eventListenner.touchPosition).magnitude
+                        < _puzzleMaker._startButtonObject.gameObject.transform.localScale.x)
+                    {
+                        _puzzleMaker.Init(_textureID, _prepareTime);
 
-                    Debug.Log("Timer started! Counting down...");
+                        _puzzleMaker._startButtonObject.SetActive(false);
+                        _startTimer = true;
+
+                        Debug.Log("Timer started! Counting down...");
+                    }
                 }
             }
         }
@@ -326,5 +363,15 @@ public class ExperimentManager : MonoBehaviour
                 }
             }
         }
+    }
+
+    Vector2 ConvertTabletTo3D(Vector2 v)
+    {
+        Vector2 ret = new Vector2();
+
+        ret.x = v.x * _puzzleMaker._largeScreenObject.transform.localScale.x;
+        ret.y = v.y * _puzzleMaker._largeScreenObject.transform.localScale.y;
+
+        return ret;
     }
 }
