@@ -2201,15 +2201,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1865788402}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b799130a6e74bea4cbfb224c608a6b3d, type: 3}
+  m_Script: {fileID: 11500000, guid: f1c04b4c885bb5a4eace06b7fcf054ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _puzzleMakerObject: {fileID: 1827507204}
-  _participantID: 
-  _textureID: 1
-  _isExperimentStarted: 0
-  _isExperimentFinished: 0
-  _prepareTime: 3
+  remoteControllerObj: {fileID: 1105813822}
+  gameCharacterObj: {fileID: 466984800}
 --- !u!64 &1865788406
 MeshCollider:
   m_ObjectHideFlags: 0
