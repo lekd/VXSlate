@@ -155,6 +155,117 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85ae136ae76afe148848e1bdeff26d59, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &282463864
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 282463868}
+  - component: {fileID: 282463867}
+  - component: {fileID: 282463866}
+  - component: {fileID: 282463865}
+  - component: {fileID: 282463869}
+  m_Layer: 8
+  m_Name: CubeBoard
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!65 &282463865
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 282463864}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!23 &282463866
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 282463864}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 60b53d1de4913504b8507dc660bfe81f, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 0
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+--- !u!33 &282463867
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 282463864}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!4 &282463868
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 282463864}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 300, z: 299}
+  m_LocalScale: {x: 650, y: 380, z: 0.001}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 9
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &282463869
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 282463864}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b799130a6e74bea4cbfb224c608a6b3d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _puzzleMakerObject: {fileID: 1827507204}
+  _eventListennerObject: {fileID: 1093932413}
+  _participantID: 
+  _textureID: 1
+  _isExperimentStarted: 0
+  _isExperimentFinished: 0
+  _prepareTime: 3
 --- !u!1 &350268961
 GameObject:
   m_ObjectHideFlags: 0
@@ -1005,6 +1116,60 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 970dd4b9371394fb4890965f608d46fd, type: 3}
+--- !u!1 &1093932413
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1093932414}
+  - component: {fileID: 1093932415}
+  m_Layer: 0
+  m_Name: DummyEventListener
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1093932414
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1093932413}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 300, z: 290}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 8
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1093932415
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1093932413}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1dc3e17007188824385592ad065ef36f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _isMouse: 1
+  _isController: 0
+  _isTablet: 0
+  NONE: 1
+  CLICKDOWN: 0
+  CLICKUP: 0
+  OBJECT_SCALING: 0
+  OBJECT_ROTATING: 0
+  scalingLevel: 0
+  rotatingAngle: 0
+  touchPosition: {x: 0, y: 0}
 --- !u!1 &1105813822
 GameObject:
   m_ObjectHideFlags: 0
@@ -1121,7 +1286,7 @@ MonoBehaviour:
   eventListenerObject: {fileID: 263427947}
   gameCameraObject: {fileID: 556465721}
   gazePointObject: {fileID: 1554097519}
-  boardObject: {fileID: 1865788402}
+  boardObject: {fileID: 282463864}
   finger1: {fileID: 934791698}
   finger2: {fileID: 1229382090}
   finger3: {fileID: 370161765}
@@ -1244,7 +1409,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1196841955}
   m_LocalRotation: {x: -0.042604744, y: -0, z: -0, w: 0.99909204}
-  m_LocalPosition: {x: 0, y: 264, z: 0}
+  m_LocalPosition: {x: 0, y: 200, z: -200}
   m_LocalScale: {x: 20, y: 20, z: 20}
   m_Children:
   - {fileID: 556465720}
@@ -2100,7 +2265,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _isInit: 0
-  _largeScreenObject: {fileID: 1865788402}
+  _largeScreenObject: {fileID: 282463864}
   _screenMaterial: {fileID: 2100000, guid: 60b53d1de4913504b8507dc660bfe81f, type: 2}
   _puzzle1O: {fileID: 2800000, guid: 6872f27e72e39ff488bbe5b2e7ce28a2, type: 3}
   _puzzle1L: {fileID: 2800000, guid: 70a9c440eab4df249aa9d9389f122907, type: 3}
@@ -2108,12 +2273,10 @@ MonoBehaviour:
   _puzzle2L: {fileID: 2800000, guid: 1abf3e5b3c6356242be9f77a69e812b1, type: 3}
   _startButtonTexture: {fileID: 2800000, guid: 959257ceb89fdb441ba9154115457bfd, type: 3}
   _gridPieceTexture: {fileID: 2800000, guid: 8e7b2a23a64354b40a24bcc40ef61834, type: 3}
-  _gridWidth: 3
-  _gridHeight: 2
   _sampleMaterial: {fileID: 2100000, guid: 60b53d1de4913504b8507dc660bfe81f, type: 2}
+  _statusFont: {fileID: 12800000, guid: 8aecb189dbe04544898c10896c953cf9, type: 3}
   _puzzleDoneObject: {fileID: 0}
   _statusObject: {fileID: 0}
-  _statusFont: {fileID: 12800000, guid: 8aecb189dbe04544898c10896c953cf9, type: 3}
   _startButtonObject: {fileID: 0}
   isPuzzledDone: 0
   isSketchStarted: 0
@@ -2148,9 +2311,9 @@ GameObject:
   - component: {fileID: 1865788408}
   - component: {fileID: 1865788407}
   - component: {fileID: 1865788406}
-  - component: {fileID: 1865788404}
   - component: {fileID: 1865788405}
-  m_Layer: 8
+  - component: {fileID: 1865788404}
+  m_Layer: 0
   m_Name: InteractiveBoard
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2201,11 +2364,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 1865788402}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f1c04b4c885bb5a4eace06b7fcf054ff, type: 3}
+  m_Script: {fileID: 11500000, guid: b799130a6e74bea4cbfb224c608a6b3d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  remoteControllerObj: {fileID: 1105813822}
-  gameCharacterObj: {fileID: 466984800}
+  _puzzleMakerObject: {fileID: 1827507204}
+  _eventListennerObject: {fileID: 1093932413}
+  _participantID: 
+  _textureID: 1
+  _isExperimentStarted: 1
+  _isExperimentFinished: 0
+  _prepareTime: 3
 --- !u!64 &1865788406
 MeshCollider:
   m_ObjectHideFlags: 0

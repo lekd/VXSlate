@@ -490,6 +490,7 @@
     <Compile Include="Assets\Script\Models\TouchGesture.cs" />
     <Compile Include="Assets\Script\Models\TouchPointerData.cs" />
     <Compile Include="Assets\Script\TestGame\ExperimentManager.cs" />
+    <Compile Include="Assets\Script\TestGame\GenericEventListener.cs" />
     <Compile Include="Assets\Script\TestGame\Piece.cs" />
     <Compile Include="Assets\Script\TestGame\Pixel.cs" />
     <Compile Include="Assets\Script\TestGame\PuzzleMaker.cs" />
