@@ -49,7 +49,7 @@ public class SimpleCharacter : MonoBehaviour
         if (local2DScale.x != 1 || local2DScale.y != 1)
         {
             Vector3 curScale = gameObject.transform.localScale;
-            gameObject.transform.localScale = new Vector3(curScale.x*local2DScale.x,curScale.y,curScale.z * local2DScale.y);
+            gameObject.transform.localScale = new Vector3(curScale.x*local2DScale.x,curScale.y * local2DScale.y, curScale.z);
             //Debug.Log("Object scaled at ratio: " + string.Format("({0},{1})", local2DScale.x, local2DScale.y));
             local2DScale.Set(1, 1);
         }
