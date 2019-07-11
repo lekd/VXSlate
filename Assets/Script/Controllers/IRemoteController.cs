@@ -7,6 +7,7 @@ namespace Assets.Script
 {
     public interface IRemoteController
     {
+        string getControllerName();
         void setGestureRecognizedCallback(GestureRecognizedEventCallback gestureRecognizedListener);
         void setModeSwitchedCallback(MenuItemListener.EditModeSelectedCallBack modeChangeListener);
     }

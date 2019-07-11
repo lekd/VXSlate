@@ -55,6 +55,10 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
     Rect boardFlatBound = new Rect();
     Rect padFlatBound = new Rect();
     Vector2 localPadFlatCenter = new Vector2();
+    public string getControllerName()
+    {
+        return "TabletController";
+    }
     void Start()
     {
         _currentMode = EditMode.OBJECT_MANIP;

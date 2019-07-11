@@ -44,4 +44,9 @@ public class ExampleMouseController : MonoBehaviour, IRemoteController
     {
         //not really needed here to consider
     }
+
+    public string getControllerName()
+    {
+        return "MouseController";
+    }
 }
