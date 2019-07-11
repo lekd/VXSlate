@@ -41,3 +41,12 @@ Icon?
 ehthumbs.db
 Thumbs.db
 VRProject/test.csv
+*.lock
+.vs/VXSlate/v16/Server/sqlite3/storage.ide
+.vs/VXSlate/v16/Server/sqlite3/storage.ide-shm
+.vs/VXSlate/v16/Server/sqlite3/storage.ide-wal
+Assembly-CSharp.csproj
+Library/ScriptAssemblies/Assembly-CSharp.dll
+Library/shadercompiler-UnityShaderCompiler.exe0.log
+Library/shadercompiler-UnityShaderCompiler.exe0.log
+Library/shadercompiler-UnityShaderCompiler.exe0.log
