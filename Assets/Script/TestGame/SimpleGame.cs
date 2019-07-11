@@ -6,27 +6,50 @@ using UnityEngine;
 
 public class SimpleGame : MonoBehaviour
 {
-    public GameObject remoteControllerObj;
+    public GameObject tabletControllerObj;
+    public GameObject oculusControllerObj;
+    public GameObject mouseControllerObj;
     public GameObject gameCharacterObj;
     private Texture2D screenTexture;
     Vector2 gameSize = new Vector2();
-    // Start is called before the first frame update
-    IRemoteController remoteController;
+
+    IRemoteController tabletController;
+    IRemoteController mouseController;
+    IRemoteController oculusController;
+
     SimpleCharacter gameCharacter;
     Color[] paintColors = new Color[1];
     Point2D drawnPoint = new Point2D();
     bool hasThingToDraw = false;
     EditMode gameMode;
     Vector3 screenSize = new Vector3();
+    // Start is called before the first frame update
     void Start()
     {
         gameCharacterObj.transform.localPosition.Set(0, 0, -0.00001f);
-        remoteController = remoteControllerObj.GetComponent<IRemoteController>();
-        if(remoteController != null)
+
+        tabletController = tabletControllerObj.GetComponent<IRemoteController>();
+        if(tabletController != null)
         {
-            remoteController.setGestureRecognizedCallback(this.handleControlGesture);
-            remoteController.setModeSwitchedCallback(this.handleEditModeChanged);
+            tabletController.setGestureRecognizedCallback(this.handleControlGesture);
+            tabletController.setModeSwitchedCallback(this.handleEditModeChanged);
         }
+
+        mouseController = mouseControllerObj.GetComponent<IRemoteController>();
+        if (mouseController != null)
+        {
+            mouseController.setGestureRecognizedCallback(this.handleControlGesture);
+            mouseController.setModeSwitchedCallback(this.handleEditModeChanged);
+        }
+
+        oculusController = oculusControllerObj.GetComponent<IRemoteController>();
+        if (oculusController != null)
+        {
+            oculusController.setGestureRecognizedCallback(this.handleControlGesture);
+            oculusController.setModeSwitchedCallback(this.handleEditModeChanged);
+        }
+
+
         gameCharacter = gameCharacterObj.GetComponent<SimpleCharacter>();
         paintColors[0] = new Color(1, 0, 0);
         screenTexture = new Texture2D(2, 2);
