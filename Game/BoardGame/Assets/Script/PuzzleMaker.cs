@@ -104,6 +104,8 @@ public class PuzzleMaker : MonoBehaviour
     public bool isSketchingOnTrack = false;
     public bool isSketchDoneSucessfully = false;
 
+    float difLargeScreenZ = 0;
+
 
     // Start is called before the first frame update
     void Start()
@@ -292,6 +294,8 @@ public class PuzzleMaker : MonoBehaviour
             Debug.LogWarning("Large screen object is missed! A random object is generated.", _largeScreenObject);
         }
 
+        difLargeScreenZ = _largeScreenObject.transform.position.z - _largeScreenObject.transform.localScale.z / 2;
+
 
         if (_mainPuzzleTexture != null)
         {
@@ -323,7 +327,7 @@ public class PuzzleMaker : MonoBehaviour
                                                                                                                                         _marginSize -
                                                                                                                                         (int)_sampleScreenArea.x / 2),
                                                                         _largeScreenObject.transform.position.y,
-                                                                        -0.0001f),
+                                                                        difLargeScreenZ - 0.0001f),
                                                             sampleScreenRotation,
                                                             new Vector3(ConvertPixelsToMeters(_sampleScreenArea.x),
                                                                         ConvertPixelsToMeters(_sampleScreenArea.y),
@@ -351,7 +355,7 @@ public class PuzzleMaker : MonoBehaviour
             GameObject puzzleAreaObject = CreateCubeGameObject("Puzzle Area",
                                                                 new Vector3(_largeScreenObject.transform.position.x - ConvertPixelsToMeters(puzzlePositionX),
                                                                             _largeScreenObject.transform.position.y,
-                                                                            -0.0001f),
+                                                                            difLargeScreenZ - 0.0001f),
                                                                 puzzleAreaRotation,
                                                                 new Vector3(ConvertPixelsToMeters(puzzleArea.x),
                                                                             ConvertPixelsToMeters(puzzleArea.y),
@@ -371,7 +375,7 @@ public class PuzzleMaker : MonoBehaviour
 
                 puzzleDonePosition.x = _largeScreenObject.transform.position.x - ConvertPixelsToMeters(_largeScreenCenter.x - _marginSize - _mainTextureArea.x / 2);
                 puzzleDonePosition.y = _largeScreenObject.transform.position.y + ConvertPixelsToMeters(_largeScreenCenter.y - _marginSize - _mainTextureArea.y / 2);
-                puzzleDonePosition.z = -0.005f;
+                puzzleDonePosition.z = difLargeScreenZ - 0.005f;
 
                 _puzzleDoneObject = CreateCubeGameObject("Puzzle Done",
                                                          puzzleDonePosition,
@@ -430,7 +434,7 @@ public class PuzzleMaker : MonoBehaviour
 
                         Vector3 gridPiecePosition = new Vector3(_firstGridPosition.x + ConvertPixelsToMeters(i * _gridPieceWidth),
                                                                 _firstGridPosition.y - ConvertPixelsToMeters(j * _gridPieceHeight),
-                                                                -0.0001f);
+                                                                difLargeScreenZ - 0.0001f);
 
                         GameObject gridPieceObject = CreateCubeGameObject("Grid Piece " + (i * _x + _y - j).ToString(),
                                                                         gridPiecePosition,
@@ -532,6 +536,7 @@ public class PuzzleMaker : MonoBehaviour
                                                     puzzleAreaObject.transform.position.y + puzzleAreaObject.transform.localScale.y / 2 - puzzlePieceScale.y / 2);
 
                             float z = UnityEngine.Random.Range(-0.005f, -0.0015f);
+                            z = difLargeScreenZ + z;
 
                             for (int id = 0; id < _puzzlePieces.Count; id++)
                             {

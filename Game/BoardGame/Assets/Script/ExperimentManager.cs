@@ -163,7 +163,7 @@ public class ExperimentManager : MonoBehaviour
 
     private void CheckEvents()
     {
-        if(_eventListenner.CLICKDOWN)
+        if(_eventListenner.TOUCHDOWN)
         {
             if (_isExperimentStarted)
             {

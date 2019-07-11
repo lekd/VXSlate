@@ -15,8 +15,9 @@ public class EventListenner : MonoBehaviour
 
     [Header("Event")]
     public bool NONE = true;
-    public bool CLICKDOWN = false;
-    public bool CLICKUP = false;
+    public bool TOUCHDOWN = false;
+    public bool TOUCHUP = false;
+    public bool TOUCHMOVE = false;
     public bool OBJECT_SCALING = false;
     public bool OBJECT_ROTATING = false;
 
@@ -29,8 +30,9 @@ public class EventListenner : MonoBehaviour
     void Start()
     {
         NONE = true;
-        CLICKDOWN = false;
-        CLICKUP = false;
+        TOUCHDOWN = false;
+        TOUCHUP = false;
+        TOUCHMOVE = false;
         OBJECT_SCALING = false;
         OBJECT_ROTATING = false;
     }
@@ -59,8 +61,8 @@ public class EventListenner : MonoBehaviour
         if (Input.GetMouseButton(0))
         {
             NONE = false;
-            CLICKDOWN = true;
-            CLICKUP = false;
+            TOUCHDOWN = true;
+            TOUCHUP = false;
 
             if (Input.GetKeyDown(KeyCode.DownArrow))
             {
@@ -86,8 +88,8 @@ public class EventListenner : MonoBehaviour
         }
         else
         {
-            CLICKDOWN = false;
-            CLICKUP = true;
+            TOUCHDOWN = false;
+            TOUCHUP = true;
             NONE = true;
         }
     }
