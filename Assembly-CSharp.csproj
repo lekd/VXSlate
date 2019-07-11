@@ -473,6 +473,7 @@
     <Compile Include="Assets\Oculus\VoiceMod\Scripts\Helpers\OVRMicInput.cs" />
     <Compile Include="Assets\Oculus\VoiceMod\Scripts\OVRVoiceMod.cs" />
     <Compile Include="Assets\Oculus\VoiceMod\Scripts\OVRVoiceModContext.cs" />
+    <Compile Include="Assets\Script\Controllers\ExampleMouseController.cs" />
     <Compile Include="Assets\Script\Controllers\GeneralPointerEventListener.cs" />
     <Compile Include="Assets\Script\Controllers\HandStreamDecoder.cs" />
     <Compile Include="Assets\Script\Controllers\InteractiveBoardController.cs" />
