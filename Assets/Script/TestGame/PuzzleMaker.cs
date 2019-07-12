@@ -13,7 +13,7 @@ public class PuzzleMaker : MonoBehaviour
     private const float _coefficientCoverterPixelToM = 3779.5275590551f;
 
     public GameObject _largeScreenObject;
-    public bool _isLargeScreenPlane = false;
+    //public bool _isLargeScreenPlane = false;
     // Large screen size in pixels
     float _largeScreenWidth;
     float _largeScreenHeight;
@@ -265,16 +265,18 @@ public class PuzzleMaker : MonoBehaviour
 
         if (_largeScreenObject != null)
         {
-            if (_isLargeScreenPlane)
-            {
-                _largeScreenWidth = ConvertMetersToPixels(_largeScreenObject.transform.localScale.x * 10);
-                _largeScreenHeight = ConvertMetersToPixels(_largeScreenObject.transform.localScale.y * 10);
-            }
-            else
-            {
-                _largeScreenWidth = ConvertMetersToPixels(_largeScreenObject.transform.localScale.x);
-                _largeScreenHeight = ConvertMetersToPixels(_largeScreenObject.transform.localScale.y);
-            }
+            //if (_isLargeScreenPlane)
+            //{
+            //    _largeScreenWidth = ConvertMetersToPixels(_largeScreenObject.transform.localScale.x * 10);
+            //    _largeScreenHeight = ConvertMetersToPixels(_largeScreenObject.transform.localScale.y * 10);
+            //}
+            //else
+            //{
+            //    _largeScreenWidth = ConvertMetersToPixels(_largeScreenObject.transform.localScale.x);
+            //    _largeScreenHeight = ConvertMetersToPixels(_largeScreenObject.transform.localScale.y);
+            //}
+            _largeScreenWidth = ConvertMetersToPixels(_largeScreenObject.transform.localScale.x);
+            _largeScreenHeight = ConvertMetersToPixels(_largeScreenObject.transform.localScale.y);
         }
         else
         {

@@ -439,8 +439,8 @@ public class SimpleGame : MonoBehaviour
     Vector2 ConvertLocalToGlobal(Vector2 local2DPos)
     {
         float scale = 1;
-        if (_puzzleMaker._isLargeScreenPlane)
-            scale = 10;
+        //if (_puzzleMaker._isLargeScreenPlane)
+        //    scale = 10;
 
         return new Vector2(local2DPos.x * _puzzleMaker._largeScreenObject.transform.localScale.x * scale + _puzzleMaker._largeScreenObject.transform.position.x,
                            local2DPos.y * _puzzleMaker._largeScreenObject.transform.localScale.y * scale + _puzzleMaker._largeScreenObject.transform.position.y);
