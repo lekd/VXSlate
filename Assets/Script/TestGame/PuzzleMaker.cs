@@ -1,6 +1,8 @@
-﻿using Assets.Script.TestGame;
+﻿using BoardGame;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,6 +13,7 @@ public class PuzzleMaker : MonoBehaviour
     private const float _coefficientCoverterPixelToM = 3779.5275590551f;
 
     public GameObject _largeScreenObject;
+    public bool _isLargeScreenPlane = false;
     // Large screen size in pixels
     float _largeScreenWidth;
     float _largeScreenHeight;
@@ -31,17 +34,17 @@ public class PuzzleMaker : MonoBehaviour
 
     float _percentageForMargins = 0.05f;
     float _marginSize = 0;
-
+    
     // Puzzle Grid
     int _x = 4; // number of collumn
     int _y = 4; // number of rows
 
     Vector2 _largeScreenCenter; //in pixel
     Vector2 _sampleScreenCenter; //in pixel
-
+        
     //public float _gridWidth = 3f;
     //public float _gridHeight = 2f;
-
+     
     public Material _sampleMaterial;
 
     List<Texture2D> _listOfTextiles;
@@ -52,7 +55,7 @@ public class PuzzleMaker : MonoBehaviour
 
     float _overlapThreshold = 0.02f; //in meters
     int _differentZThreshold = 10;
-
+    
     float _differentScale = 0.1f;
     int _numberOfScale = 10;
     Vector3 _standardPieceScale = Vector3.zero;
@@ -60,7 +63,7 @@ public class PuzzleMaker : MonoBehaviour
 
     float _differentAngle = 4;
     int _numberOfRotation = 80;
-    Vector3 _standardRotation = Vector3.zero;
+    Vector3 _standardRotation = Vector3.zero; 
 
     Color _startPointsColor = new Color(255, 0, 0);
     Color _linePointsColor = new Color(255, 255, 0);
@@ -78,7 +81,7 @@ public class PuzzleMaker : MonoBehaviour
 
     //For sketch
     Vector2 _previous2DPoint = new Vector2(1000000, 1000000);
-
+       
     public Font _statusFont;
 
     //Status notification
@@ -102,6 +105,8 @@ public class PuzzleMaker : MonoBehaviour
     public bool isSketchingOnTrack = false;
     public bool isSketchDoneSucessfully = false;
 
+    float difLargeScreenZ = 0;
+
 
     // Start is called before the first frame update
     void Start()
@@ -112,9 +117,13 @@ public class PuzzleMaker : MonoBehaviour
             startButtonRotation.eulerAngles = new Vector3(0, 0, 180);
 
             _startButtonObject = CreateCubeGameObject("Start Button",
-                                                      new Vector3(0, 2.5f, 0),
+                                                      new Vector3(_largeScreenObject.transform.position.x,
+                                                                  _largeScreenObject.transform.position.y,
+                                                                  _largeScreenObject.transform.position.z - _largeScreenObject.transform.localScale.z/2 - 0.001f),
                                                       startButtonRotation,
-                                                      new Vector3(0.5f, 0.5f, 0.5f),
+                                                      new Vector3(_largeScreenObject.transform.localScale.x/4, 
+                                                                  _largeScreenObject.transform.localScale.x/4, 
+                                                                  _largeScreenObject.transform.localScale.z),
                                                       null,
                                                       _startButtonTexture,
                                                       Color.white);
@@ -256,8 +265,16 @@ public class PuzzleMaker : MonoBehaviour
 
         if (_largeScreenObject != null)
         {
-            _largeScreenWidth = ConvertMetersToPixels(_largeScreenObject.transform.localScale.x);
-            _largeScreenHeight = ConvertMetersToPixels(_largeScreenObject.transform.localScale.y);
+            if (_isLargeScreenPlane)
+            {
+                _largeScreenWidth = ConvertMetersToPixels(_largeScreenObject.transform.localScale.x * 10);
+                _largeScreenHeight = ConvertMetersToPixels(_largeScreenObject.transform.localScale.y * 10);
+            }
+            else
+            {
+                _largeScreenWidth = ConvertMetersToPixels(_largeScreenObject.transform.localScale.x);
+                _largeScreenHeight = ConvertMetersToPixels(_largeScreenObject.transform.localScale.y);
+            }
         }
         else
         {
@@ -290,6 +307,8 @@ public class PuzzleMaker : MonoBehaviour
             Debug.LogWarning("Large screen object is missed! A random object is generated.", _largeScreenObject);
         }
 
+        difLargeScreenZ = _largeScreenObject.transform.position.z - _largeScreenObject.transform.localScale.z / 2;
+
 
         if (_mainPuzzleTexture != null)
         {
@@ -321,7 +340,7 @@ public class PuzzleMaker : MonoBehaviour
                                                                                                                                         _marginSize -
                                                                                                                                         (int)_sampleScreenArea.x / 2),
                                                                         _largeScreenObject.transform.position.y,
-                                                                        -0.0001f),
+                                                                        difLargeScreenZ - 0.0001f),
                                                             sampleScreenRotation,
                                                             new Vector3(ConvertPixelsToMeters(_sampleScreenArea.x),
                                                                         ConvertPixelsToMeters(_sampleScreenArea.y),
@@ -349,7 +368,7 @@ public class PuzzleMaker : MonoBehaviour
             GameObject puzzleAreaObject = CreateCubeGameObject("Puzzle Area",
                                                                 new Vector3(_largeScreenObject.transform.position.x - ConvertPixelsToMeters(puzzlePositionX),
                                                                             _largeScreenObject.transform.position.y,
-                                                                            -0.0001f),
+                                                                            difLargeScreenZ - 0.0001f),
                                                                 puzzleAreaRotation,
                                                                 new Vector3(ConvertPixelsToMeters(puzzleArea.x),
                                                                             ConvertPixelsToMeters(puzzleArea.y),
@@ -369,7 +388,7 @@ public class PuzzleMaker : MonoBehaviour
 
                 puzzleDonePosition.x = _largeScreenObject.transform.position.x - ConvertPixelsToMeters(_largeScreenCenter.x - _marginSize - _mainTextureArea.x / 2);
                 puzzleDonePosition.y = _largeScreenObject.transform.position.y + ConvertPixelsToMeters(_largeScreenCenter.y - _marginSize - _mainTextureArea.y / 2);
-                puzzleDonePosition.z = -0.005f;
+                puzzleDonePosition.z = difLargeScreenZ - 0.005f;
 
                 _puzzleDoneObject = CreateCubeGameObject("Puzzle Done",
                                                          puzzleDonePosition,
@@ -401,8 +420,8 @@ public class PuzzleMaker : MonoBehaviour
                 //                                         _largeScreenObject.transform.position.y + ConvertPixelsToMeters(_largeScreenCenter.y - _marginSize - _gridPieceHeight / 2));
 
                 Vector2 _firstGridPosition = new Vector2(_largeScreenObject.transform.position.x - ConvertPixelsToMeters(_largeScreenCenter.x - _marginSize - _gridPieceWidth / 2),
-                                                         _largeScreenObject.transform.position.y + ConvertPixelsToMeters((_y / 2) * _gridPieceHeight - _gridPieceHeight / 2));
-
+                                                         _largeScreenObject.transform.position.y + ConvertPixelsToMeters((_y/2)* _gridPieceHeight - _gridPieceHeight / 2));
+                
 
 
                 _firstGridPixelPosition = new Vector2(_largeScreenObject.transform.position.x - ConvertPixelsToMeters(_largeScreenCenter.x - _marginSize),
@@ -428,7 +447,7 @@ public class PuzzleMaker : MonoBehaviour
 
                         Vector3 gridPiecePosition = new Vector3(_firstGridPosition.x + ConvertPixelsToMeters(i * _gridPieceWidth),
                                                                 _firstGridPosition.y - ConvertPixelsToMeters(j * _gridPieceHeight),
-                                                                -0.0001f);
+                                                                difLargeScreenZ - 0.0001f);
 
                         GameObject gridPieceObject = CreateCubeGameObject("Grid Piece " + (i * _x + _y - j).ToString(),
                                                                         gridPiecePosition,
@@ -530,6 +549,7 @@ public class PuzzleMaker : MonoBehaviour
                                                     puzzleAreaObject.transform.position.y + puzzleAreaObject.transform.localScale.y / 2 - puzzlePieceScale.y / 2);
 
                             float z = UnityEngine.Random.Range(-0.005f, -0.0015f);
+                            z = difLargeScreenZ + z;
 
                             for (int id = 0; id < _puzzlePieces.Count; id++)
                             {
@@ -653,8 +673,8 @@ public class PuzzleMaker : MonoBehaviour
     }
 
     public void CheckSketch()
-    {
-        if (CheckPointPixelColor(_startPointsColor, _linePointsColor, _endPointsColor))
+    {    
+        if(CheckPointPixelColor(_startPointsColor, _linePointsColor, _endPointsColor))
         {
             if (!isSketchDoneSucessfully)
             {
@@ -704,7 +724,7 @@ public class PuzzleMaker : MonoBehaviour
         c = _originalPuzzleTexture.GetPixel((int)pixelUV.x, (int)pixelUV.y);//texture2D.GetPixel((int)pixelUV.x, (int)pixelUV.y);
 
         if (Mathf.Abs(c.r - startColor.r) < 20 &&
-           Mathf.Abs(c.g - startColor.g) < 20 &&
+           Mathf.Abs(c.g - startColor.g) < 20 && 
            Mathf.Abs(c.b - startColor.b) < 20)
         {
             isInStartPoints = true;
@@ -727,7 +747,7 @@ public class PuzzleMaker : MonoBehaviour
             isSketchDoneSucessfully = true;
         }
         else if (isInStartPoints &&
-                 Mathf.Abs(c.r - lineColor.r) < 20 &&
+                 Mathf.Abs(c.r - lineColor.r) < 20 && 
                  Mathf.Abs(c.g - lineColor.g) < 20 &&
                  Mathf.Abs(c.b - lineColor.b) < 20)
         {
@@ -820,17 +840,17 @@ public class PuzzleMaker : MonoBehaviour
 
     private Texture2D BrushSketchLines(Texture2D tex, int x, int y)
     {
-        for (int i = 0; i < _sketchedBrush; i++)
+        for(int i = 0; i < _sketchedBrush; i++)
         {
-            for (int j = 0; j < _sketchedBrush; j++)
+            for(int j = 0; j < _sketchedBrush; j++)
             {
-                for (int sign = 0; sign < 4; sign++)
+                for(int sign = 0; sign < 4; sign++)
                 {
                     int a, b;
                     a = x;
                     b = y;
 
-                    if (sign == 0)
+                    if(sign == 0)
                     {
                         a += i;
                         b += j;
@@ -867,18 +887,18 @@ public class PuzzleMaker : MonoBehaviour
 
                     if (distance <= _sketchedBrush - 1)
                     {
-                        if (tex.GetPixel(a, b) != Color.black)
+                        if(tex.GetPixel(a, b) != Color.black)
                         {
                             Pixel p = new Pixel(a, b, tex.GetPixel(a, b), Color.black);
                             tex.SetPixel(a, b, Color.black);
 
                             _sketchedPixels.Add(p);
                         }
-                    }
+                    }                    
                 }
             }
         }
-
+        
         tex.Apply();
 
         return tex;
@@ -888,9 +908,9 @@ public class PuzzleMaker : MonoBehaviour
     {
         foreach (var gridPiece in _gridPieces)
         {
-            foreach (var puzzlePiece in _puzzlePieces)
+            foreach(var puzzlePiece in _puzzlePieces)
             {
-                if (puzzlePiece.Name == gridPiece.Name && (new Vector3(puzzlePiece.GameObject.transform.position.x - gridPiece.GameObject.transform.position.x,
+                if(puzzlePiece.Name == gridPiece.Name && (new Vector3(puzzlePiece.GameObject.transform.position.x - gridPiece.GameObject.transform.position.x,
                                                                       puzzlePiece.GameObject.transform.position.y - gridPiece.GameObject.transform.position.y,
                                                                       0)).magnitude > 0.02f)
                 {
@@ -963,7 +983,7 @@ public class PuzzleMaker : MonoBehaviour
         }
     }
 
-
+    
     Vector2 ConvertPositionToPixelPosition(Vector2 position)
     {
         Vector2 ret = Vector2.zero;
@@ -1006,16 +1026,16 @@ public class PuzzleMaker : MonoBehaviour
         return false;
     }
 
-
+    
 
     private void ResetTexture()
     {
-
+        
         if (_puzzleDoneObject != null)
         {
             Texture2D texture2D = _puzzleDoneObject.gameObject.GetComponent<Renderer>().material.mainTexture as Texture2D;
 
-            if (_sketchedPixels != null)
+            if(_sketchedPixels != null)
             {
                 foreach (var p in _sketchedPixels)
                 {
@@ -1024,21 +1044,21 @@ public class PuzzleMaker : MonoBehaviour
 
                 _sketchedPixels.Clear();
             }
-
+            
             texture2D.Apply();
             _puzzleDoneObject.gameObject.GetComponent<Renderer>().material.mainTexture = texture2D;
         }
     }
 
-
+   
 
     public List<Piece> SortPieces(List<Piece> list)
     {
-        for (int i = 0; i < list.Count - 1; i++)
+        for(int i = 0; i < list.Count - 1; i++)
         {
-            for (int j = i + 1; j < list.Count - 1; j++)
+            for(int j = i+1; j < list.Count - 1; j++)
             {
-                if (list[i].GameObject.transform.position.z > list[j].GameObject.transform.position.z)
+                if(list[i].GameObject.transform.position.z > list[j].GameObject.transform.position.z)
                 {
                     Piece tmp = list[i];
                     list[i] = list[j];
@@ -1076,7 +1096,7 @@ public class PuzzleMaker : MonoBehaviour
             newGameObject.GetComponent<Renderer>().material = material;
         else if (texture != null)
             newGameObject.GetComponent<Renderer>().material.mainTexture = texture;
-        else
+        else 
             newGameObject.GetComponent<Renderer>().material.color = color;
 
         return newGameObject;
@@ -1084,7 +1104,7 @@ public class PuzzleMaker : MonoBehaviour
 
     Vector2 RescaleArea(Vector2 orginal, Vector2 scale)
     {
-        if (orginal.x / scale.x > orginal.y / scale.y)
+        if(orginal.x / scale.x > orginal.y / scale.y)
         {
             orginal.x = scale.x * orginal.y / scale.y;
         }

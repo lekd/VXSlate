@@ -260,6 +260,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1c04b4c885bb5a4eace06b7fcf054ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _puzzleMakerObject: {fileID: 1827507204}
+  _eventListennerObject: {fileID: 0}
+  _participantID: 
+  _textureID: 1
+  _isExperimentStarted: 0
+  _isExperimentFinished: 0
+  _prepareTime: 3
   tabletControllerObj: {fileID: 1105813822}
   oculusControllerObj: {fileID: 0}
   mouseControllerObj: {fileID: 1132650032}
@@ -2285,6 +2292,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1827507206}
+  - component: {fileID: 1827507205}
   m_Layer: 0
   m_Name: PuzzleMaker
   m_TagString: Untagged
@@ -2292,6 +2300,40 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &1827507205
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1827507204}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f8a4e684d87627a4eb3c2850ace97314, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _isInit: 0
+  _largeScreenObject: {fileID: 282463864}
+  _isLargeScreenPlane: 0
+  _screenMaterial: {fileID: 2100000, guid: 0162f4feda0d23649aa23abbd612410f, type: 2}
+  _puzzle1O: {fileID: 2800000, guid: 60285f7aea92b934e9cccff60ddbb87e, type: 3}
+  _puzzle1L: {fileID: 2800000, guid: 441b27734cedfd64cb9ece71333f8e51, type: 3}
+  _puzzle2O: {fileID: 2800000, guid: 9485571002e0c94478ff948a6539d773, type: 3}
+  _puzzle2L: {fileID: 2800000, guid: 75422f0c866c2cd4fada274295100740, type: 3}
+  _startButtonTexture: {fileID: 2800000, guid: eef9bc0f3ce2186468416101a598ae68, type: 3}
+  _gridPieceTexture: {fileID: 2800000, guid: 48b8100379888e148adc6ca96f78871b, type: 3}
+  _sampleMaterial: {fileID: 0}
+  _statusFont: {fileID: 12800000, guid: 8aecb189dbe04544898c10896c953cf9, type: 3}
+  _puzzleDoneObject: {fileID: 0}
+  _statusObject: {fileID: 0}
+  _startButtonObject: {fileID: 0}
+  isPuzzledDone: 0
+  isSketchStarted: 0
+  isInStartPoints: 0
+  isInLinePoints: 0
+  isInEndPoints: 0
+  isSketchingOnTrack: 0
+  isSketchDoneSucessfully: 0
 --- !u!4 &1827507206
 Transform:
   m_ObjectHideFlags: 0

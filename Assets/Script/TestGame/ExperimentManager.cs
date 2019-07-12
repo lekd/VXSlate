@@ -1,4 +1,5 @@
-﻿using Assets.Script.TestGame;
+﻿using BoardGame;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -16,14 +17,16 @@ public class ExperimentManager : MonoBehaviour
     public bool _isExperimentStarted = false;
     public bool _isExperimentFinished = false;
     public float _prepareTime = 3; //in seconds
-
+      
     bool _startTimer = false;
 
     bool isMouseDown = false;
 
     PuzzleMaker _puzzleMaker;
-    GenericEventListener _eventListenner;
+   
     Piece _selectedPiece = null;
+
+    //EventListenner _eventListenner;
     // Start is called before the first frame update
     void Start()
     {
@@ -34,20 +37,16 @@ public class ExperimentManager : MonoBehaviour
         else
         {
             _puzzleMaker = _puzzleMakerObject.GetComponent<PuzzleMaker>();
-            _puzzleMaker.Init(_textureID, _prepareTime);
-
-            _puzzleMaker._startButtonObject.SetActive(false);
-            _startTimer = true;
         }
 
-        if (_eventListennerObject == null)
-        {
-            Debug.LogWarning("Missing Puzzle Maker Object!", _puzzleMakerObject);
-        }
-        else
-        {
-            _eventListenner = _eventListennerObject.GetComponent<GenericEventListener>();
-        }
+        //if (_eventListennerObject == null)
+        //{
+        //    Debug.LogWarning("Missing Puzzle Maker Object!", _puzzleMakerObject);
+        //}
+        //else
+        //{
+        //    _eventListenner = _eventListennerObject.GetComponent<EventListenner>();
+        //}
     }
 
     // Update is called once per frame
@@ -57,7 +56,7 @@ public class ExperimentManager : MonoBehaviour
         {
             _puzzleMaker._statusObject.GetComponent<Text>().text = "ARE YOU READY?\n" + ((int)_prepareTime + 1).ToString();
             _puzzleMaker._statusObject.GetComponent<Text>().font = _puzzleMaker._statusFont;
-            _puzzleMaker._statusObject.GetComponent<Text>().color = Color.blue;
+            _puzzleMaker._statusObject.GetComponent<Text>().color =Color.blue;
             _puzzleMaker._statusObject.GetComponent<Text>().fontSize = 28;
             _puzzleMaker._statusObject.GetComponent<Text>().alignment = TextAnchor.MiddleCenter;
 
@@ -78,7 +77,7 @@ public class ExperimentManager : MonoBehaviour
             _puzzleMaker._statusObject.GetComponent<Text>().font = _puzzleMaker._statusFont;
             _puzzleMaker._statusObject.GetComponent<Text>().color = Color.black;
             _puzzleMaker._statusObject.GetComponent<Text>().fontSize = 4;
-            _puzzleMaker._statusObject.GetComponent<Text>().alignment = TextAnchor.LowerCenter;
+            _puzzleMaker. _statusObject.GetComponent<Text>().alignment = TextAnchor.LowerCenter;
         }
 
         //OnMouseDown();
@@ -88,7 +87,7 @@ public class ExperimentManager : MonoBehaviour
 
         if (_isExperimentStarted && _puzzleMaker._isInit)
         {
-
+            
 
             if (!_isExperimentFinished)
             {
@@ -116,10 +115,10 @@ public class ExperimentManager : MonoBehaviour
                     _puzzleMaker._statusObject.GetComponent<Text>().text = "Puzzle grid is done!\nPlease start sketching from RED to BLUE point.";
                 }
 
-                if (_puzzleMaker.isSketchStarted && !_puzzleMaker.isSketchDoneSucessfully && isMouseDown)
+                if(_puzzleMaker.isSketchStarted && !_puzzleMaker.isSketchDoneSucessfully && isMouseDown)
                     _puzzleMaker.CheckSketch();
 
-                if (_puzzleMaker.isSketchDoneSucessfully)
+                if(_puzzleMaker.isSketchDoneSucessfully)
                     _isExperimentFinished = true;
 
                 if (Input.GetKeyDown(KeyCode.DownArrow) && _selectedPiece != null)
@@ -166,141 +165,141 @@ public class ExperimentManager : MonoBehaviour
 
     private void CheckEvents()
     {
-        if (_eventListenner.CLICKDOWN)
-        {
-            if (_isExperimentStarted)
-            {
-                if (Input.GetMouseButton(0))
-                {
-                    //For testing
-                    //_puzzleMaker.isPuzzledDone = true;
+        //if(_eventListenner.TOUCHDOWN)
+        //{
+        //    if (_isExperimentStarted)
+        //    {
+        //        if (Input.GetMouseButton(0))
+        //        {
+        //            //For testing
+        //            //_puzzleMaker.isPuzzledDone = true;
 
-                    RaycastHit hitInfo1 = new RaycastHit();
+        //            RaycastHit hitInfo1 = new RaycastHit();
 
-                    bool hit1 = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo1);
+        //            bool hit1 = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo1);
 
-                    //if (InStartPoints(ConvertPositionToPixelPosition(new Vector2(hitInfo1.point.x, hitInfo1.point.y))))
-                    //    Debug.Log("IN START POINTS");
+        //            //if (InStartPoints(ConvertPositionToPixelPosition(new Vector2(hitInfo1.point.x, hitInfo1.point.y))))
+        //            //    Debug.Log("IN START POINTS");
 
-                    //if (InLinePoints(ConvertPositionToPixelPosition(new Vector2(hitInfo1.point.x, hitInfo1.point.y))))
-                    //    Debug.Log("IN LINE POINTS");
+        //            //if (InLinePoints(ConvertPositionToPixelPosition(new Vector2(hitInfo1.point.x, hitInfo1.point.y))))
+        //            //    Debug.Log("IN LINE POINTS");
 
-                    if (!isMouseDown)
-                    {
-                        Debug.Log("OnMouseDown");
+        //            if (!isMouseDown)
+        //            {
+        //                Debug.Log("OnMouseDown");
 
-                        if (!_puzzleMaker.isPuzzledDone)
-                        {
-                            RaycastHit hitInfo = new RaycastHit();
+        //                if (!_puzzleMaker.isPuzzledDone)
+        //                {
+        //                    RaycastHit hitInfo = new RaycastHit();
 
-                            bool hit = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo);
+        //                    bool hit = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo);
 
-                            if (hit)
-                            {
-                                if (_selectedPiece != null && _selectedPiece.GameObject.name == hitInfo.transform.gameObject.name)
-                                {
-                                    _selectedPiece.IsSelected = false;
-                                    _selectedPiece.GameObject.GetComponent<Renderer>().material.mainTexture = _selectedPiece.Original;
+        //                    if (hit)
+        //                    {
+        //                        if (_selectedPiece != null && _selectedPiece.GameObject.name == hitInfo.transform.gameObject.name)
+        //                        {
+        //                            _selectedPiece.IsSelected = false;
+        //                            _selectedPiece.GameObject.GetComponent<Renderer>().material.mainTexture = _selectedPiece.Original;
 
-                                    _selectedPiece = null;
-                                }
-                                else
-                                {
-                                    for (int i = 0; i < _puzzleMaker._puzzlePieces.Count; i++)
-                                    {
-                                        if (_puzzleMaker._puzzlePieces[i].GameObject.name == hitInfo.transform.gameObject.name)
-                                        {
-                                            float z = 0;
+        //                            _selectedPiece = null;
+        //                        }
+        //                        else
+        //                        {
+        //                            for (int i = 0; i < _puzzleMaker._puzzlePieces.Count; i++)
+        //                            {
+        //                                if (_puzzleMaker._puzzlePieces[i].GameObject.name == hitInfo.transform.gameObject.name)
+        //                                {
+        //                                    float z = 0;
 
-                                            Piece piece = _puzzleMaker._puzzlePieces[i];
+        //                                    Piece piece = _puzzleMaker._puzzlePieces[i];
 
-                                            //Reset previous puzzle
-                                            if (_selectedPiece != null)
-                                            {
-                                                _selectedPiece.IsSelected = false;
-                                                _selectedPiece.GameObject.GetComponent<Renderer>().material.mainTexture = _selectedPiece.Original;
-                                            }
+        //                                    //Reset previous puzzle
+        //                                    if (_selectedPiece != null)
+        //                                    {
+        //                                        _selectedPiece.IsSelected = false;
+        //                                        _selectedPiece.GameObject.GetComponent<Renderer>().material.mainTexture = _selectedPiece.Original;
+        //                                    }
 
-                                            z = _puzzleMaker._puzzlePieces[0].GameObject.transform.position.z;
+        //                                    z = _puzzleMaker._puzzlePieces[0].GameObject.transform.position.z;
 
-                                            for (int j = 0; j < i; j++)
-                                            {
-                                                _puzzleMaker._puzzlePieces[j].GameObject.transform.position = new Vector3(_puzzleMaker._puzzlePieces[j].GameObject.transform.position.x,
-                                                                                                                         _puzzleMaker._puzzlePieces[j].GameObject.transform.position.y,
-                                                                                                                         _puzzleMaker._puzzlePieces[j + 1].GameObject.transform.position.z);
-                                            }
+        //                                    for (int j = 0; j < i; j++)
+        //                                    {
+        //                                        _puzzleMaker._puzzlePieces[j].GameObject.transform.position = new Vector3(_puzzleMaker._puzzlePieces[j].GameObject.transform.position.x,
+        //                                                                                                                 _puzzleMaker._puzzlePieces[j].GameObject.transform.position.y,
+        //                                                                                                                 _puzzleMaker._puzzlePieces[j + 1].GameObject.transform.position.z);
+        //                                    }
 
-                                            // Highlight new puzzle
-                                            piece.IsSelected = true;
-                                            piece.GameObject.GetComponent<Renderer>().material.mainTexture = piece.Highlighted;
+        //                                    // Highlight new puzzle
+        //                                    piece.IsSelected = true;
+        //                                    piece.GameObject.GetComponent<Renderer>().material.mainTexture = piece.Highlighted;
 
-                                            if (z != 0)
-                                                piece.GameObject.transform.position = new Vector3(piece.GameObject.transform.position.x,
-                                                                                                  piece.GameObject.transform.position.y,
-                                                                                                  z);
+        //                                    if (z != 0)
+        //                                        piece.GameObject.transform.position = new Vector3(piece.GameObject.transform.position.x,
+        //                                                                                          piece.GameObject.transform.position.y,
+        //                                                                                          z);
 
-                                            _selectedPiece = piece;
+        //                                    _selectedPiece = piece;
 
-                                            _puzzleMaker._puzzlePieces = _puzzleMaker.SortPieces(_puzzleMaker._puzzlePieces);
+        //                                    _puzzleMaker._puzzlePieces = _puzzleMaker.SortPieces(_puzzleMaker._puzzlePieces);
 
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if (_selectedPiece != null)
-                            {
-                                _selectedPiece.IsSelected = false;
-                                _selectedPiece.GameObject.GetComponent<Renderer>().material.mainTexture = _selectedPiece.Original;
-                            }
+        //                                    break;
+        //                                }
+        //                            }
+        //                        }
+        //                    }
+        //                }
+        //                else
+        //                {
+        //                    if (_selectedPiece != null)
+        //                    {
+        //                        _selectedPiece.IsSelected = false;
+        //                        _selectedPiece.GameObject.GetComponent<Renderer>().material.mainTexture = _selectedPiece.Original;
+        //                    }
 
 
-                        }
+        //                }
 
-                        isMouseDown = true;
-                    }
-                }
-            }
-            else
-            {
-                if (_eventListenner._isMouse)
-                {
-                    RaycastHit hitInfo = new RaycastHit();
+        //                isMouseDown = true;
+        //            }
+        //        }
+        //    }
+        //    else
+        //    {
+        //        if(_eventListenner._isMouse)
+        //        { 
+        //            RaycastHit hitInfo = new RaycastHit();
 
-                    bool hit = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo);
+        //            bool hit = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo);
 
-                    if (hit && _puzzleMaker._startButtonObject.gameObject.name == hitInfo.transform.gameObject.name)
-                    {
-                        _puzzleMaker.Init(_textureID, _prepareTime);
+        //            if (hit && _puzzleMaker._startButtonObject.gameObject.name == hitInfo.transform.gameObject.name)
+        //            {
+        //                _puzzleMaker.Init(_textureID, _prepareTime);
 
-                        _puzzleMaker._startButtonObject.SetActive(false);
-                        _startTimer = true;
+        //                _puzzleMaker._startButtonObject.SetActive(false);
+        //                _startTimer = true;
 
-                        Debug.Log("Timer started! Counting down...");
-                    }
-                }
+        //                Debug.Log("Timer started! Counting down...");
+        //            }
+        //        }
 
-                if (_eventListenner._isTablet)
-                {
-                    Vector2 startButtonV2 = new Vector2(_puzzleMaker._startButtonObject.gameObject.transform.position.x,
-                                                        _puzzleMaker._startButtonObject.gameObject.transform.position.y);
+        //        if(_eventListenner._isTablet)
+        //        {
+        //            Vector2 startButtonV2 = new Vector2(_puzzleMaker._startButtonObject.gameObject.transform.position.x,
+        //                                                _puzzleMaker._startButtonObject.gameObject.transform.position.y);
 
-                    if ((startButtonV2 - _eventListenner.touchPosition).magnitude
-                        < _puzzleMaker._startButtonObject.gameObject.transform.localScale.x)
-                    {
-                        _puzzleMaker.Init(_textureID, _prepareTime);
+        //            if ((startButtonV2 - _eventListenner.touchPosition).magnitude
+        //                < _puzzleMaker._startButtonObject.gameObject.transform.localScale.x)
+        //            {
+        //                _puzzleMaker.Init(_textureID, _prepareTime);
 
-                        _puzzleMaker._startButtonObject.SetActive(false);
-                        _startTimer = true;
+        //                _puzzleMaker._startButtonObject.SetActive(false);
+        //                _startTimer = true;
 
-                        Debug.Log("Timer started! Counting down...");
-                    }
-                }
-            }
-        }
+        //                Debug.Log("Timer started! Counting down...");
+        //            }
+        //        }
+        //    }
+        //}
     }
 
     private void OnMouseUp()

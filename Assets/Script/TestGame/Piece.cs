@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Assets.Script.TestGame
+namespace BoardGame
 {
     public class Piece
     {
