@@ -111,7 +111,9 @@ public class HandStreamDecoder : MonoBehaviour
 
         if (handStream != null)
             handStream.Close();
-        response.Close();
+
+        if(response != null)
+            response.Close();
     }
     void OnApplicationQuit()
     {

@@ -29,7 +29,7 @@ public class ExampleMouseController : MonoBehaviour, IRemoteController
     void Update()
     {
         TouchGesture touchDownGesture = new TouchGesture();
-
+       
         if (Input.GetMouseButton(0))
         {
             _currentMousePosition = GetMousePosition();
@@ -42,21 +42,23 @@ public class ExampleMouseController : MonoBehaviour, IRemoteController
                                                                    //then notify the game to know about the event
 
                 _previousMousePosition = _currentMousePosition;
-
+                
                 if (gestureRecognizedBroadcaster != null)
                 {
                     gestureRecognizedBroadcaster(touchDownGesture);
+                    
+                    //Debug.Log("MouseDown called: " + touchDownCallRaised);
                     previousGesture = touchDownGesture;
                 }
 
-                Debug.Log("Mouse is down to (" + _currentMousePosition + ")");
+                Debug.Log("Mouse is down at (" + _currentMousePosition + ")");
             }
             else
             {
-                if (Input.GetKeyDown(KeyCode.DownArrow) && previousGesture.GestureType != GestureType.OBJECT_SCALING)
+                if (Input.GetKeyDown(KeyCode.DownArrow) && _isMouseDown)
                 {
                     touchDownGesture.GestureType = GestureType.OBJECT_SCALING;
-                    touchDownGesture.MetaData = new Vector2(0, 0);//some mouse down position normalized to -0.5 and 0.5
+                    touchDownGesture.MetaData = new Vector2(0.9f, 0.9f);//some mouse down position normalized to -0.5 and 0.5
                                                                   //then notify the game to know about the event
                     if (gestureRecognizedBroadcaster != null)
                     {
@@ -66,10 +68,10 @@ public class ExampleMouseController : MonoBehaviour, IRemoteController
 
                     Debug.Log("Puzzle piece is scaled down!");
                 }
-                else if (Input.GetKeyUp(KeyCode.UpArrow) && previousGesture.GestureType != GestureType.OBJECT_SCALING)
+                else if (Input.GetKeyUp(KeyCode.UpArrow) && _isMouseDown)
                 {
                     touchDownGesture.GestureType = GestureType.OBJECT_SCALING;
-                    touchDownGesture.MetaData = new Vector2(0, 0);//some mouse down position normalized to -0.5 and 0.5
+                    touchDownGesture.MetaData = new Vector2(1.1f, 1.1f);//some mouse down position normalized to -0.5 and 0.5
                                                                   //then notify the game to know about the event
                     if (gestureRecognizedBroadcaster != null)
                     {
@@ -80,10 +82,10 @@ public class ExampleMouseController : MonoBehaviour, IRemoteController
                     Debug.Log("Puzzle piece is scaled up!");
                 }
 
-                if (Input.GetKeyDown(KeyCode.LeftArrow) && previousGesture.GestureType != GestureType.OBJECT_ROTATING)
+                if (Input.GetKeyDown(KeyCode.LeftArrow) && _isMouseDown)
                 {
                     touchDownGesture.GestureType = GestureType.OBJECT_ROTATING;
-                    touchDownGesture.MetaData = new Vector2(0, 0);//some mouse down position normalized to -0.5 and 0.5
+                    touchDownGesture.MetaData = new Vector2(-5, -5);//some mouse down position normalized to -0.5 and 0.5
                                                                   //then notify the game to know about the event
                     if (gestureRecognizedBroadcaster != null)
                     {
@@ -93,10 +95,10 @@ public class ExampleMouseController : MonoBehaviour, IRemoteController
 
                     Debug.Log("Puzzle piece is rotated left!");
                 }
-                else if (Input.GetKeyUp(KeyCode.RightArrow) && previousGesture.GestureType != GestureType.OBJECT_ROTATING)
+                else if (Input.GetKeyUp(KeyCode.RightArrow) && _isMouseDown)
                 {
                     touchDownGesture.GestureType = GestureType.OBJECT_ROTATING;
-                    touchDownGesture.MetaData = new Vector2(0, 0);//some mouse down position normalized to -0.5 and 0.5
+                    touchDownGesture.MetaData = new Vector2(5 , 5);//some mouse down position normalized to -0.5 and 0.5
                                                                   //then notify the game to know about the event
                     if (gestureRecognizedBroadcaster != null)
                     {
@@ -133,7 +135,7 @@ public class ExampleMouseController : MonoBehaviour, IRemoteController
         else
         {
             _isMouseDown = false;
-
+            
             if (previousGesture.GestureType != GestureType.NONE)
             {
                 touchDownGesture.GestureType = GestureType.NONE;

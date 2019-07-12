@@ -387,7 +387,7 @@ public class PuzzleMaker : MonoBehaviour
                 Vector3 puzzleDonePosition = Vector3.zero;
 
                 puzzleDonePosition.x = _largeScreenObject.transform.position.x - ConvertPixelsToMeters(_largeScreenCenter.x - _marginSize - _mainTextureArea.x / 2);
-                puzzleDonePosition.y = _largeScreenObject.transform.position.y + ConvertPixelsToMeters(_largeScreenCenter.y - _marginSize - _mainTextureArea.y / 2);
+                puzzleDonePosition.y = _largeScreenObject.transform.position.y;
                 puzzleDonePosition.z = difLargeScreenZ - 0.005f;
 
                 _puzzleDoneObject = CreateCubeGameObject("Puzzle Done",
@@ -548,12 +548,12 @@ public class PuzzleMaker : MonoBehaviour
                             float y = UnityEngine.Random.Range(puzzleAreaObject.transform.position.y - puzzleAreaObject.transform.localScale.y / 2 + puzzlePieceScale.y / 2,
                                                     puzzleAreaObject.transform.position.y + puzzleAreaObject.transform.localScale.y / 2 - puzzlePieceScale.y / 2);
 
-                            float z = UnityEngine.Random.Range(-0.005f, -0.0015f);
+                            float z = UnityEngine.Random.Range(-0.0075f, -0.0015f);
                             z = difLargeScreenZ + z;
 
                             for (int id = 0; id < _puzzlePieces.Count; id++)
                             {
-                                if (_puzzlePieces[id].GameObject.transform.position.z == z)
+                                if (Mathf.Abs(_puzzlePieces[id].GameObject.transform.position.z-z) < 0.00005)
                                 {
                                     flag = true;
                                 }
@@ -586,7 +586,7 @@ public class PuzzleMaker : MonoBehaviour
                     }
                 }
 
-                _puzzlePieces = SortPieces(_puzzlePieces);
+                SortPieces();
 
                 //isInit = true;
                 Debug.Log("Init finished!");
@@ -633,7 +633,7 @@ public class PuzzleMaker : MonoBehaviour
         _canvasObject.GetComponent<CanvasScaler>().dynamicPixelsPerUnit = 75;
         _canvasObject.GetComponent<RectTransform>().position = new Vector3(_largeScreenObject.transform.position.x,
                                                                            _largeScreenObject.transform.position.y,
-                                                                           _largeScreenObject.transform.position.z - 0.0125f);
+                                                                           _largeScreenObject.transform.position.z - 0.02f);
 
         float canvasScaleXY = _largeScreenObject.transform.localScale.x / 100 > _largeScreenObject.transform.localScale.y / 100 ? _largeScreenObject.transform.localScale.y / 100 : _largeScreenObject.transform.localScale.x / 100;
         _canvasObject.GetComponent<RectTransform>().localScale = new Vector3(canvasScaleXY,
@@ -672,9 +672,9 @@ public class PuzzleMaker : MonoBehaviour
         _isInit = true;
     }
 
-    public void CheckSketch()
+    public void CheckSketch(Vector3 rayPoint)
     {    
-        if(CheckPointPixelColor(_startPointsColor, _linePointsColor, _endPointsColor))
+        if(CheckPointPixelColor(rayPoint, _startPointsColor, _linePointsColor, _endPointsColor))
         {
             if (!isSketchDoneSucessfully)
             {
@@ -695,123 +695,129 @@ public class PuzzleMaker : MonoBehaviour
             _statusObject.GetComponent<Text>().text = "Please keep sketching on track!";
         }
     }
-    bool CheckPointPixelColor(Color startColor, Color lineColor, Color endColor)
+    bool CheckPointPixelColor(Vector3 rayPoint, Color startColor, Color lineColor, Color endColor)
     {
         bool ret = true;
 
-        RaycastHit hit;
+        RaycastHit[] hits = Physics.RaycastAll(rayPoint, Vector3.forward);
 
-        if (!Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit))
-            return false;
-
-        Renderer rend = hit.transform.GetComponent<Renderer>();
-        MeshCollider mesh = hit.collider as MeshCollider;
-
-        if (rend == null || rend.sharedMaterial == null || rend.sharedMaterial.mainTexture == null || mesh == null)
-            return false;
-
-        if (!hit.transform.name.Contains("Puzzle Done"))
-            return false;
-
-        Texture2D texture2D = rend.material.mainTexture as Texture2D;
-
-        Vector2 pixelUV = hit.textureCoord;
-
-        pixelUV.x *= texture2D.width;
-        pixelUV.y *= texture2D.height;
-
-        Color32 c;
-        c = _originalPuzzleTexture.GetPixel((int)pixelUV.x, (int)pixelUV.y);//texture2D.GetPixel((int)pixelUV.x, (int)pixelUV.y);
-
-        if (Mathf.Abs(c.r - startColor.r) < 20 &&
-           Mathf.Abs(c.g - startColor.g) < 20 && 
-           Mathf.Abs(c.b - startColor.b) < 20)
+        //if (!Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit))
+        //    return false;
+        for (int id = 0; id < hits.Length; id++)
         {
-            isInStartPoints = true;
-            isInLinePoints = false;
-            isInEndPoints = false;
-
-            isSketchingOnTrack = true;
-        }
-        else if (isInStartPoints &&
-                 isInLinePoints &&
-                Mathf.Abs(c.r - endColor.r) < 20 &&
-                Mathf.Abs(c.g - endColor.g) < 20 &&
-                Mathf.Abs(c.b - endColor.b) < 20)
-        {
-            isInStartPoints = true;
-            isInLinePoints = true;
-            isInEndPoints = true;
-
-            isSketchingOnTrack = true;
-            isSketchDoneSucessfully = true;
-        }
-        else if (isInStartPoints &&
-                 Mathf.Abs(c.r - lineColor.r) < 20 && 
-                 Mathf.Abs(c.g - lineColor.g) < 20 &&
-                 Mathf.Abs(c.b - lineColor.b) < 20)
-        {
-            isInStartPoints = true;
-            isInLinePoints = true;
-            isInEndPoints = false;
-
-            isSketchingOnTrack = true;
-        }
-        else
-        {
-            isSketchingOnTrack = false;
-            ret = false;
-        }
-
-        hit.transform.GetComponent<Renderer>().material.mainTexture = BrushSketchLines(texture2D, (int)pixelUV.x, (int)pixelUV.y);
-
-        Vector2 difUV = pixelUV - _previous2DPoint;
-
-        int signX = 1;
-        int signY = 1;
-
-        int difX = (int)pixelUV.x - (int)_previous2DPoint.x;
-
-        if ((int)pixelUV.x < _previous2DPoint.x)
-        {
-            signX = (-1);
-        }
-
-        int difY = (int)pixelUV.y - (int)_previous2DPoint.y;
-
-        if ((int)pixelUV.y < _previous2DPoint.y)
-        {
-            signY = (-1);
-        }
-
-        difX *= signX;
-        difY *= signY;
-
-        float difXY = (float)difX / difY;
-        float difYX = (float)difY / difX;
-
-        if (difUV.magnitude > 0 &&
-            difUV.magnitude < 75)
-        {
-            for (int i = 0, j = 0; i < difX - 1 || j < difY - 1;)
+            if (hits[id].transform.name.Contains("Puzzle Done"))
             {
-                if (difX > difY)
+                RaycastHit hit = hits[id];
+
+                Renderer rend = hit.transform.GetComponent<Renderer>();
+                MeshCollider mesh = hit.collider as MeshCollider;
+
+                if (rend == null || rend.sharedMaterial == null || rend.sharedMaterial.mainTexture == null || mesh == null)
+                    return false;
+
+                Texture2D texture2D = rend.material.mainTexture as Texture2D;
+
+                Vector2 pixelUV = hit.textureCoord;
+
+                pixelUV.x *= texture2D.width;
+                pixelUV.y *= texture2D.height;
+
+                Color32 c;
+                c = _originalPuzzleTexture.GetPixel((int)pixelUV.x, (int)pixelUV.y);//texture2D.GetPixel((int)pixelUV.x, (int)pixelUV.y);
+
+                if (Mathf.Abs(c.r - startColor.r) < 20 &&
+                   Mathf.Abs(c.g - startColor.g) < 20 &&
+                   Mathf.Abs(c.b - startColor.b) < 20)
                 {
-                    i += 1;
-                    j = (int)(difYX * i);
+                    isInStartPoints = true;
+                    isInLinePoints = false;
+                    isInEndPoints = false;
+
+                    isSketchingOnTrack = true;
                 }
-                else if (difX == difY)
+                else if (isInStartPoints &&
+                         isInLinePoints &&
+                        Mathf.Abs(c.r - endColor.r) < 20 &&
+                        Mathf.Abs(c.g - endColor.g) < 20 &&
+                        Mathf.Abs(c.b - endColor.b) < 20)
                 {
-                    i++;
-                    j++;
+                    isInStartPoints = true;
+                    isInLinePoints = true;
+                    isInEndPoints = true;
+
+                    isSketchingOnTrack = true;
+                    isSketchDoneSucessfully = true;
+                }
+                else if (isInStartPoints &&
+                         Mathf.Abs(c.r - lineColor.r) < 20 &&
+                         Mathf.Abs(c.g - lineColor.g) < 20 &&
+                         Mathf.Abs(c.b - lineColor.b) < 20)
+                {
+                    isInStartPoints = true;
+                    isInLinePoints = true;
+                    isInEndPoints = false;
+
+                    isSketchingOnTrack = true;
                 }
                 else
                 {
-                    j += 1;
-                    i = (int)(difXY * j);
+                    isSketchingOnTrack = false;
+                    ret = false;
                 }
 
-                BrushSketchLines(texture2D, (int)_previous2DPoint.x + i * signX, (int)_previous2DPoint.y + j * signY);
+                hit.transform.GetComponent<Renderer>().material.mainTexture = BrushSketchLines(texture2D, (int)pixelUV.x, (int)pixelUV.y);
+
+                Vector2 difUV = pixelUV - _previous2DPoint;
+
+                int signX = 1;
+                int signY = 1;
+
+                int difX = (int)pixelUV.x - (int)_previous2DPoint.x;
+
+                if ((int)pixelUV.x < _previous2DPoint.x)
+                {
+                    signX = (-1);
+                }
+
+                int difY = (int)pixelUV.y - (int)_previous2DPoint.y;
+
+                if ((int)pixelUV.y < _previous2DPoint.y)
+                {
+                    signY = (-1);
+                }
+
+                difX *= signX;
+                difY *= signY;
+
+                float difXY = (float)difX / difY;
+                float difYX = (float)difY / difX;
+
+                if (difUV.magnitude > 0 &&
+                    difUV.magnitude < 75)
+                {
+                    for (int i = 0, j = 0; i < difX - 1 || j < difY - 1;)
+                    {
+                        if (difX > difY)
+                        {
+                            i += 1;
+                            j = (int)(difYX * i);
+                        }
+                        else if (difX == difY)
+                        {
+                            i++;
+                            j++;
+                        }
+                        else
+                        {
+                            j += 1;
+                            i = (int)(difXY * j);
+                        }
+
+                        BrushSketchLines(texture2D, (int)_previous2DPoint.x + i * signX, (int)_previous2DPoint.y + j * signY);
+                    }
+                }
+
+                _previous2DPoint = new Vector2((int)pixelUV.x, (int)pixelUV.y);
             }
         }
         //else
@@ -832,8 +838,6 @@ public class PuzzleMaker : MonoBehaviour
         //                  "," +
         //                  difY);
         //}
-
-        _previous2DPoint = new Vector2((int)pixelUV.x, (int)pixelUV.y);
 
         return ret;
     }
@@ -906,15 +910,36 @@ public class PuzzleMaker : MonoBehaviour
 
     public bool CheckPuzzlesDone()
     {
+        bool ret = true;
+
         foreach (var gridPiece in _gridPieces)
         {
             foreach(var puzzlePiece in _puzzlePieces)
             {
-                if(puzzlePiece.Name == gridPiece.Name && (new Vector3(puzzlePiece.GameObject.transform.position.x - gridPiece.GameObject.transform.position.x,
-                                                                      puzzlePiece.GameObject.transform.position.y - gridPiece.GameObject.transform.position.y,
-                                                                      0)).magnitude > 0.02f)
+                if(puzzlePiece.Name == gridPiece.Name)
                 {
-                    return false;
+                    Vector3 distance = new Vector3(puzzlePiece.GameObject.transform.position.x - gridPiece.GameObject.transform.position.x,
+                                                   puzzlePiece.GameObject.transform.position.y - gridPiece.GameObject.transform.position.y,
+                                                   0);
+                    //).magnitude > 0.02f)
+                    float scaleRatio = puzzlePiece.GameObject.transform.localScale.x / gridPiece.GameObject.transform.localScale.x;
+                    float rotation = puzzlePiece.GameObject.transform.rotation.eulerAngles.z - gridPiece.GameObject.transform.rotation.eulerAngles.z;
+
+                    if (distance.magnitude < _overlapThreshold && scaleRatio > 0.95 && scaleRatio < 1.05 && Mathf.Abs(rotation) < 5)
+                    {
+                        puzzlePiece.GameObject.GetComponent<Renderer>().material.color = Color.yellow;
+
+                        //puzzlePiece.GameObject.transform.position = gridPiece.GameObject.transform.position;
+                        //puzzlePiece.GameObject.transform.rotation = gridPiece.GameObject.transform.rotation;
+                        //puzzlePiece.GameObject.transform.localScale = gridPiece.GameObject.transform.localScale;
+                        Debug.Log(puzzlePiece.Name + " is located correctly!");
+                    }
+                    else
+                    {
+                        puzzlePiece.GameObject.GetComponent<Renderer>().material.color = Color.white;
+
+                        ret = false;
+                    }
                 }
 
                 //if (puzzlePiece.Name == gridPiece.Name && (new Vector3(puzzlePiece.GameObject.transform.position.x - gridPiece.GameObject.transform.position.x,
@@ -926,7 +951,7 @@ public class PuzzleMaker : MonoBehaviour
             }
         }
 
-        return true;
+        return ret;
     }
 
     public void UpdatePiecePosition(Piece _selectedPiece)
@@ -1052,22 +1077,20 @@ public class PuzzleMaker : MonoBehaviour
 
    
 
-    public List<Piece> SortPieces(List<Piece> list)
+    public void SortPieces()
     {
-        for(int i = 0; i < list.Count - 1; i++)
+        for(int i = 0; i < _puzzlePieces.Count - 1; i++)
         {
-            for(int j = i+1; j < list.Count - 1; j++)
+            for(int j = i+1; j < _puzzlePieces.Count; j++)
             {
-                if(list[i].GameObject.transform.position.z > list[j].GameObject.transform.position.z)
+                if(_puzzlePieces[i].GameObject.transform.position.z > _puzzlePieces[j].GameObject.transform.position.z)
                 {
-                    Piece tmp = list[i];
-                    list[i] = list[j];
-                    list[j] = tmp;
+                    Piece tmp = _puzzlePieces[i];
+                    _puzzlePieces[i] = _puzzlePieces[j];
+                    _puzzlePieces[j] = tmp;
                 }
             }
         }
-
-        return list;
     }
 
     float ConvertPixelsToMeters(float pixels)

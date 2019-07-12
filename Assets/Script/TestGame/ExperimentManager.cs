@@ -25,8 +25,7 @@ public class ExperimentManager : MonoBehaviour
     PuzzleMaker _puzzleMaker;
    
     Piece _selectedPiece = null;
-
-    //EventListenner _eventListenner;
+     //EventListenner _eventListenner;
     // Start is called before the first frame update
     void Start()
     {
@@ -86,9 +85,7 @@ public class ExperimentManager : MonoBehaviour
         CheckEvents();
 
         if (_isExperimentStarted && _puzzleMaker._isInit)
-        {
-            
-
+        {           
             if (!_isExperimentFinished)
             {
                 if (isMouseDown && _selectedPiece != null)
@@ -115,8 +112,8 @@ public class ExperimentManager : MonoBehaviour
                     _puzzleMaker._statusObject.GetComponent<Text>().text = "Puzzle grid is done!\nPlease start sketching from RED to BLUE point.";
                 }
 
-                if(_puzzleMaker.isSketchStarted && !_puzzleMaker.isSketchDoneSucessfully && isMouseDown)
-                    _puzzleMaker.CheckSketch();
+                //if(_puzzleMaker.isSketchStarted && !_puzzleMaker.isSketchDoneSucessfully && isMouseDown)
+                //    _puzzleMaker.CheckSketch();
 
                 if(_puzzleMaker.isSketchDoneSucessfully)
                     _isExperimentFinished = true;
