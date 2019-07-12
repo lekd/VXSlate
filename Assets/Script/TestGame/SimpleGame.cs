@@ -23,6 +23,7 @@ public class SimpleGame : MonoBehaviour
     bool hasThingToDraw = false;
     EditMode gameMode;
     Vector3 screenSize = new Vector3();
+
     // Start is called before the first frame update
     void Start()
     {
@@ -119,6 +120,8 @@ public class SimpleGame : MonoBehaviour
                 hasTouchDown = false;
             }
         }
+
+
         /*if(!handledByCharacter)
         {
             if(gesture.GestureType == GestureType.SINGLE_TOUCH_DOWN
