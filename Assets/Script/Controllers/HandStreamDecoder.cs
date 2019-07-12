@@ -108,7 +108,9 @@ public class HandStreamDecoder : MonoBehaviour
     {
         isStreaming = false;
         Thread.Sleep(500);
-        handStream.Close();
+
+        if (handStream != null)
+            handStream.Close();
         response.Close();
     }
     void OnApplicationQuit()
