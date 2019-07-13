@@ -47,12 +47,10 @@ public class SimpleGame : MonoBehaviour
     Vector3 difPosition = Vector2.zero;
 
     TouchGesture _currentGesture;
-    bool isGestureExecuted = true;
 
     // Start is called before the first frame update
     void Start()
     {
-        isGestureExecuted = true;
         gameCharacterObj.transform.localPosition.Set(0, 0, -0.00001f);
 
         tabletController = tabletControllerObj.GetComponent<IRemoteController>();
@@ -147,17 +145,17 @@ public class SimpleGame : MonoBehaviour
                     _puzzleMaker._puzzleDoneObject.SetActive(true);
                 }
 
-                //For testing
-                _puzzleMaker.isPuzzledDone = true;
-                ////
+                ////For testing
+                //_puzzleMaker.isPuzzledDone = true;
+                //////
 
                 if (_puzzleMaker.isPuzzledDone && !_puzzleMaker.isSketchStarted)
                 {
                     _puzzleMaker.isSketchStarted = true;
 
-                    //For testing
-                    _puzzleMaker._puzzleDoneObject.SetActive(true);
-                    ////
+                    ////For testing
+                    //_puzzleMaker._puzzleDoneObject.SetActive(true);
+                    //////
 
                     if (_puzzleMaker._sketchedPixels == null)
                         _puzzleMaker._sketchedPixels = new List<Pixel>();
@@ -196,11 +194,7 @@ public class SimpleGame : MonoBehaviour
     int touchDownReceived = 0;
     void handleControlGesture(TouchGesture gesture)
     {
-        if (isGestureExecuted)
-        {
-            _currentGesture = gesture;
-            isGestureExecuted = false;
-        }
+        _currentGesture = gesture;
 
         /*if(!handledByCharacter)
         {
@@ -252,11 +246,11 @@ public class SimpleGame : MonoBehaviour
                 _selectedPiece.GameObject.GetComponent<Renderer>().material.mainTexture = _selectedPiece.Original;
             }
 
-            isGestureExecuted = true;
+            _currentGesture = null;
         }
         else
         {
-            if (_isExperimentStarted && !isGestureExecuted)
+            if (_isExperimentStarted && _currentGesture != null)
             {
                 //RaycastHit hitInfo1 = new RaycastHit();
 
@@ -358,7 +352,7 @@ public class SimpleGame : MonoBehaviour
                             }
                         }
 
-                        isGestureExecuted = true;
+                        _currentGesture = null;
                     }
                     else if (hasTouchDown)
                     {
@@ -375,7 +369,7 @@ public class SimpleGame : MonoBehaviour
 
                             _selectedPiece.GameObject.transform.Translate(difV - _selectedPiece.GameObject.transform.position, Space.World);
 
-                            isGestureExecuted = true;
+                            _currentGesture = null;
                         }
                         else if (_selectedPiece != null && _currentGesture.GestureType == GestureType.OBJECT_SCALING)
                         {
@@ -385,7 +379,7 @@ public class SimpleGame : MonoBehaviour
                                                                                           _selectedPiece.GameObject.transform.localScale.y * local2DScale.y,
                                                                                           _selectedPiece.GameObject.transform.localScale.z);
 
-                            isGestureExecuted = true;
+                            _currentGesture = null;
                         }
                         else if (_selectedPiece != null && _currentGesture.GestureType == GestureType.OBJECT_ROTATING)
                         {
@@ -393,7 +387,7 @@ public class SimpleGame : MonoBehaviour
 
                             _selectedPiece.GameObject.transform.RotateAround(_selectedPiece.GameObject.transform.position, _selectedPiece.GameObject.transform.forward, local2DRotation.x);
 
-                            isGestureExecuted = true;
+                            _currentGesture = null;
                         }
 
                         if (_currentGesture.GestureType == GestureType.NONE)
@@ -404,7 +398,7 @@ public class SimpleGame : MonoBehaviour
                                 _selectedPiece.GameObject.GetComponent<Renderer>().material.mainTexture = _selectedPiece.Original;
                             }
 
-                            isGestureExecuted = true;
+                            _currentGesture = null;
                         }
                     }
                 }
@@ -432,7 +426,7 @@ public class SimpleGame : MonoBehaviour
 
                             _puzzleMaker.CheckSketch(rayPoint);
 
-                            isGestureExecuted = true;
+                            _currentGesture = null;
                         }
                     }
                 }
@@ -464,7 +458,7 @@ public class SimpleGame : MonoBehaviour
                         }
                     }
 
-                    isGestureExecuted = true;
+                    _currentGesture = null;
                 }
             }
         }
