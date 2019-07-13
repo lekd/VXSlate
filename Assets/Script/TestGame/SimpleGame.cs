@@ -46,9 +46,13 @@ public class SimpleGame : MonoBehaviour
     bool hasTouchDown = false;
     Vector3 difPosition = Vector2.zero;
 
+    TouchGesture _currentGesture;
+    bool isGestureExecuted = true;
+
     // Start is called before the first frame update
     void Start()
     {
+        isGestureExecuted = true;
         gameCharacterObj.transform.localPosition.Set(0, 0, -0.00001f);
 
         tabletController = tabletControllerObj.GetComponent<IRemoteController>();
@@ -82,12 +86,9 @@ public class SimpleGame : MonoBehaviour
         else
         {
             Debug.LogWarning("Missing Oculus Controller Object!", _puzzleMakerObject);
-        }
-
-        
+        }        
 
         hasTouchDown = false;
-
 
         gameCharacter = gameCharacterObj.GetComponent<SimpleCharacter>();
         paintColors[0] = new Color(1, 0, 0);
@@ -146,17 +147,17 @@ public class SimpleGame : MonoBehaviour
                     _puzzleMaker._puzzleDoneObject.SetActive(true);
                 }
 
-                ////For testing
-                //_puzzleMaker.isPuzzledDone = true;
-                /////
+                //For testing
+                _puzzleMaker.isPuzzledDone = true;
+                ////
 
                 if (_puzzleMaker.isPuzzledDone && !_puzzleMaker.isSketchStarted)
                 {
                     _puzzleMaker.isSketchStarted = true;
 
-                    ////For testing
-                    //_puzzleMaker._puzzleDoneObject.SetActive(true);
-                    //////
+                    //For testing
+                    _puzzleMaker._puzzleDoneObject.SetActive(true);
+                    ////
 
                     if (_puzzleMaker._sketchedPixels == null)
                         _puzzleMaker._sketchedPixels = new List<Pixel>();
@@ -177,6 +178,8 @@ public class SimpleGame : MonoBehaviour
             }
         }
 
+        HandleGameLogic();
+
         /*if(hasThingToDraw)
         {
             drawOnTexture(screenTexture, drawnPoint.X, drawnPoint.Y);
@@ -193,16 +196,53 @@ public class SimpleGame : MonoBehaviour
     int touchDownReceived = 0;
     void handleControlGesture(TouchGesture gesture)
     {
-        if(_puzzleMaker == null && _puzzleMakerObject != null)
+        if (isGestureExecuted)
+        {
+            _currentGesture = gesture;
+            isGestureExecuted = false;
+        }
+
+        /*if(!handledByCharacter)
+        {
+            if(gesture.GestureType == GestureType.SINGLE_TOUCH_DOWN
+                || gesture.GestureType == GestureType.SINGLE_TOUCH_MOVE)
+            {
+                hasThingToDraw = true;
+                Vector2 localTouchPos = (Vector2)gesture.MetaData;
+                drawnPoint.X = (int)((localTouchPos.x) * screenTexture.width);
+                drawnPoint.Y = (int)((localTouchPos.y) * screenTexture.height);
+            }
+        }*/
+    }
+    void drawOnTexture(Texture2D tex, int posX, int posY)
+    {
+        //tex.SetPixels(posX, posY, 5, 5, paintColors);
+        tex.SetPixel(posX, posY, Color.red);
+    }
+
+    Vector2 ConvertLocalToGlobal(Vector2 local2DPos)
+    {
+        float scale = 1;
+        //if (_puzzleMaker._isLargeScreenPlane)
+        //    scale = 10;
+
+        return new Vector2(local2DPos.x * _puzzleMaker._largeScreenObject.transform.localScale.x * scale + _puzzleMaker._largeScreenObject.transform.position.x,
+                           local2DPos.y * _puzzleMaker._largeScreenObject.transform.localScale.y * scale + _puzzleMaker._largeScreenObject.transform.position.y);
+
+    }
+
+    void HandleGameLogic()
+    {
+        if (_puzzleMaker == null && _puzzleMakerObject != null)
         {
             _puzzleMaker = _puzzleMakerObject.GetComponent<PuzzleMaker>();
             Debug.Log(">> Init Puzzle Maker");
         }
-        else if(_puzzleMakerObject == null)
+        else if (_puzzleMakerObject == null)
         {
             Debug.LogWarning("Missing Puzzle Maker Object!", _puzzleMakerObject);
         }
-        if (gesture.GestureType == GestureType.NONE)
+        if (_currentGesture != null && _currentGesture.GestureType == GestureType.NONE)
         {
             hasTouchDown = false;
 
@@ -211,11 +251,12 @@ public class SimpleGame : MonoBehaviour
                 _selectedPiece.IsSelected = false;
                 _selectedPiece.GameObject.GetComponent<Renderer>().material.mainTexture = _selectedPiece.Original;
             }
-            
+
+            isGestureExecuted = true;
         }
         else
         {
-            if (_isExperimentStarted)
+            if (_isExperimentStarted && !isGestureExecuted)
             {
                 //RaycastHit hitInfo1 = new RaycastHit();
 
@@ -230,13 +271,13 @@ public class SimpleGame : MonoBehaviour
 
                 if (!_puzzleMaker.isPuzzledDone)
                 {
-                    if (!hasTouchDown && gesture.GestureType == GestureType.SINGLE_TOUCH_DOWN)
+                    if (!hasTouchDown && _currentGesture != null && _currentGesture.GestureType == GestureType.SINGLE_TOUCH_DOWN)
                     {
                         touchDownReceived++;
                         Debug.Log("TouchDownReceived: " + touchDownReceived);
                         hasTouchDown = true;
 
-                        Vector2 local2DPos = ConvertLocalToGlobal((Vector2)gesture.MetaData);
+                        Vector2 local2DPos = ConvertLocalToGlobal((Vector2)_currentGesture.MetaData);
 
                         Vector3 rayPoint = new Vector3(local2DPos.x,
                                                         local2DPos.y,
@@ -316,13 +357,14 @@ public class SimpleGame : MonoBehaviour
                                 break;
                             }
                         }
+
+                        isGestureExecuted = true;
                     }
                     else if (hasTouchDown)
                     {
-                        Debug.Log(gesture.GestureType);
-                        if (_selectedPiece != null && gesture.GestureType == GestureType.SINGLE_TOUCH_MOVE)
+                        if (_selectedPiece != null && _currentGesture != null && _currentGesture.GestureType == GestureType.SINGLE_TOUCH_MOVE)
                         {
-                            Vector2 local2DPos = ConvertLocalToGlobal((Vector2)gesture.MetaData);
+                            Vector2 local2DPos = ConvertLocalToGlobal((Vector2)_currentGesture.MetaData);
 
                             Vector3 rayPoint = new Vector3(local2DPos.x,
                                                            local2DPos.y,
@@ -332,29 +374,37 @@ public class SimpleGame : MonoBehaviour
                             Vector3 difV = rayPoint - difPosition;
 
                             _selectedPiece.GameObject.transform.Translate(difV - _selectedPiece.GameObject.transform.position, Space.World);
+
+                            isGestureExecuted = true;
                         }
-                        else if (_selectedPiece != null && gesture.GestureType == GestureType.OBJECT_SCALING)
+                        else if (_selectedPiece != null && _currentGesture.GestureType == GestureType.OBJECT_SCALING)
                         {
-                            Vector2 local2DScale = (Vector2)gesture.MetaData;
+                            Vector2 local2DScale = (Vector2)_currentGesture.MetaData;
 
                             _selectedPiece.GameObject.transform.localScale = new Vector3(_selectedPiece.GameObject.transform.localScale.x * local2DScale.x,
                                                                                           _selectedPiece.GameObject.transform.localScale.y * local2DScale.y,
                                                                                           _selectedPiece.GameObject.transform.localScale.z);
+
+                            isGestureExecuted = true;
                         }
-                        else if (_selectedPiece != null && gesture.GestureType == GestureType.OBJECT_ROTATING)
+                        else if (_selectedPiece != null && _currentGesture.GestureType == GestureType.OBJECT_ROTATING)
                         {
-                            Vector2 local2DRotation = (Vector2)gesture.MetaData * -1;
+                            Vector2 local2DRotation = (Vector2)_currentGesture.MetaData * -1;
 
                             _selectedPiece.GameObject.transform.RotateAround(_selectedPiece.GameObject.transform.position, _selectedPiece.GameObject.transform.forward, local2DRotation.x);
+
+                            isGestureExecuted = true;
                         }
 
-                        if (gesture.GestureType == GestureType.NONE)
+                        if (_currentGesture.GestureType == GestureType.NONE)
                         {
                             if (_selectedPiece != null)
                             {
                                 _selectedPiece.IsSelected = false;
                                 _selectedPiece.GameObject.GetComponent<Renderer>().material.mainTexture = _selectedPiece.Original;
                             }
+
+                            isGestureExecuted = true;
                         }
                     }
                 }
@@ -368,30 +418,32 @@ public class SimpleGame : MonoBehaviour
 
                     if (_puzzleMaker.isSketchStarted && !_puzzleMaker.isSketchDoneSucessfully)
                     {
-                        if ((!hasTouchDown && gesture.GestureType == GestureType.SINGLE_TOUCH_DOWN) ||
-                            (hasTouchDown && gesture.GestureType == GestureType.SINGLE_TOUCH_MOVE))
+                        if ((!hasTouchDown && _currentGesture.GestureType == GestureType.SINGLE_TOUCH_DOWN) ||
+                            (hasTouchDown && _currentGesture.GestureType == GestureType.SINGLE_TOUCH_MOVE))
                         {
 
                             hasTouchDown = true;
 
-                            Vector2 local2DPos = ConvertLocalToGlobal((Vector2)gesture.MetaData);
+                            Vector2 local2DPos = ConvertLocalToGlobal((Vector2)_currentGesture.MetaData);
 
                             Vector3 rayPoint = new Vector3(local2DPos.x,
                                                             local2DPos.y,
                                                             _puzzleMaker._largeScreenObject.transform.position.z - 1.5f);
 
                             _puzzleMaker.CheckSketch(rayPoint);
+
+                            isGestureExecuted = true;
                         }
                     }
                 }
             }
             else
             {
-                if (gesture.GestureType == GestureType.SINGLE_TOUCH_DOWN)
+                if (_currentGesture != null && _currentGesture.GestureType == GestureType.SINGLE_TOUCH_DOWN)
                 {
                     hasTouchDown = true;
 
-                    Vector2 local2DPos = ConvertLocalToGlobal((Vector2)gesture.MetaData);
+                    Vector2 local2DPos = ConvertLocalToGlobal((Vector2)_currentGesture.MetaData);
 
                     Vector3 rayPoint = new Vector3(local2DPos.x,
                                                    local2DPos.y,
@@ -399,7 +451,7 @@ public class SimpleGame : MonoBehaviour
 
                     RaycastHit[] hits = Physics.RaycastAll(rayPoint, Vector3.forward);
 
-                    foreach(var hitInfo in hits)
+                    foreach (var hitInfo in hits)
                     {
                         if (_puzzleMaker._startButtonObject.gameObject.name == hitInfo.transform.gameObject.name)
                         {
@@ -410,40 +462,11 @@ public class SimpleGame : MonoBehaviour
 
                             Debug.Log(">> Timer started! Counting down...");
                         }
-                    }                    
+                    }
+
+                    isGestureExecuted = true;
                 }
             }
-
-            
         }
-
-
-        /*if(!handledByCharacter)
-        {
-            if(gesture.GestureType == GestureType.SINGLE_TOUCH_DOWN
-                || gesture.GestureType == GestureType.SINGLE_TOUCH_MOVE)
-            {
-                hasThingToDraw = true;
-                Vector2 localTouchPos = (Vector2)gesture.MetaData;
-                drawnPoint.X = (int)((localTouchPos.x) * screenTexture.width);
-                drawnPoint.Y = (int)((localTouchPos.y) * screenTexture.height);
-            }
-        }*/
-    }
-    void drawOnTexture(Texture2D tex, int posX, int posY)
-    {
-        //tex.SetPixels(posX, posY, 5, 5, paintColors);
-        tex.SetPixel(posX, posY, Color.red);
-    }
-
-    Vector2 ConvertLocalToGlobal(Vector2 local2DPos)
-    {
-        float scale = 1;
-        //if (_puzzleMaker._isLargeScreenPlane)
-        //    scale = 10;
-
-        return new Vector2(local2DPos.x * _puzzleMaker._largeScreenObject.transform.localScale.x * scale + _puzzleMaker._largeScreenObject.transform.position.x,
-                           local2DPos.y * _puzzleMaker._largeScreenObject.transform.localScale.y * scale + _puzzleMaker._largeScreenObject.transform.position.y);
-
     }
 }
