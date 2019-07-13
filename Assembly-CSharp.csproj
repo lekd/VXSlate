@@ -480,6 +480,7 @@
     <Compile Include="Assets\Script\Controllers\IntroDlgEventHandler.cs" />
     <Compile Include="Assets\Script\Controllers\IRemoteController.cs" />
     <Compile Include="Assets\Script\Controllers\MenuItemListener.cs" />
+    <Compile Include="Assets\Script\Controllers\OculusController.cs" />
     <Compile Include="Assets\Script\Controllers\TabletTouchEventManager.cs" />
     <Compile Include="Assets\Script\Controllers\TouchGestureRecognizer.cs" />
     <Compile Include="Assets\Script\Controllers\VirtualPadController.cs" />
