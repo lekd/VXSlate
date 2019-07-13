@@ -61,10 +61,11 @@ public class SimpleGame : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("Missing Tablet Controller Object!", _puzzleMakerObject);
+            Debug.LogWarning("Missing Tablet Controller Object!", tabletControllerObj);
         }
 
         mouseController = mouseControllerObj.GetComponent<IRemoteController>();
+
         if (mouseController != null)
         {
             mouseController.setGestureRecognizedCallback(this.handleControlGesture);
@@ -72,10 +73,11 @@ public class SimpleGame : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("Missing Mouse Controller Object!", _puzzleMakerObject);
+            Debug.LogWarning("Missing Mouse Controller Object!", mouseControllerObj);
         }
 
         oculusController = oculusControllerObj.GetComponent<IRemoteController>();
+
         if (oculusController != null)
         {
             oculusController.setGestureRecognizedCallback(this.handleControlGesture);
@@ -83,7 +85,7 @@ public class SimpleGame : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("Missing Oculus Controller Object!", _puzzleMakerObject);
+            Debug.LogWarning("Missing Oculus Controller Object!", oculusControllerObj);
         }        
 
         hasTouchDown = false;
@@ -192,9 +194,11 @@ public class SimpleGame : MonoBehaviour
     }
 
     int touchDownReceived = 0;
+
     void handleControlGesture(TouchGesture gesture)
     {
         _currentGesture = gesture;
+        Debug.Log(">> " + gesture.GestureType);
 
         /*if(!handledByCharacter)
         {
@@ -244,6 +248,7 @@ public class SimpleGame : MonoBehaviour
             {
                 _selectedPiece.IsSelected = false;
                 _selectedPiece.GameObject.GetComponent<Renderer>().material.mainTexture = _selectedPiece.Original;
+                _selectedPiece = null;
             }
 
             _currentGesture = null;
@@ -390,17 +395,31 @@ public class SimpleGame : MonoBehaviour
                             _currentGesture = null;
                         }
 
-                        if (_currentGesture.GestureType == GestureType.NONE)
+                        if (_currentGesture != null && _currentGesture.GestureType == GestureType.NONE)
                         {
                             if (_selectedPiece != null)
                             {
                                 _selectedPiece.IsSelected = false;
                                 _selectedPiece.GameObject.GetComponent<Renderer>().material.mainTexture = _selectedPiece.Original;
+                                _selectedPiece = null;
                             }
 
                             _currentGesture = null;
                         }
                     }
+
+                    if (_currentGesture != null && _currentGesture.GestureType == GestureType.NONE)
+                    {
+                        if (_selectedPiece != null)
+                        {
+                            _selectedPiece.IsSelected = false;
+                            _selectedPiece.GameObject.GetComponent<Renderer>().material.mainTexture = _selectedPiece.Original;
+                            _selectedPiece = null;
+                        }
+
+                        _currentGesture = null;
+                    }
+
                 }
                 else
                 {
@@ -408,6 +427,7 @@ public class SimpleGame : MonoBehaviour
                     {
                         _selectedPiece.IsSelected = false;
                         _selectedPiece.GameObject.GetComponent<Renderer>().material.mainTexture = _selectedPiece.Original;
+                        _selectedPiece = null;
                     }
 
                     if (_puzzleMaker.isSketchStarted && !_puzzleMaker.isSketchDoneSucessfully)

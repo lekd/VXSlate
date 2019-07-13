@@ -3,40 +3,78 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class OculusController : MonoBehaviour
+public class OculusController : MonoBehaviour, IRemoteController
 {
     //large screen game object
     public GameObject boardObject;
 
+    public GameObject _leftController;
+    public GameObject _rightController;
+
+    LineRenderer _laserLine;
+
     //callback to notify the game about new event from the controller
     event GestureRecognizedEventCallback gestureRecognizedBroadcaster = null;
     TouchGesture previousGesture;
-    Vector2 _previousMousePosition;
+
     Vector2 _currentMousePosition;
-    bool _isMouseDown;
-    bool _isMouseUp;
+    Vector2 _previousMousePosition;
+
+    Vector3 _previousLeftControllerPosition;
+    Vector3 _currentLeftControllerPosition;
+    Vector3 _previousRightControllerPosition;
+    Vector3 _currentRightControllerPosition;
+
+    Vector3 _previousLeftControllerOrientation;
+    Vector3 _previousRightControllerOrientation;
+
+    bool _isLeftControllerDown;
+    bool _isRightControllerDown;
+    bool _isPreviousPositionLogReset = false;
 
     // Start is called before the first frame update
     void Start()
     {
+        _laserLine = GetComponent<LineRenderer>();
+        _laserLine.startWidth = 0.0075f;
+        _laserLine.endWidth = 0.25f;
         previousGesture = new TouchGesture();
         previousGesture.GestureType = GestureType.NONE;
-        _isMouseDown = false;
+
+        _isLeftControllerDown = false;
+        _isRightControllerDown = false;
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (_rightController != null)
+        {
+            _laserLine.SetPosition(0, _rightController.transform.position);
+
+            RaycastHit hitInfo = new RaycastHit();
+
+            bool hit = Physics.Raycast(_rightController.transform.position, _rightController.transform.rotation * Vector3.forward, out hitInfo);
+
+            if(hit)
+            {               
+                _laserLine.SetPosition(1, hitInfo.point);
+            }
+        }
+        else
+        {
+            _laserLine.SetPosition(0, new Vector3(0, 0, 0));
+        }
+
         TouchGesture touchDownGesture = new TouchGesture();
 
-        if (OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, OVRInput.Controller.RTouch) > 0.5f)
-        {
-            
-            _currentMousePosition = GetMousePosition();
+        _currentMousePosition = GetMousePosition();
 
-            if (!_isMouseDown)
+        if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.RTouch))
+        {
+            if (!_isRightControllerDown)
             {
-                _isMouseDown = true;
+                _isRightControllerDown = true;
 
                 touchDownGesture.GestureType = GestureType.SINGLE_TOUCH_DOWN;
                 touchDownGesture.MetaData = _currentMousePosition;// new Vector2(0, 0);//some mouse down position normalized to -0.5 and 0.5
@@ -47,95 +85,17 @@ public class OculusController : MonoBehaviour
                 if (gestureRecognizedBroadcaster != null)
                 {
                     gestureRecognizedBroadcaster(touchDownGesture);
-
-                    //Debug.Log("MouseDown called: " + touchDownCallRaised);
                     previousGesture = touchDownGesture;
                 }
 
-                Debug.Log("Mouse is down at (" + _currentMousePosition + ")");
-            }
-            else
-            {
-                if (Input.GetKeyDown(KeyCode.DownArrow) && _isMouseDown)
-                {
-                    touchDownGesture.GestureType = GestureType.OBJECT_SCALING;
-                    touchDownGesture.MetaData = new Vector2(0.9f, 0.9f);//some mouse down position normalized to -0.5 and 0.5
-                                                                        //then notify the game to know about the event
-                    if (gestureRecognizedBroadcaster != null)
-                    {
-                        gestureRecognizedBroadcaster(touchDownGesture);
-                        previousGesture = touchDownGesture;
-                    }
-
-                    Debug.Log("Puzzle piece is scaled down!");
-                }
-                else if (Input.GetKeyUp(KeyCode.UpArrow) && _isMouseDown)
-                {
-                    touchDownGesture.GestureType = GestureType.OBJECT_SCALING;
-                    touchDownGesture.MetaData = new Vector2(1.1f, 1.1f);//some mouse down position normalized to -0.5 and 0.5
-                                                                        //then notify the game to know about the event
-                    if (gestureRecognizedBroadcaster != null)
-                    {
-                        gestureRecognizedBroadcaster(touchDownGesture);
-                        previousGesture = touchDownGesture;
-                    }
-
-                    Debug.Log("Puzzle piece is scaled up!");
-                }
-
-                if (Input.GetKeyDown(KeyCode.LeftArrow) && _isMouseDown)
-                {
-                    touchDownGesture.GestureType = GestureType.OBJECT_ROTATING;
-                    touchDownGesture.MetaData = new Vector2(-5, -5);//some mouse down position normalized to -0.5 and 0.5
-                                                                    //then notify the game to know about the event
-                    if (gestureRecognizedBroadcaster != null)
-                    {
-                        gestureRecognizedBroadcaster(touchDownGesture);
-                        previousGesture = touchDownGesture;
-                    }
-
-                    Debug.Log("Puzzle piece is rotated left!");
-                }
-                else if (Input.GetKeyUp(KeyCode.RightArrow) && _isMouseDown)
-                {
-                    touchDownGesture.GestureType = GestureType.OBJECT_ROTATING;
-                    touchDownGesture.MetaData = new Vector2(5, 5);//some mouse down position normalized to -0.5 and 0.5
-                                                                  //then notify the game to know about the event
-                    if (gestureRecognizedBroadcaster != null)
-                    {
-                        gestureRecognizedBroadcaster(touchDownGesture);
-                        previousGesture = touchDownGesture;
-                    }
-
-                    Debug.Log("Puzzle piece is rotated right!");
-                }
-
-                if (_previousMousePosition != null && _previousMousePosition != _currentMousePosition)
-                {
-                    touchDownGesture.GestureType = GestureType.SINGLE_TOUCH_MOVE;
-                    touchDownGesture.MetaData = _currentMousePosition;// new Vector2(0, 0);//some mouse down position normalized to -0.5 and 0.5
-                                                                      //then notify the game to know about the event
-                    _previousMousePosition = _currentMousePosition;
-
-                    if (gestureRecognizedBroadcaster != null)
-                    {
-                        gestureRecognizedBroadcaster(touchDownGesture);
-                        previousGesture = touchDownGesture;
-                    }
-
-                    Debug.Log("Mouse is moved to (" + _currentMousePosition + ")");
-                }
-            }
-
-
-            //else if (previousGesture.GestureType == GestureType.NONE && previousGesture.GestureType != GestureType.SINGLE_TOUCH_DOWN)
-            //{
-
-            //}
+                Debug.Log("Controller is down at (" + _currentMousePosition + ")");
+            }            
         }
-        else
+
+        if (OVRInput.GetUp(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.RTouch))
         {
-            _isMouseDown = false;
+            _isRightControllerDown = false;
+            _isPreviousPositionLogReset = false;
 
             if (previousGesture.GestureType != GestureType.NONE)
             {
@@ -152,26 +112,184 @@ public class OculusController : MonoBehaviour
             }
         }
 
+        if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.LTouch))
+        {
+            _isLeftControllerDown = true;
+        }
 
-        //handle mouse event here, once a mouse event detected, map it to its corresponding TouchGesture, which is the event understood by the game
-        //for example
-        //if detectMouseDown
+        if (OVRInput.GetUp(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.LTouch))
+        {
+            _isLeftControllerDown = false;
+            _isPreviousPositionLogReset = false;
+        }
+        
+        if (_isRightControllerDown)
+        {
+            if(_isLeftControllerDown)
+            {
+                if (!_isPreviousPositionLogReset)
+                {
+                    _previousLeftControllerPosition = _leftController.transform.position;
+                    _previousRightControllerPosition = _rightController.transform.position;
 
-        //do it similarly for other mouse event
+                    _isPreviousPositionLogReset = true;
+                }
+
+                float previousDif = (_previousLeftControllerPosition - _previousRightControllerPosition).magnitude;
+                float newDif = (_rightController.transform.position - _leftController.transform.position).magnitude;
+                float disRatio = newDif / previousDif;
+
+                if(disRatio < 0.95f || disRatio > 1.05f)
+                {
+                    touchDownGesture.GestureType = GestureType.OBJECT_SCALING;
+                    touchDownGesture.MetaData = new Vector2(disRatio, disRatio);//some mouse down position normalized to -0.5 and 0.5
+                                                                        //then notify the game to know about the event
+                    if (gestureRecognizedBroadcaster != null)
+                    {
+                        gestureRecognizedBroadcaster(touchDownGesture);
+                        previousGesture = touchDownGesture;
+                    }
+
+                    Debug.Log("Puzzle piece is scaled by" + disRatio + "!");
+
+                    _previousLeftControllerPosition = _leftController.transform.position;
+                    _previousRightControllerPosition = _rightController.transform.position;
+                }
+
+                Vector3 previousDirection = _previousRightControllerPosition - _previousLeftControllerPosition;
+                Vector3 afterDirection = _rightController.transform.position - _leftController.transform.position;
+
+                float angle = Vector3.Angle(previousDirection, afterDirection);
+
+                if (angle > 2.5f)
+                {
+                    float a = Mathf.Atan2(previousDirection.x * afterDirection.y - previousDirection.y * afterDirection.x, previousDirection.x * afterDirection.x + previousDirection.y * afterDirection.y) * Mathf.Rad2Deg;
+
+                    if (a > 0)
+                        angle *= -1;
+
+                    touchDownGesture.GestureType = GestureType.OBJECT_ROTATING;
+                    touchDownGesture.MetaData = new Vector2(a, a);//some mouse down position normalized to -0.5 and 0.5
+                                                                                    //then notify the game to know about the event
+                    if (gestureRecognizedBroadcaster != null)
+                    {
+                        gestureRecognizedBroadcaster(touchDownGesture);
+                        previousGesture = touchDownGesture;
+                    }
+
+                    Debug.Log("Puzzle piece is rotated by " + angle + " degrees!");
+
+                    _previousLeftControllerPosition = _leftController.transform.position;
+                    _previousRightControllerPosition = _rightController.transform.position;
+                }
+
+                //Vector3 difAngle = _rightController.transform.rotation.eulerAngles - _previousOrientation;
+                //Debug.Log("difAngle: " + difAngle);
+
+                //if (difAngle.z > 1f)
+                //{
+                //    touchDownGesture.GestureType = GestureType.OBJECT_ROTATING;
+                //    touchDownGesture.MetaData = new Vector2(difAngle.z, difAngle.z);//some mouse down position normalized to -0.5 and 0.5
+                //                                                                    //then notify the game to know about the event
+                //    if (gestureRecognizedBroadcaster != null)
+                //    {
+                //        gestureRecognizedBroadcaster(touchDownGesture);
+                //        previousGesture = touchDownGesture;
+                //    }
+
+                //    _previousOrientation = _rightController.transform.rotation.eulerAngles;
+                //    Debug.Log("Puzzle piece is rotated by " + difAngle + " degrees!");
+                //}
+
+                //if (Input.GetKeyDown(KeyCode.DownArrow) && _isMouseDown)
+                //{
+                //    touchDownGesture.GestureType = GestureType.OBJECT_SCALING;
+                //    touchDownGesture.MetaData = new Vector2(0.9f, 0.9f);//some mouse down position normalized to -0.5 and 0.5
+                //                                                        //then notify the game to know about the event
+                //    if (gestureRecognizedBroadcaster != null)
+                //    {
+                //        gestureRecognizedBroadcaster(touchDownGesture);
+                //        previousGesture = touchDownGesture;
+                //    }
+
+                //    Debug.Log("Puzzle piece is scaled down!");
+                //}
+                //else if (Input.GetKeyUp(KeyCode.UpArrow) && _isMouseDown)
+                //{
+                //    touchDownGesture.GestureType = GestureType.OBJECT_SCALING;
+                //    touchDownGesture.MetaData = new Vector2(1.1f, 1.1f);//some mouse down position normalized to -0.5 and 0.5
+                //                                                        //then notify the game to know about the event
+                //    if (gestureRecognizedBroadcaster != null)
+                //    {
+                //        gestureRecognizedBroadcaster(touchDownGesture);
+                //        previousGesture = touchDownGesture;
+                //    }
+
+                //    Debug.Log("Puzzle piece is scaled up!");
+                //}
+
+                //if (Input.GetKeyDown(KeyCode.LeftArrow) && _isMouseDown)
+                //{
+                //    touchDownGesture.GestureType = GestureType.OBJECT_ROTATING;
+                //    touchDownGesture.MetaData = new Vector2(-5, -5);//some mouse down position normalized to -0.5 and 0.5
+                //                                                    //then notify the game to know about the event
+                //    if (gestureRecognizedBroadcaster != null)
+                //    {
+                //        gestureRecognizedBroadcaster(touchDownGesture);
+                //        previousGesture = touchDownGesture;
+                //    }
+
+                //    Debug.Log("Puzzle piece is rotated left!");
+                //}
+                //else if (Input.GetKeyUp(KeyCode.RightArrow) && _isMouseDown)
+                //{
+                //    touchDownGesture.GestureType = GestureType.OBJECT_ROTATING;
+                //    touchDownGesture.MetaData = new Vector2(5, 5);//some mouse down position normalized to -0.5 and 0.5
+                //                                                  //then notify the game to know about the event
+                //    if (gestureRecognizedBroadcaster != null)
+                //    {
+                //        gestureRecognizedBroadcaster(touchDownGesture);
+                //        previousGesture = touchDownGesture;
+                //    }
+
+                //    Debug.Log("Puzzle piece is rotated right!");
+                //}
+            }
+            else
+            {
+                if (_previousMousePosition != null && _previousMousePosition != _currentMousePosition)
+                {
+                    touchDownGesture.GestureType = GestureType.SINGLE_TOUCH_MOVE;
+                    touchDownGesture.MetaData = _currentMousePosition;// new Vector2(0, 0);//some mouse down position normalized to -0.5 and 0.5
+                                                                      //then notify the game to know about the event
+                    _previousMousePosition = _currentMousePosition;
+
+                    if (gestureRecognizedBroadcaster != null)
+                    {
+                        gestureRecognizedBroadcaster(touchDownGesture);
+                        previousGesture = touchDownGesture;
+                    }
+
+                    Debug.Log("Controller is moved to (" + _currentMousePosition + ")");
+                }
+            }
+        }        
     }
 
     private Vector2 GetMousePosition()
     {
-        RaycastHit[] hits = Physics.RaycastAll(Camera.main.ScreenPointToRay(Input.mousePosition));
+        RaycastHit[] hits = Physics.RaycastAll(_rightController.transform.position, _rightController.transform.rotation * Vector3.forward);
 
         foreach (var hitInfo in hits)
         {
             if (boardObject != null && hitInfo.transform.gameObject.name == boardObject.name)
             {
                 Vector2 point = hitInfo.point - boardObject.transform.position;
+
                 return new Vector2(point.x / boardObject.transform.localScale.x, point.y / boardObject.transform.localScale.y);
             }
         }
+
         return new Vector2(0, 0);
     }
 
@@ -188,6 +306,6 @@ public class OculusController : MonoBehaviour
 
     public string getControllerName()
     {
-        return "MouseController";
+        return "OculusController";
     }
 }
