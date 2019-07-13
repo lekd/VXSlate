@@ -1,5 +1,6 @@
 ﻿using Assets.Script;
 using BoardGame;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -8,13 +9,16 @@ using UnityEngine.UI;
 
 public class SimpleGame : MonoBehaviour
 {
-    [Header("Objects Mapping")]
-    public GameObject _puzzleMakerObject;
-    public GameObject _eventListennerObject;
+    //public GameObject _eventListennerObject;
 
     [Header("Experiment Log")]
     public string _participantID;
     public int _textureID = 1;
+    public bool _usingTablet = false;
+    public bool _usingController = false;
+    public bool _usingMouse = false;
+
+    [Header("Experiment Stage")]
     public bool _isExperimentStarted = false;
     public bool _isExperimentFinished = false;
     public float _prepareTime = 3; //in seconds
@@ -22,6 +26,7 @@ public class SimpleGame : MonoBehaviour
     bool _startTimer = false;
 
     [Header("Experiment Objects")]
+    public GameObject _puzzleMakerObject;
     public GameObject tabletControllerObj;
     public GameObject oculusControllerObj;
     public GameObject mouseControllerObj;
@@ -47,6 +52,12 @@ public class SimpleGame : MonoBehaviour
     Vector3 difPosition = Vector2.zero;
 
     TouchGesture _currentGesture;
+
+    StreamWriter _puzzleMatchingSW;
+    StreamWriter _sketchingSW;
+    StreamWriter _summarySW;
+
+    float _experimentStartTime;
 
     // Start is called before the first frame update
     void Start()
@@ -134,6 +145,19 @@ public class SimpleGame : MonoBehaviour
             _puzzleMaker._statusObject.GetComponent<Text>().color = Color.black;
             _puzzleMaker._statusObject.GetComponent<Text>().fontSize = 4;
             _puzzleMaker._statusObject.GetComponent<Text>().alignment = TextAnchor.LowerCenter;
+
+            string extension = DateTime.Now.ToString();
+            extension.Replace('\\', '_');
+            extension.Replace('/', '_');
+            _puzzleMatchingSW = new StreamWriter(".\\PuzzleMatching\\" + _participantID + "_" + extension + ".csv");
+            _sketchingSW = new StreamWriter(".\\Sketching\\" + _participantID + "_" + extension + ".csv");
+            _summarySW = new StreamWriter(".\\Summary\\" + _participantID + "_" + extension + ".csv");
+
+            _puzzleMatchingSW.WriteLine("ParticipantID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,Action,DistanceMoved,ScaledLevel,RotatedAngle\n");
+            _sketchingSW.WriteLine("ParticipantID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,IsTouchPoint,IsOnTrack\n");
+            _summarySW.WriteLine("ParticipantID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration\n");
+
+            _experimentStartTime = Time.time;
         }
         else if (_isExperimentStarted && _puzzleMaker._isInit)
         {
@@ -145,6 +169,21 @@ public class SimpleGame : MonoBehaviour
                 {
                     _puzzleMaker.isPuzzledDone = true;
                     _puzzleMaker._puzzleDoneObject.SetActive(true);
+
+                    _summarySW.WriteLine(_participantID
+                                         + ",Matching,"
+                                         + _usingTablet.ToString()
+                                         + ","
+                                         + _usingController.ToString()
+                                         + ","
+                                         + _usingMouse.ToString()
+                                         + ","
+                                         + _experimentStartTime.ToString()
+                                         + ","
+                                         + Time.time.ToString()
+                                         + ","
+                                         + (Time.time - _experimentStartTime).ToString());
+                    _experimentStartTime = Time.time;
                 }
 
                 ////For testing
@@ -171,6 +210,24 @@ public class SimpleGame : MonoBehaviour
             }
             else
             {
+                _summarySW.WriteLine(_participantID
+                                     + ",Sketching,"
+                                     + _usingTablet.ToString()
+                                     + ","
+                                     + _usingController.ToString()
+                                     + ","
+                                     + _usingMouse.ToString()
+                                     + ","
+                                     + _experimentStartTime.ToString()
+                                     + ","
+                                     + Time.time.ToString()
+                                     + ","
+                                     + (Time.time - _experimentStartTime).ToString());
+
+                _puzzleMatchingSW.Close();
+                _sketchingSW.Close();
+                _summarySW.Close();
+
                 _puzzleMaker._statusObject.GetComponent<Text>().color = Color.blue;
                 _puzzleMaker._statusObject.GetComponent<Text>().alignment = TextAnchor.MiddleCenter;
                 _puzzleMaker._statusObject.GetComponent<Text>().fontSize = 10;
@@ -441,8 +498,8 @@ public class SimpleGame : MonoBehaviour
                             Vector2 local2DPos = ConvertLocalToGlobal((Vector2)_currentGesture.MetaData);
 
                             Vector3 rayPoint = new Vector3(local2DPos.x,
-                                                            local2DPos.y,
-                                                            _puzzleMaker._largeScreenObject.transform.position.z - 1.5f);
+                                                           local2DPos.y,
+                                                           _puzzleMaker._largeScreenObject.transform.position.z - 1.5f);
 
                             _puzzleMaker.CheckSketch(rayPoint);
 
@@ -482,5 +539,12 @@ public class SimpleGame : MonoBehaviour
                 }
             }
         }
+    }
+
+    private void OnApplicationQuit()
+    {
+        _puzzleMatchingSW.Close();
+        _sketchingSW.Close();
+        _summarySW.Close();
     }
 }
