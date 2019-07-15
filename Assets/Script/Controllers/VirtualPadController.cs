@@ -9,7 +9,7 @@ public enum EditMode { OBJECT_MANIP, DRAW, MENU_SELECTION }
 public class VirtualPadController : MonoBehaviour, IRemoteController
 {
     const int MAX_FINGERS_COUNT = 5;
-    const float VIRTUALPAD_DEPTHOFFSET = -0.01f;
+    const float VIRTUALPAD_DEPTHOFFSET = -0.02f;
     //Public Game Objects
     public GameObject eventListenerObject;
     public GameObject gameCameraObject;
@@ -33,8 +33,8 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
     GestureRecognizedEventCallback gestureRecognizedListener = null;
     event GestureRecognizedEventCallback gestureRecognizedBroadcaster = null;
     event MenuItemListener.EditModeSelectedCallBack editModeChangedListener = null;
-    
 
+    bool _gazeCanShift = true;
     EditMode _currentMode;
     public EditMode CurrentMode
     {
@@ -120,7 +120,10 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
         padContainer2DBoundary.yMin = boardObjectBound.min.y + virtualPadBound.size.y / 2;
         padContainer2DBoundary.yMax = boardObjectBound.max.y - virtualPadBound.size.y / 2;
         //Update Virtual Pad Following Camera Lookat Vector
-        UpdateVirtualPadBasedOnCamera(padContainer2DBoundary);
+        if (_gazeCanShift)
+        {
+            UpdateVirtualPadBasedOnCamera(padContainer2DBoundary);
+        }
         UpdateFingersBasedOnTouch();
         //Update virtual pad translation caused by pointers
         lock(padTranslationByPointers.AccessLock)
@@ -180,8 +183,9 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
         }*/
         int hittableLayerMask = 1 << 8;
         RaycastHit[] allHits;
-        Ray camRay = new Ray(gazePointObject.transform.position, gazePointObject.transform.position - gameCamera.transform.position);
-        allHits = Physics.RaycastAll(camRay, 1000, hittableLayerMask);
+        Ray camRay = new Ray(gameCamera.transform.position, gazePointObject.transform.position - gameCamera.transform.position);
+        //allHits = Physics.RaycastAll(camRay, 1000, hittableLayerMask);
+        allHits = Physics.RaycastAll(camRay);
         if (allHits != null && allHits.Length>0)
         {
             bool isHittingPad = false;
@@ -203,6 +207,8 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                         Vector3 curPadPos = gameObject.transform.position;
                         Vector3 newPadPos = GlobalUtilities.boundPointToContainer(hitPos, board2DBound);
                         gameObject.transform.Translate(new Vector3(newPadPos.x - curPadPos.x, newPadPos.y - curPadPos.y, newPadPos.z - curPadPos.z + VIRTUALPAD_DEPTHOFFSET));
+                        //Vector3 curGazePos = gazePointObject.transform.position;
+                        //gazePointObject.transform.Translate(new Vector3(0, 0, hitPos.z - curGazePos.z + VIRTUALPAD_DEPTHOFFSET));
                         break;
                     }
                 }
@@ -301,9 +307,9 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
         {
             if (recognizedGesture.GestureType == GestureType.FIVE_POINTERS)
             {
-                _currentMode = EditMode.MENU_SELECTION;
+                /*_currentMode = EditMode.MENU_SELECTION;
                 prevMultiTouchGesture = recognizedGesture;
-                isMultiTouch = true;
+                isMultiTouch = true;*/
                 latestSingleTouchDown = null;
                 return;
             }
@@ -352,12 +358,16 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                     recognizedGesture.MetaData = localPosOnBoard;
                     if(recognizedGesture.GestureType == GestureType.SINGLE_TOUCH_DOWN)
                     {
-                        latestSingleTouchDown = recognizedGesture;
+                        //latestSingleTouchDown = recognizedGesture;
+                        if (gestureRecognizedBroadcaster != null)
+                        {
+                            gestureRecognizedBroadcaster(recognizedGesture);
+                        }
                     }
                     else if (recognizedGesture.GestureType == GestureType.SINGLE_LONG_TOUCH)
                     {
                         //Debug.Log("Long touch at: " + localPosOnBoard.ToString());
-                        if (gestureRecognizedBroadcaster != null)
+                        /*if (gestureRecognizedBroadcaster != null)
                         {
                             if (latestSingleTouchDown != null)
                             {
@@ -365,11 +375,11 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                                 latestSingleTouchDown = null;
                             }
                             //gestureRecognizedBroadcaster(recognizedGesture);
-                        }
+                        }*/
                     }
                     else
                     {
-                        if(latestSingleTouchDown != null)
+                        /*if(latestSingleTouchDown != null)
                         {
                             Vector2 latestTouchDownPos = (Vector2)latestSingleTouchDown.MetaData;
                             Vector2 curTouchPos = (Vector2)recognizedGesture.MetaData;
@@ -383,19 +393,20 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                                 }
                             }
                         }
-                        else
-                        {
+                        else*/
+                        //{
                             if (gestureRecognizedBroadcaster != null)
                             {
                                 gestureRecognizedBroadcaster(recognizedGesture);
                             }
-                        }
+                        //}
                     }
                 }
             }
             else if (recognizedGesture.GestureType == GestureType.OBJECT_SCALING
                 || recognizedGesture.GestureType == GestureType.OBJECT_ROTATING)
             {
+                _gazeCanShift = false;
                 Vector2[] gestureData = (Vector2[])recognizedGesture.MetaData;
                 for (int i = 1; i < gestureData.Length; i++)
                 {
@@ -410,11 +421,15 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                 {
                     if (gestureRecognizedBroadcaster != null)
                     {
-                        if (latestSingleTouchDown != null)
+                        if (latestSingleTouchDown == null)
                         {
-                            gestureRecognizedBroadcaster(latestSingleTouchDown);
-                            latestSingleTouchDown = null;
+                            latestSingleTouchDown = new TouchGesture();
+                            latestSingleTouchDown.GestureType = GestureType.SINGLE_TOUCH_DOWN;
+                            latestSingleTouchDown.MetaData = new Vector2((gestureData[1].x+gestureData[2].x)/2,
+                                                                        (gestureData[1].y + gestureData[2].y)/ 2);
                         }
+                        gestureRecognizedBroadcaster(latestSingleTouchDown);
+                        //latestSingleTouchDown = null;
                         gestureRecognizedBroadcaster(recognizedGesture);
                     }
                 }
@@ -422,11 +437,13 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
             }
             else if(recognizedGesture.GestureType == GestureType.NONE)
             {
+                _gazeCanShift = true;
                 prevMultiTouchGesture = null;
                 if (gestureRecognizedBroadcaster != null)
                 {
                     gestureRecognizedBroadcaster(recognizedGesture);
                 }
+                latestSingleTouchDown = null;
             }
             
             

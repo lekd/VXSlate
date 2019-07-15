@@ -17,6 +17,7 @@ namespace Assets.Script
     public class TouchGestureRecognizer:IGestureRecognizer
     {
         private const int TOUCH_REFRESH_RATE = 60;
+        const int LONG_TOUCH_DURATION = 1;
         
         RecordedTouch stayStillSingleTouchDown;
         event GestureRecognizedEventCallback gestureRecognizedListener;
@@ -89,11 +90,40 @@ namespace Assets.Script
                     //first, always recognize if there is any rotation
                     Vector2 curBetweenPointerVector = new Vector2(curTouchEvent.AvaiPointers[1].RelX - curTouchEvent.AvaiPointers[0].RelX,
                                                                    curTouchEvent.AvaiPointers[1].RelY - curTouchEvent.AvaiPointers[0].RelY);
-                    if (!prevTwoPointersVector.Equals(new Vector2(0,0)))
+                    Vector2 nextPointer1 = new Vector2();
+                    nextPointer1.x = curTouchEvent.AvaiPointers[0].RelX + curTouchEvent.AvaiPointers[0].RelVeloX / TOUCH_REFRESH_RATE;
+                    nextPointer1.y = curTouchEvent.AvaiPointers[0].RelY + curTouchEvent.AvaiPointers[0].RelVeloY / TOUCH_REFRESH_RATE;
+                    Vector2 nextPointer2 = new Vector2();
+                    nextPointer2.x = curTouchEvent.AvaiPointers[1].RelX + curTouchEvent.AvaiPointers[1].RelVeloX / TOUCH_REFRESH_RATE;
+                    nextPointer2.y = curTouchEvent.AvaiPointers[1].RelY + curTouchEvent.AvaiPointers[1].RelVeloY / TOUCH_REFRESH_RATE;
+                    Vector2 nextBetweenPointerVector = new Vector2(nextPointer2.x - nextPointer1.x, nextPointer2.y - nextPointer1.y);
+                    double curAngle = Math.Atan2(curBetweenPointerVector.y, curBetweenPointerVector.x);
+                    double nextAngle = Math.Atan2(nextBetweenPointerVector.y, nextBetweenPointerVector.x);
+                    float rotChange = (float)((nextAngle - curAngle) * 180 / Math.PI) % 360;
+                    rotChange *= 2;
+                    if (rotChange < -180)
+                    {
+                        rotChange += 360.0f;
+                    }
+                    if (rotChange > 180)
+                    {
+                        rotChange -= 360.0f;
+                    }
+                    Vector2 rotation = new Vector2(rotChange, rotChange);
+                    recognizedGesture = new TouchGesture();
+                    recognizedGesture.GestureType = GestureType.OBJECT_ROTATING;
+                    Vector2[] metaData = new Vector2[3];
+                    metaData[0] = rotation;
+                    metaData[1] = new Vector2(curTouchEvent.AvaiPointers[0].RelX, curTouchEvent.AvaiPointers[0].RelY);
+                    metaData[2] = new Vector2(curTouchEvent.AvaiPointers[1].RelX, curTouchEvent.AvaiPointers[1].RelY);
+                    recognizedGesture.MetaData = metaData;
+                    informGestureRecognizedEvent(recognizedGesture);
+                    /*if (!prevTwoPointersVector.Equals(new Vector2(0,0)))
                     {
                         double prevAngle = Math.Atan2(prevTwoPointersVector.y, prevTwoPointersVector.x);
                         double curAngle = Math.Atan2(curBetweenPointerVector.y, curBetweenPointerVector.x);
                         float rotChange = (float)((curAngle - prevAngle) * 180 / Math.PI) % 360;
+                        rotChange *= 2;
                         if (rotChange < -180)
                         {
                             rotChange += 360.0f;
@@ -102,7 +132,8 @@ namespace Assets.Script
                         {
                             rotChange -= 360.0f;
                         }
-                        Vector2 rotation = new Vector2(rotChange, rotChange);
+                        //rotChange = rotChange*5/Math.Abs(rotChange);
+                        Vector2 rotation = new Vector2(-rotChange, -rotChange);
                         recognizedGesture = new TouchGesture();
                         recognizedGesture.GestureType = GestureType.OBJECT_ROTATING;
                         Vector2[] metaData = new Vector2[3];
@@ -112,7 +143,7 @@ namespace Assets.Script
                         recognizedGesture.MetaData = metaData;
                         informGestureRecognizedEvent(recognizedGesture);
                     }
-                    prevTwoPointersVector = curBetweenPointerVector;
+                    prevTwoPointersVector = curBetweenPointerVector;*/
                     //two fingers moving in opposite direction => object scaling
                     if (curTouchEvent.AvaiPointers[0].RelVeloX * curTouchEvent.AvaiPointers[1].RelVeloX < 0
                     && curTouchEvent.AvaiPointers[0].RelVeloY * curTouchEvent.AvaiPointers[1].RelVeloY < 0)
@@ -166,7 +197,7 @@ namespace Assets.Script
                 {
                     TouchPointerData initTouch = stayStillSingleTouchDown.TouchPointers[0];
                     TimeSpan durationSinceInitTouch = System.DateTime.Now - stayStillSingleTouchDown.TimeStamp;
-                    if(durationSinceInitTouch.TotalMilliseconds > 500 &&
+                    if(durationSinceInitTouch.TotalMilliseconds > LONG_TOUCH_DURATION &&
                         Math.Abs(initTouch.RelX - curTouchEvent.AvaiPointers[0].RelX)<0.05
                         && Math.Abs(initTouch.RelY - curTouchEvent.AvaiPointers[0].RelY)<0.05)
                     {

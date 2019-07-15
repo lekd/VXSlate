@@ -31,7 +31,6 @@ public class SimpleGame : MonoBehaviour
     public GameObject tabletControllerObj;
     public GameObject oculusControllerObj;
     public GameObject mouseControllerObj;
-    public GameObject gameCharacterObj;
     private Texture2D screenTexture;
 
     public GameObject _virtualPadObject;
@@ -45,7 +44,6 @@ public class SimpleGame : MonoBehaviour
     IRemoteController mouseController;
     IRemoteController oculusController;
 
-    SimpleCharacter gameCharacter;
     Color[] paintColors = new Color[1];
     Point2D drawnPoint = new Point2D();
     bool hasThingToDraw = false;
@@ -58,7 +56,9 @@ public class SimpleGame : MonoBehaviour
     bool hasTouchDown = false;
     Vector3 difPosition = Vector2.zero;
 
+    object gestureUpdateLock = new object();
     TouchGesture _currentGesture;
+    TouchGesture _latestTouchDown = null;
 
     StreamWriter _puzzleMatchingSW;
     StreamWriter _sketchingSW;
@@ -79,7 +79,7 @@ public class SimpleGame : MonoBehaviour
     {
         //gameCharacterObj.transform.localPosition.Set(0, 0, -0.00001f);
 
-        if (!_usingController && !_usingMouse && _usingTablet)
+        if (!_usingController && !_usingMouse && !_usingTablet)
         {
             Debug.LogError("No interaction technique is selected! Please to using Controler or using Tablet or using Mouse.");
         }
@@ -141,20 +141,7 @@ public class SimpleGame : MonoBehaviour
 
             hasTouchDown = false;
 
-            gameCharacter = gameCharacterObj.GetComponent<SimpleCharacter>();
-            paintColors[0] = new Color(1, 0, 0);
-            screenTexture = new Texture2D(2, 2);
-            //load screen texture from image
-            string textureImgPath = "./Assets/Resources/Images/solid_gray.png";
-            byte[] imgData;
-            if (File.Exists(textureImgPath))
-            {
-                imgData = File.ReadAllBytes(textureImgPath);
-                screenTexture.LoadImage(imgData);
-            }
-            Debug.Log(string.Format("ScreenTexture size: ({0},{1})", screenTexture.width, screenTexture.height));
-            gameMode = EditMode.OBJECT_MANIP;
-            screenSize = gameObject.GetComponent<Collider>().bounds.size;
+            
         }
     }
 
@@ -384,7 +371,10 @@ public class SimpleGame : MonoBehaviour
             }
         }
 
-        HandleGameLogic();
+        lock (gestureUpdateLock)
+        {
+            HandleGameLogic();
+        }
 
         /*if(hasThingToDraw)
         {
@@ -399,24 +389,30 @@ public class SimpleGame : MonoBehaviour
         gameMode = mode;
     }
 
-    int touchDownReceived = 0;
+    
 
     void handleControlGesture(TouchGesture gesture)
     {
-        _currentGesture = gesture;
-        Debug.Log(">> " + gesture.GestureType);
-
-        /*if(!handledByCharacter)
+        lock (gestureUpdateLock)
         {
-            if(gesture.GestureType == GestureType.SINGLE_TOUCH_DOWN
-                || gesture.GestureType == GestureType.SINGLE_TOUCH_MOVE)
+            /*if (gesture.GestureType == GestureType.SINGLE_TOUCH_DOWN)
             {
-                hasThingToDraw = true;
-                Vector2 localTouchPos = (Vector2)gesture.MetaData;
-                drawnPoint.X = (int)((localTouchPos.x) * screenTexture.width);
-                drawnPoint.Y = (int)((localTouchPos.y) * screenTexture.height);
+                _latestTouchDown = gesture;
             }
-        }*/
+            else*/
+            {
+                _currentGesture = gesture;
+            }
+            Debug.Log(">> " + gesture.GestureType);
+            if (gesture.GestureType == GestureType.OBJECT_ROTATING ||
+                    gesture.GestureType == GestureType.OBJECT_SCALING)
+            {
+                Vector2[] gesture_params = (Vector2[])gesture.MetaData;
+                Debug.Log(string.Format("{0} with ({1},{2})", gesture.GestureType, gesture_params[0].x, gesture_params[0].y));
+            }
+        }
+
+        
     }
     void drawOnTexture(Texture2D tex, int posX, int posY)
     {
@@ -437,6 +433,19 @@ public class SimpleGame : MonoBehaviour
 
     void HandleGameLogic()
     {
+        TouchGesture backupCurrent = null;
+        /*if (_latestTouchDown != null)
+        {
+            backupCurrent = _currentGesture;
+            _currentGesture = _latestTouchDown;
+            _latestTouchDown = null;
+        }*/
+        if (_currentGesture!= null && _currentGesture.GestureType == GestureType.OBJECT_ROTATING ||
+                    _currentGesture.GestureType == GestureType.OBJECT_SCALING)
+        {
+            Vector2[] gesture_params = (Vector2[])_currentGesture.MetaData;
+            Debug.Log(string.Format("CURRENT: {0} with ({1},{2})", _currentGesture.GestureType, gesture_params[0].x, gesture_params[0].y));
+        }
         if (_puzzleMaker == null && _puzzleMakerObject != null)
         {
             _puzzleMaker = _puzzleMakerObject.GetComponent<PuzzleMaker>();
@@ -467,8 +476,7 @@ public class SimpleGame : MonoBehaviour
                 {
                     if (!hasTouchDown && _currentGesture != null && _currentGesture.GestureType == GestureType.SINGLE_TOUCH_DOWN)
                     {
-                        touchDownReceived++;
-                        Debug.Log("TouchDownReceived: " + touchDownReceived);
+                        
                         hasTouchDown = true;
 
                         Vector2 local2DPos = ConvertLocalToGlobal((Vector2)_currentGesture.MetaData);
@@ -644,7 +652,13 @@ public class SimpleGame : MonoBehaviour
                         }
                         else if (_selectedPiece != null && _currentGesture.GestureType == GestureType.OBJECT_SCALING)
                         {
-                            Vector2 local2DScale = (Vector2)_currentGesture.MetaData;
+                            //Vector2 local2DScale = (Vector2)_currentGesture.MetaData;
+                            Vector2[] scaleData = (Vector2[])_currentGesture.MetaData;
+                            Vector2 local2DScale = scaleData[0];
+                            _selectedPiece.GameObject.transform.localScale = new Vector3(_selectedPiece.GameObject.transform.localScale.x * local2DScale.x,
+                                                                                          _selectedPiece.GameObject.transform.localScale.y * local2DScale.y,
+                                                                                          _selectedPiece.GameObject.transform.localScale.z);
+                            Debug.Log("New scale: " + string.Format("({0},{1})", _selectedPiece.GameObject.transform.localScale.x, _selectedPiece.GameObject.transform.localScale.y));
 
                             LoggingVariable lv = new LoggingVariable("MATCHING",
                                                                      _matchingActionStartTime.ToString(),
@@ -668,16 +682,17 @@ public class SimpleGame : MonoBehaviour
 
                             _matchingLogList.Add(lv);
 
-                            _selectedPiece.GameObject.transform.localScale = new Vector3(_selectedPiece.GameObject.transform.localScale.x * local2DScale.x,
-                                                                                          _selectedPiece.GameObject.transform.localScale.y * local2DScale.y,
-                                                                                          _selectedPiece.GameObject.transform.localScale.z);
-
+                            
                             _currentGesture = null;
                             _matchingActionStartTime = Time.time;
                         }
                         else if (_selectedPiece != null && _currentGesture.GestureType == GestureType.OBJECT_ROTATING)
                         {
-                            Vector2 local2DRotation = (Vector2)_currentGesture.MetaData * -1;
+                            //Vector2 local2DRotation = (Vector2)_currentGesture.MetaData * -1;
+                            Vector2[] rotateData = (Vector2[])_currentGesture.MetaData;
+                            Vector2 local2DRotation = rotateData[0]*-1;
+                            _selectedPiece.GameObject.transform.RotateAround(_selectedPiece.GameObject.transform.position, _selectedPiece.GameObject.transform.forward, local2DRotation.x);
+                            Debug.Log("New rotation");
 
                             LoggingVariable lv = new LoggingVariable("MATCHING",
                                                                      _matchingActionStartTime.ToString(),
@@ -701,8 +716,7 @@ public class SimpleGame : MonoBehaviour
 
                             _matchingLogList.Add(lv);
 
-                            _selectedPiece.GameObject.transform.RotateAround(_selectedPiece.GameObject.transform.position, _selectedPiece.GameObject.transform.forward, local2DRotation.x);
-
+                            
                             _currentGesture = null;
                             _matchingActionStartTime = Time.time;
                         }
@@ -840,6 +854,8 @@ public class SimpleGame : MonoBehaviour
                 }
             }
         }
+
+        //_currentGesture = backupCurrent;
     }
 
     private void OnApplicationQuit()
