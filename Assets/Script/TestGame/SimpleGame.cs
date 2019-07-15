@@ -58,8 +58,13 @@ public class SimpleGame : MonoBehaviour
     StreamWriter _summarySW;
 
     float _experimentStartTime;
+    float _sketchingTime;
 
     public List<LoggingVariable> _matchingLogList;
+    float _matchingStartTime = 0;
+    float _matchingPieceStartTime = 0;
+    float _matchingActionStartTime = 0;
+    int _matchingPuzzleClickDown = 1;
 
     // Start is called before the first frame update
     void Start()
@@ -157,9 +162,9 @@ public class SimpleGame : MonoBehaviour
                           + DateTime.Now.Minute.ToString()
                           + DateTime.Now.Second.ToString();
 
-            _puzzleMatchingSW = new StreamWriter(".\\Assets\\ExperimentResults\\PuzzleMatching\\" + _participantID + "_" + extension + ".csv");
-            _sketchingSW = new StreamWriter(".\\Assets\\ExperimentResults\\Sketching\\" + _participantID + "_" + extension + ".csv");
-            _summarySW = new StreamWriter(".\\Assets\\ExperimentResults\\Summary\\" + _participantID + "_" + extension + ".csv");
+            _puzzleMatchingSW = new StreamWriter(".\\Assets\\ExperimentResults\\PuzzleMatching\\Matching_" + _participantID + "_" + extension + ".csv");
+            _sketchingSW = new StreamWriter(".\\Assets\\ExperimentResults\\Sketching\\Sketching_" + _participantID + "_" + extension + ".csv");
+            _summarySW = new StreamWriter(".\\Assets\\ExperimentResults\\Summary\\Summary_" + _participantID + "_" + extension + ".csv");
 
             _puzzleMatchingSW.WriteLine("ParticipantID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,Action,DistanceMoved,ScaledLevel,RotatedAngle");
             _sketchingSW.WriteLine("ParticipantID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,IsTouchPoint,IsOnTrack,SketchingPointID,XSketchingPoint,YSketchingPoint");
@@ -191,20 +196,53 @@ public class SimpleGame : MonoBehaviour
                                          + Time.time.ToString()
                                          + ","
                                          + (Time.time - _experimentStartTime).ToString());
-                    _experimentStartTime = Time.time;
+
+                    if(_puzzleMatchingSW != null)
+                    {
+                        foreach(var e in _matchingLogList)
+                        {
+                            _puzzleMatchingSW.WriteLine(_participantID 
+                                                   + ","
+                                                   + "MATCHING"
+                                                   + ","
+                                                   + _usingTablet.ToString()
+                                                   + ","
+                                                   + _usingController.ToString()
+                                                   + ","
+                                                   + _usingMouse.ToString()
+                                                   + ","
+                                                   + e.StartTime
+                                                   + ","
+                                                   + e.EndTime
+                                                   + ","
+                                                   + e.Duration
+                                                   + ","
+                                                   + e.Action
+                                                   + ","
+                                                   + e.DistanceMoved
+                                                   + ","
+                                                   + e.ScaleLevel
+                                                   + ","
+                                                   + e.RotateAngel);
+                        }
+
+                        _puzzleMatchingSW.Close();
+                    }
+
+                    _sketchingTime = Time.time;
                 }
 
-                //For testing
-                _puzzleMaker.isPuzzledDone = true;
-                ////
+                ////For testing
+                //_puzzleMaker.isPuzzledDone = true;
+                //////
 
                 if (_puzzleMaker.isPuzzledDone && !_puzzleMaker.isSketchStarted)
                 {
                     _puzzleMaker.isSketchStarted = true;
 
-                    //For testing
-                    _puzzleMaker._puzzleDoneObject.SetActive(true);
-                    ////
+                    ////For testing
+                    //_puzzleMaker._puzzleDoneObject.SetActive(true);
+                    //////
 
                     if (_puzzleMaker._sketchedPixels == null)
                         _puzzleMaker._sketchedPixels = new List<Pixel>();
@@ -262,15 +300,11 @@ public class SimpleGame : MonoBehaviour
                                      + ","
                                      + _usingMouse.ToString()
                                      + ","
-                                     + _experimentStartTime.ToString()
+                                     + _sketchingTime.ToString()
                                      + ","
                                      + Time.time.ToString()
                                      + ","
-                                     + (Time.time - _experimentStartTime).ToString());
-
-                _puzzleMatchingSW.Close();
-                _sketchingSW.Close();
-                _summarySW.Close();
+                                     + (Time.time - _sketchingTime).ToString());
 
                 _puzzleMaker._statusObject.GetComponent<Text>().color = Color.blue;
                 _puzzleMaker._statusObject.GetComponent<Text>().alignment = TextAnchor.MiddleCenter;
@@ -358,17 +392,6 @@ public class SimpleGame : MonoBehaviour
         {
             if (_isExperimentStarted && _currentGesture != null)
             {
-                //RaycastHit hitInfo1 = new RaycastHit();
-
-                //bool hit1 = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo1);
-
-                ////if (InStartPoints(ConvertPositionToPixelPosition(new Vector2(hitInfo1.point.x, hitInfo1.point.y))))
-                ////    Debug.Log("IN START POINTS");
-
-                ////if (InLinePoints(ConvertPositionToPixelPosition(new Vector2(hitInfo1.point.x, hitInfo1.point.y))))
-                ////    Debug.Log("IN LINE POINTS");
-                ///
-
                 if (!_puzzleMaker.isPuzzledDone)
                 {
                     if (!hasTouchDown && _currentGesture != null && _currentGesture.GestureType == GestureType.SINGLE_TOUCH_DOWN)
@@ -459,6 +482,52 @@ public class SimpleGame : MonoBehaviour
                         }
 
                         _currentGesture = null;
+
+                        if (_matchingLogList == null)
+                            _matchingLogList = new List<LoggingVariable>();
+
+                        if(_matchingStartTime == 0)
+                        {
+                            _matchingStartTime = Time.time;
+                        }
+
+                        if(_matchingPieceStartTime == 0)
+                        {
+                            _matchingPieceStartTime = Time.time;
+                        }
+
+                        if(_matchingActionStartTime ==0)
+                        {
+                            _matchingActionStartTime = Time.time;
+                        }
+
+                        if(_selectedPiece != null)
+                        {
+                            LoggingVariable lv = new LoggingVariable("MATCHING",
+                                                                     _matchingActionStartTime.ToString(),
+                                                                     Time.time.ToString(),
+                                                                     (Time.time - _matchingActionStartTime).ToString(),
+                                                                     _matchingPuzzleClickDown.ToString(),
+                                                                     _selectedPiece.GameObject.name,
+                                                                     "DOWN",
+                                                                     _selectedPiece.GameObject.transform.position.x.ToString(),
+                                                                     _selectedPiece.GameObject.transform.position.y.ToString(),
+                                                                     _selectedPiece.GameObject.transform.position.x.ToString(),
+                                                                     _selectedPiece.GameObject.transform.position.y.ToString(),
+                                                                     "0",
+                                                                     "0",
+                                                                     "0",
+                                                                     "",
+                                                                     "",
+                                                                     "",
+                                                                     "",
+                                                                     "");
+
+                            _matchingLogList.Add(lv);
+
+                            _matchingActionStartTime = Time.time;
+                        }
+
                     }
                     else if (hasTouchDown)
                     {
@@ -472,28 +541,99 @@ public class SimpleGame : MonoBehaviour
 
 
                             Vector3 difV = rayPoint - difPosition;
+                            Vector3 moveV = difV - _selectedPiece.GameObject.transform.position;
 
-                            _selectedPiece.GameObject.transform.Translate(difV - _selectedPiece.GameObject.transform.position, Space.World);
+                            LoggingVariable lv = new LoggingVariable("MATCHING",
+                                                                     _matchingActionStartTime.ToString(),
+                                                                     Time.time.ToString(),
+                                                                     (Time.time - _matchingActionStartTime).ToString(),
+                                                                     _matchingPuzzleClickDown.ToString(),
+                                                                     _selectedPiece.GameObject.name,
+                                                                     "MOVE",
+                                                                     _selectedPiece.GameObject.transform.position.x.ToString(),
+                                                                     _selectedPiece.GameObject.transform.position.y.ToString(),
+                                                                     difV.x.ToString(),
+                                                                     difV.y.ToString(),
+                                                                     moveV.magnitude.ToString(),
+                                                                     "0",
+                                                                     "0",
+                                                                     "",
+                                                                     "",
+                                                                     "",
+                                                                     "",
+                                                                     "");
+
+                            _matchingLogList.Add(lv);
+
+                            _selectedPiece.GameObject.transform.Translate(moveV, Space.World);
 
                             _currentGesture = null;
+
+                            _matchingActionStartTime = Time.time;
                         }
                         else if (_selectedPiece != null && _currentGesture.GestureType == GestureType.OBJECT_SCALING)
                         {
                             Vector2 local2DScale = (Vector2)_currentGesture.MetaData;
+
+                            LoggingVariable lv = new LoggingVariable("MATCHING",
+                                                                     _matchingActionStartTime.ToString(),
+                                                                     Time.time.ToString(),
+                                                                     (Time.time - _matchingActionStartTime).ToString(),
+                                                                     _matchingPuzzleClickDown.ToString(),
+                                                                     _selectedPiece.GameObject.name,
+                                                                     "SCALING",
+                                                                     _selectedPiece.GameObject.transform.position.x.ToString(),
+                                                                     _selectedPiece.GameObject.transform.position.y.ToString(),
+                                                                     _selectedPiece.GameObject.transform.position.x.ToString(),
+                                                                     _selectedPiece.GameObject.transform.position.y.ToString(),
+                                                                     "0",
+                                                                     local2DScale.x.ToString(),
+                                                                     "0",
+                                                                     "",
+                                                                     "",
+                                                                     "",
+                                                                     "",
+                                                                     "");
+
+                            _matchingLogList.Add(lv);
 
                             _selectedPiece.GameObject.transform.localScale = new Vector3(_selectedPiece.GameObject.transform.localScale.x * local2DScale.x,
                                                                                           _selectedPiece.GameObject.transform.localScale.y * local2DScale.y,
                                                                                           _selectedPiece.GameObject.transform.localScale.z);
 
                             _currentGesture = null;
+                            _matchingActionStartTime = Time.time;
                         }
                         else if (_selectedPiece != null && _currentGesture.GestureType == GestureType.OBJECT_ROTATING)
                         {
                             Vector2 local2DRotation = (Vector2)_currentGesture.MetaData * -1;
 
+                            LoggingVariable lv = new LoggingVariable("MATCHING",
+                                                                     _matchingActionStartTime.ToString(),
+                                                                     Time.time.ToString(),
+                                                                     (Time.time - _matchingActionStartTime).ToString(),
+                                                                     _matchingPuzzleClickDown.ToString(),
+                                                                     _selectedPiece.GameObject.name,
+                                                                     "SCALING",
+                                                                     _selectedPiece.GameObject.transform.position.x.ToString(),
+                                                                     _selectedPiece.GameObject.transform.position.y.ToString(),
+                                                                     _selectedPiece.GameObject.transform.position.x.ToString(),
+                                                                     _selectedPiece.GameObject.transform.position.y.ToString(),
+                                                                     "0",
+                                                                     "0",
+                                                                     local2DRotation.x.ToString(),
+                                                                     "",
+                                                                     "",
+                                                                     "",
+                                                                     "",
+                                                                     "");
+
+                            _matchingLogList.Add(lv);
+
                             _selectedPiece.GameObject.transform.RotateAround(_selectedPiece.GameObject.transform.position, _selectedPiece.GameObject.transform.forward, local2DRotation.x);
 
                             _currentGesture = null;
+                            _matchingActionStartTime = Time.time;
                         }
 
                         if (_currentGesture != null && _currentGesture.GestureType == GestureType.NONE)
@@ -503,9 +643,33 @@ public class SimpleGame : MonoBehaviour
                                 _selectedPiece.IsSelected = false;
                                 _selectedPiece.GameObject.GetComponent<Renderer>().material.mainTexture = _selectedPiece.Original;
                                 _selectedPiece = null;
+
+                                LoggingVariable lv = new LoggingVariable("MATCHING",
+                                                                     _matchingActionStartTime.ToString(),
+                                                                     Time.time.ToString(),
+                                                                     (Time.time - _matchingActionStartTime).ToString(),
+                                                                     _matchingPuzzleClickDown.ToString(),
+                                                                     _selectedPiece.GameObject.name,
+                                                                     "UP",
+                                                                     _selectedPiece.GameObject.transform.position.x.ToString(),
+                                                                     _selectedPiece.GameObject.transform.position.y.ToString(),
+                                                                     _selectedPiece.GameObject.transform.position.x.ToString(),
+                                                                     _selectedPiece.GameObject.transform.position.y.ToString(),
+                                                                     "0",
+                                                                     "0",
+                                                                     "0",
+                                                                     "",
+                                                                     "",
+                                                                     "",
+                                                                     "",
+                                                                     "");
+
+                                _matchingLogList.Add(lv);
+                                _matchingActionStartTime = Time.time;
                             }
 
                             _currentGesture = null;
+                            _matchingActionStartTime = Time.time;
                         }
                     }
 
@@ -587,8 +751,13 @@ public class SimpleGame : MonoBehaviour
 
     private void OnApplicationQuit()
     {
-        _puzzleMatchingSW.Close();
-        _sketchingSW.Close();
-        _summarySW.Close();
+        if(_puzzleMatchingSW != null)
+            _puzzleMatchingSW.Close();
+
+        if(_sketchingSW != null)
+            _sketchingSW.Close();
+
+        if(_summarySW != null)
+            _summarySW.Close();
     }
 }

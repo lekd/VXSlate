@@ -107,14 +107,13 @@ public class PuzzleMaker : MonoBehaviour
     public bool isSketchingOnTrack = false;
     public bool isSketchDoneSucessfully = false;
 
-    public List<LoggingVariable> _sketchingLogList;
 
     float difLargeScreenZ = 0;
 
     float _startSketchingTime = 0;
     float _startSketchingPointTime = 0;
-    Vector2 _currentTouchPoint;
 
+    public List<LoggingVariable> _sketchingLogList;
 
     // Start is called before the first frame update
     void Start()
@@ -732,7 +731,7 @@ public class PuzzleMaker : MonoBehaviour
 
                 pixelUV.x *= texture2D.width;
                 pixelUV.y *= texture2D.height;
-                _currentTouchPoint = pixelUV;
+                //_currentTouchPoint = pixelUV;
 
                 Color32 c;
                 c = _originalPuzzleTexture.GetPixel((int)pixelUV.x, (int)pixelUV.y);//texture2D.GetPixel((int)pixelUV.x, (int)pixelUV.y);
@@ -838,6 +837,7 @@ public class PuzzleMaker : MonoBehaviour
 
                 _previous2DPoint = new Vector2((int)pixelUV.x, (int)pixelUV.y);
                 _sketchedPointID++;
+                _startSketchingPointTime = Time.time;
 
                 break;
             }
@@ -872,12 +872,12 @@ public class PuzzleMaker : MonoBehaviour
             _startSketchingPointTime = Time.time;
         else
         {
-            _startTime = _startSketchingPointTime.ToString();
-            _endTime = Time.time.ToString();
-            _duration = (Time.time - _startSketchingPointTime).ToString();
-            _startSketchingPointTime = Time.time;
+            _startTime = _startSketchingPointTime.ToString();            
         }
 
+        _endTime = Time.time.ToString();
+        _duration = (Time.time - _startSketchingPointTime).ToString();
+        
         int min = (int)(_sketchedBrush / 2) * (-1);
         int max = (int)(_sketchedBrush / 2);
 
