@@ -335,6 +335,7 @@ MonoBehaviour:
   _isExperimentStarted: 0
   _isExperimentFinished: 0
   _prepareTime: 3
+  _stateChangeTime: 10
   _puzzleMakerObject: {fileID: 1827507204}
   tabletControllerObj: {fileID: 1105813822}
   oculusControllerObj: {fileID: 1349240420}
@@ -1609,7 +1610,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1196841955}
   m_LocalRotation: {x: -0.042604744, y: -0, z: -0, w: 0.99909204}
-  m_LocalPosition: {x: 0, y: 0.5, z: 0}
+  m_LocalPosition: {x: 0, y: 1, z: 2.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 556465720}
@@ -2254,6 +2255,7 @@ MonoBehaviour:
   _isExperimentStarted: 0
   _isExperimentFinished: 0
   _prepareTime: 3
+  _stateChangeTime: 10
   _puzzleMakerObject: {fileID: 1827507204}
   tabletControllerObj: {fileID: 1105813822}
   oculusControllerObj: {fileID: 1349240420}
@@ -2733,6 +2735,7 @@ MonoBehaviour:
   _startButtonTexture: {fileID: 2800000, guid: eef9bc0f3ce2186468416101a598ae68, type: 3}
   _gridPieceTexture: {fileID: 2800000, guid: 48b8100379888e148adc6ca96f78871b, type: 3}
   _sampleMaterial: {fileID: 0}
+  puzzleMasterObject: {fileID: 0}
   _statusFont: {fileID: 12800000, guid: 8aecb189dbe04544898c10896c953cf9, type: 3}
   _puzzleDoneObject: {fileID: 0}
   _statusObject: {fileID: 0}
