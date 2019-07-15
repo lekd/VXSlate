@@ -10,6 +10,7 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
 {
     const int MAX_FINGERS_COUNT = 5;
     const float VIRTUALPAD_DEPTHOFFSET = -0.02f;
+    float PAD_Z = 0;
     //Public Game Objects
     public GameObject eventListenerObject;
     public GameObject gameCameraObject;
@@ -35,6 +36,7 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
     event MenuItemListener.EditModeSelectedCallBack editModeChangedListener = null;
 
     bool _gazeCanShift = true;
+    Vector3 latestGazeInPad = new Vector3();
     EditMode _currentMode;
     public EditMode CurrentMode
     {
@@ -94,7 +96,7 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
         padTranslationByPointers.CriticData = new Vector2(0, 0);
         padScaleByPointers.CriticData = new Vector2(0, 0);
 
-
+        PAD_Z = gameObject.transform.position.z;
         setMenuActiveness(false);
     }
     // Update is called once per frame
@@ -120,10 +122,7 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
         padContainer2DBoundary.yMin = boardObjectBound.min.y + virtualPadBound.size.y / 2;
         padContainer2DBoundary.yMax = boardObjectBound.max.y - virtualPadBound.size.y / 2;
         //Update Virtual Pad Following Camera Lookat Vector
-        if (_gazeCanShift)
-        {
-            UpdateVirtualPadBasedOnCamera(padContainer2DBoundary);
-        }
+        UpdateVirtualPadBasedOnCamera(padContainer2DBoundary);
         UpdateFingersBasedOnTouch();
         //Update virtual pad translation caused by pointers
         lock(padTranslationByPointers.AccessLock)
@@ -204,11 +203,31 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                     if (allHits[i].collider.name.CompareTo(boardObject.name) == 0)
                     {
                         Vector3 hitPos = allHits[i].point;
-                        Vector3 curPadPos = gameObject.transform.position;
-                        Vector3 newPadPos = GlobalUtilities.boundPointToContainer(hitPos, board2DBound);
-                        gameObject.transform.Translate(new Vector3(newPadPos.x - curPadPos.x, newPadPos.y - curPadPos.y, newPadPos.z - curPadPos.z + VIRTUALPAD_DEPTHOFFSET));
-                        //Vector3 curGazePos = gazePointObject.transform.position;
-                        //gazePointObject.transform.Translate(new Vector3(0, 0, hitPos.z - curGazePos.z + VIRTUALPAD_DEPTHOFFSET));
+                        hitPos.z = PAD_Z;
+                        Vector3 curPadCenter = gameObject.transform.position;
+                        Vector2 transDistance2D = new Vector2(hitPos.x - latestGazeInPad.x, hitPos.y - latestGazeInPad.y);
+                        Vector3 newPadCenter = new Vector3(curPadCenter.x + transDistance2D.x, curPadCenter.y + transDistance2D.y, PAD_Z);
+                        newPadCenter = GlobalUtilities.boundPointToContainer(newPadCenter, board2DBound);
+                        if (_gazeCanShift)
+                        {
+                            gameObject.transform.Translate(newPadCenter.x - curPadCenter.x, newPadCenter.y - curPadCenter.y, 0);
+                            latestGazeInPad = hitPos;
+                        }
+                        //Vector3 newPadPos = GlobalUtilities.boundPointToContainer(hitPos, board2DBound);
+                        //gameObject.transform.Translate(new Vector3(newPadPos.x - curPadPos.x, newPadPos.y - curPadPos.y, newPadPos.z - curPadPos.z + VIRTUALPAD_DEPTHOFFSET));
+
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < allHits.Length; i++)
+                {
+                    if (allHits[i].collider.name.CompareTo(boardObject.name) == 0)
+                    {
+                        latestGazeInPad = allHits[i].point;
+                        latestGazeInPad.z = PAD_Z;
                         break;
                     }
                 }

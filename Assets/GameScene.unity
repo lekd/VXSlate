@@ -1067,7 +1067,7 @@ GameObject:
   - component: {fileID: 788566890}
   - component: {fileID: 788566889}
   m_Layer: 0
-  m_Name: VirtulPad
+  m_Name: VirtualPad
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1163,7 +1163,7 @@ Transform:
   m_GameObject: {fileID: 788566888}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 2, z: 4.88}
-  m_LocalScale: {x: 1.3, y: 1.8, z: 0.0001}
+  m_LocalScale: {x: 0.7, y: 1.1, z: 0.0001}
   m_Children:
   - {fileID: 302666554}
   - {fileID: 209697442}
