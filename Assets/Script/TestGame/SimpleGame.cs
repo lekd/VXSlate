@@ -22,6 +22,7 @@ public class SimpleGame : MonoBehaviour
     public bool _isExperimentStarted = false;
     public bool _isExperimentFinished = false;
     public float _prepareTime = 3; //in seconds
+    public float _stateChangeTime = 10; //in seconds
 
     bool _startTimer = false;
 
@@ -65,11 +66,12 @@ public class SimpleGame : MonoBehaviour
     float _matchingPieceStartTime = 0;
     float _matchingActionStartTime = 0;
     int _matchingPuzzleClickDown = 1;
+    float _sketchingStartTime = 0;
 
     // Start is called before the first frame update
     void Start()
     {
-        gameCharacterObj.transform.localPosition.Set(0, 0, -0.00001f);
+        //gameCharacterObj.transform.localPosition.Set(0, 0, -0.00001f);
 
         tabletController = tabletControllerObj.GetComponent<IRemoteController>();
         if(tabletController != null)
@@ -166,7 +168,7 @@ public class SimpleGame : MonoBehaviour
             _sketchingSW = new StreamWriter(".\\Assets\\ExperimentResults\\Sketching\\Sketching_" + _participantID + "_" + extension + ".csv");
             _summarySW = new StreamWriter(".\\Assets\\ExperimentResults\\Summary\\Summary_" + _participantID + "_" + extension + ".csv");
 
-            _puzzleMatchingSW.WriteLine("ParticipantID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,Action,DistanceMoved,ScaledLevel,RotatedAngle");
+            _puzzleMatchingSW.WriteLine("ParticipantID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,MatchingPuzzleTime,PuzzleName,Action,DistanceMoved,ScaledLevel,RotatedAngle");
             _sketchingSW.WriteLine("ParticipantID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,IsTouchPoint,IsOnTrack,SketchingPointID,XSketchingPoint,YSketchingPoint");
             _summarySW.WriteLine("ParticipantID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration");
 
@@ -181,10 +183,9 @@ public class SimpleGame : MonoBehaviour
                 if (!_puzzleMaker.isPuzzledDone && _puzzleMaker.CheckPuzzlesDone())
                 {
                     _puzzleMaker.isPuzzledDone = true;
-                    _puzzleMaker._puzzleDoneObject.SetActive(true);
 
                     _summarySW.WriteLine(_participantID
-                                         + ",Matching,"
+                                         + ",MATCHING,"
                                          + _usingTablet.ToString()
                                          + ","
                                          + _usingController.ToString()
@@ -197,11 +198,23 @@ public class SimpleGame : MonoBehaviour
                                          + ","
                                          + (Time.time - _experimentStartTime).ToString());
 
-                    if(_puzzleMatchingSW != null)
+                    _sketchingTime = Time.time;
+                }
+
+
+
+
+
+                ////For testing
+                //_puzzleMaker.isPuzzledDone = true;
+                //////
+                if (_puzzleMaker.isPuzzledDone)
+                {
+                    if (_puzzleMatchingSW != null)
                     {
-                        foreach(var e in _matchingLogList)
+                        foreach (var e in _matchingLogList)
                         {
-                            _puzzleMatchingSW.WriteLine(_participantID 
+                            _puzzleMatchingSW.WriteLine(_participantID
                                                    + ","
                                                    + "MATCHING"
                                                    + ","
@@ -217,6 +230,10 @@ public class SimpleGame : MonoBehaviour
                                                    + ","
                                                    + e.Duration
                                                    + ","
+                                                   + e.MatchingPuzzleTime
+                                                   + ","
+                                                   + e.PuzzleName
+                                                   + ","
                                                    + e.Action
                                                    + ","
                                                    + e.DistanceMoved
@@ -229,27 +246,44 @@ public class SimpleGame : MonoBehaviour
                         _puzzleMatchingSW.Close();
                     }
 
-                    _sketchingTime = Time.time;
+                    if (!_puzzleMaker.isSketchStarted && _stateChangeTime < 0)
+                    {
+                        _puzzleMaker.isSketchStarted = true;
+                        _sketchingStartTime = Time.time;
+
+                        ////For testing
+                        //_puzzleMaker._puzzleDoneObject.SetActive(true);
+                        //////
+
+                        if (_puzzleMaker._sketchedPixels == null)
+                            _puzzleMaker._sketchedPixels = new List<Pixel>();
+
+                        _puzzleMaker._statusObject.GetComponent<Text>().color = Color.green;
+                        _puzzleMaker._statusObject.GetComponent<Text>().fontSize = 4;
+                        _puzzleMaker._statusObject.GetComponent<Text>().alignment = TextAnchor.LowerCenter;
+                        _puzzleMaker._statusObject.GetComponent<Text>().text = "Please start sketching from RED point to BLUE point.";
+                    }
+                    else if(_stateChangeTime > 0)
+                    {
+                        _puzzleMaker._statusObject.GetComponent<Text>().color = Color.green;
+                        _puzzleMaker._statusObject.GetComponent<Text>().alignment = TextAnchor.MiddleCenter;
+                        _puzzleMaker._statusObject.GetComponent<Text>().fontSize = 10;
+
+                        if (_stateChangeTime < 8)
+                        {
+                            _puzzleMaker._puzzleDoneObject.SetActive(true);
+                            _puzzleMaker.puzzleMasterObject.SetActive(false);
+                            _puzzleMaker._statusObject.GetComponent<Text>().text = "Please start sketching from RED point to BLUE point.\n" + ((int)_stateChangeTime + 1).ToString();
+                        }
+                        else
+                        {
+                            _puzzleMaker._statusObject.GetComponent<Text>().text = "Puzzle grid is done!" + ((int)_stateChangeTime + 1).ToString();
+                        }
+
+                        _stateChangeTime -= Time.deltaTime;                    
+                    }
                 }
-
-                ////For testing
-                //_puzzleMaker.isPuzzledDone = true;
-                //////
-
-                if (_puzzleMaker.isPuzzledDone && !_puzzleMaker.isSketchStarted)
-                {
-                    _puzzleMaker.isSketchStarted = true;
-
-                    ////For testing
-                    //_puzzleMaker._puzzleDoneObject.SetActive(true);
-                    //////
-
-                    if (_puzzleMaker._sketchedPixels == null)
-                        _puzzleMaker._sketchedPixels = new List<Pixel>();
-
-                    _puzzleMaker._statusObject.GetComponent<Text>().color = Color.green;
-                    _puzzleMaker._statusObject.GetComponent<Text>().text = "Puzzle grid is done!\nPlease start sketching from RED to BLUE point.";
-                }
+                   
 
                 if (_puzzleMaker.isSketchDoneSucessfully)
                 {
@@ -287,25 +321,30 @@ public class SimpleGame : MonoBehaviour
                         _sketchingSW.Close();
                     }
 
+                    if (_summarySW != null)
+                    {
+                        _summarySW.WriteLine(_participantID
+                                             + ",SKETCHING,"
+                                             + _usingTablet.ToString()
+                                             + ","
+                                             + _usingController.ToString()
+                                             + ","
+                                             + _usingMouse.ToString()
+                                             + ","
+                                             + _sketchingStartTime.ToString()
+                                             + ","
+                                             + Time.time.ToString()
+                                             + ","
+                                             + (Time.time - _sketchingStartTime).ToString());
+
+                        _summarySW.Close();
+                    }
+
                     _isExperimentFinished = true;
                 }
             }
             else
             {
-                _summarySW.WriteLine(_participantID
-                                     + ",Sketching,"
-                                     + _usingTablet.ToString()
-                                     + ","
-                                     + _usingController.ToString()
-                                     + ","
-                                     + _usingMouse.ToString()
-                                     + ","
-                                     + _sketchingTime.ToString()
-                                     + ","
-                                     + Time.time.ToString()
-                                     + ","
-                                     + (Time.time - _sketchingTime).ToString());
-
                 _puzzleMaker._statusObject.GetComponent<Text>().color = Color.blue;
                 _puzzleMaker._statusObject.GetComponent<Text>().alignment = TextAnchor.MiddleCenter;
                 _puzzleMaker._statusObject.GetComponent<Text>().fontSize = 10;
@@ -581,7 +620,7 @@ public class SimpleGame : MonoBehaviour
                                                                      (Time.time - _matchingActionStartTime).ToString(),
                                                                      _matchingPuzzleClickDown.ToString(),
                                                                      _selectedPiece.GameObject.name,
-                                                                     "SCALING",
+                                                                     "SCALE",
                                                                      _selectedPiece.GameObject.transform.position.x.ToString(),
                                                                      _selectedPiece.GameObject.transform.position.y.ToString(),
                                                                      _selectedPiece.GameObject.transform.position.x.ToString(),
@@ -614,7 +653,7 @@ public class SimpleGame : MonoBehaviour
                                                                      (Time.time - _matchingActionStartTime).ToString(),
                                                                      _matchingPuzzleClickDown.ToString(),
                                                                      _selectedPiece.GameObject.name,
-                                                                     "SCALING",
+                                                                     "ROTATE",
                                                                      _selectedPiece.GameObject.transform.position.x.ToString(),
                                                                      _selectedPiece.GameObject.transform.position.y.ToString(),
                                                                      _selectedPiece.GameObject.transform.position.x.ToString(),
@@ -690,6 +729,28 @@ public class SimpleGame : MonoBehaviour
                 {
                     if (_selectedPiece != null)
                     {
+                        LoggingVariable lv = new LoggingVariable("MATCHING",
+                                                                     _matchingActionStartTime.ToString(),
+                                                                     Time.time.ToString(),
+                                                                     (Time.time - _matchingActionStartTime).ToString(),
+                                                                     _matchingPuzzleClickDown.ToString(),
+                                                                     _selectedPiece.GameObject.name,
+                                                                     "UP",
+                                                                     _selectedPiece.GameObject.transform.position.x.ToString(),
+                                                                     _selectedPiece.GameObject.transform.position.y.ToString(),
+                                                                     _selectedPiece.GameObject.transform.position.x.ToString(),
+                                                                     _selectedPiece.GameObject.transform.position.y.ToString(),
+                                                                     "0",
+                                                                     "0",
+                                                                     "0",
+                                                                     "",
+                                                                     "",
+                                                                     "",
+                                                                     "",
+                                                                     "");
+
+                        _matchingLogList.Add(lv);
+
                         _selectedPiece.IsSelected = false;
                         _selectedPiece.GameObject.GetComponent<Renderer>().material.mainTexture = _selectedPiece.Original;
                         _selectedPiece = null;

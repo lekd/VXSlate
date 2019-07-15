@@ -50,6 +50,7 @@ public class PuzzleMaker : MonoBehaviour
     List<Texture2D> _listOfTextiles;
     List<Piece> _gridPieces;
     public List<Piece> _puzzlePieces;
+    public GameObject puzzleMasterObject;
 
     Texture2D _mainTexture;
 
@@ -420,7 +421,7 @@ public class PuzzleMaker : MonoBehaviour
                 GameObject gridMasterObject = new GameObject();
                 gridMasterObject.name = "Puzzle Grid";
 
-                GameObject puzzleMasterObject = new GameObject();
+                puzzleMasterObject = new GameObject();
                 puzzleMasterObject.name = "Puzzle Pieces";
 
                 float _gridPieceWidth = _mainTextureArea.x / _x;
@@ -519,11 +520,17 @@ public class PuzzleMaker : MonoBehaviour
                         puzzleTextureHighlighted.Apply();
 
                         Quaternion puzzlePieceRotation = new Quaternion();
-
-
+                        
                         _standardRotation = new Vector3(0, 0, 180);
 
-                        float zAngle = ((int)(UnityEngine.Random.Range(0, _numberOfRotation))) * _differentAngle;
+                        int zAngle;
+                        do
+                        {
+                            zAngle = (int)UnityEngine.Random.Range(0, 360);
+                        }
+                        while (zAngle % 5 != 0);
+
+                        //float zAngle = ((int)(UnityEngine.Random.Range(0, _numberOfRotation))) * _differentAngle;
 
                         puzzlePieceRotation.eulerAngles = new Vector3(0, 0, zAngle);
 
@@ -1094,7 +1101,6 @@ public class PuzzleMaker : MonoBehaviour
 
     public void HighlightGridPiece()
     {
-
         foreach (var gridPiece in _gridPieces)
         {
             bool flag = false;
