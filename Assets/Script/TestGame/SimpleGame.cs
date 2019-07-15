@@ -33,6 +33,12 @@ public class SimpleGame : MonoBehaviour
     public GameObject mouseControllerObj;
     public GameObject gameCharacterObj;
     private Texture2D screenTexture;
+
+    public GameObject _virtualPadObject;
+    public GameObject _gazeObject;
+    public GameObject _leftOculusControllerObject;
+    public GameObject _rightOculusControllerObject;
+
     Vector2 gameSize = new Vector2();
 
     IRemoteController tabletController;
@@ -73,57 +79,83 @@ public class SimpleGame : MonoBehaviour
     {
         //gameCharacterObj.transform.localPosition.Set(0, 0, -0.00001f);
 
-        tabletController = tabletControllerObj.GetComponent<IRemoteController>();
-        if(tabletController != null)
+        if (!_usingController && !_usingMouse && _usingTablet)
         {
-            tabletController.setGestureRecognizedCallback(this.handleControlGesture);
-            tabletController.setModeSwitchedCallback(this.handleEditModeChanged);
+            Debug.LogError("No interaction technique is selected! Please to using Controler or using Tablet or using Mouse.");
         }
         else
         {
-            Debug.LogWarning("Missing Tablet Controller Object!", tabletControllerObj);
+            if (_usingController)
+            {
+                oculusController = oculusControllerObj.GetComponent<IRemoteController>();
+
+                if (oculusController != null)
+                {
+                    oculusController.setGestureRecognizedCallback(this.handleControlGesture);
+                    oculusController.setModeSwitchedCallback(this.handleEditModeChanged);
+                }
+                else
+                {
+                    Debug.LogWarning("Missing Oculus Controller Object!", oculusControllerObj);
+                }
+
+                if (_virtualPadObject != null)
+                    _virtualPadObject.SetActive(false);
+
+                if (_gazeObject != null)
+                    _gazeObject.SetActive(false);
+            }
+            else if (_usingTablet)
+            {
+                tabletController = tabletControllerObj.GetComponent<IRemoteController>();
+                if (tabletController != null)
+                {
+                    tabletController.setGestureRecognizedCallback(this.handleControlGesture);
+                    tabletController.setModeSwitchedCallback(this.handleEditModeChanged);
+                }
+                else
+                {
+                    Debug.LogWarning("Missing Tablet Controller Object!", tabletControllerObj);
+                }
+
+                if (_leftOculusControllerObject != null)
+                    _leftOculusControllerObject.SetActive(false);
+
+                if (_rightOculusControllerObject != null)
+                    _rightOculusControllerObject.SetActive(false);
+            }
+            else
+            {
+                mouseController = mouseControllerObj.GetComponent<IRemoteController>();
+
+                if (mouseController != null)
+                {
+                    mouseController.setGestureRecognizedCallback(this.handleControlGesture);
+                    mouseController.setModeSwitchedCallback(this.handleEditModeChanged);
+                }
+                else
+                {
+                    Debug.LogWarning("Missing Mouse Controller Object!", mouseControllerObj);
+                }
+            }            
+
+            hasTouchDown = false;
+
+            gameCharacter = gameCharacterObj.GetComponent<SimpleCharacter>();
+            paintColors[0] = new Color(1, 0, 0);
+            screenTexture = new Texture2D(2, 2);
+            //load screen texture from image
+            string textureImgPath = "./Assets/Resources/Images/solid_gray.png";
+            byte[] imgData;
+            if (File.Exists(textureImgPath))
+            {
+                imgData = File.ReadAllBytes(textureImgPath);
+                screenTexture.LoadImage(imgData);
+            }
+            Debug.Log(string.Format("ScreenTexture size: ({0},{1})", screenTexture.width, screenTexture.height));
+            gameMode = EditMode.OBJECT_MANIP;
+            screenSize = gameObject.GetComponent<Collider>().bounds.size;
         }
-
-        mouseController = mouseControllerObj.GetComponent<IRemoteController>();
-
-        if (mouseController != null)
-        {
-            mouseController.setGestureRecognizedCallback(this.handleControlGesture);
-            mouseController.setModeSwitchedCallback(this.handleEditModeChanged);
-        }
-        else
-        {
-            Debug.LogWarning("Missing Mouse Controller Object!", mouseControllerObj);
-        }
-
-        oculusController = oculusControllerObj.GetComponent<IRemoteController>();
-
-        if (oculusController != null)
-        {
-            oculusController.setGestureRecognizedCallback(this.handleControlGesture);
-            oculusController.setModeSwitchedCallback(this.handleEditModeChanged);
-        }
-        else
-        {
-            Debug.LogWarning("Missing Oculus Controller Object!", oculusControllerObj);
-        }        
-
-        hasTouchDown = false;
-
-        gameCharacter = gameCharacterObj.GetComponent<SimpleCharacter>();
-        paintColors[0] = new Color(1, 0, 0);
-        screenTexture = new Texture2D(2, 2);
-        //load screen texture from image
-        string textureImgPath = "./Assets/Resources/Images/solid_gray.png";
-        byte[] imgData;
-        if(File.Exists(textureImgPath))
-        {
-            imgData = File.ReadAllBytes(textureImgPath);
-            screenTexture.LoadImage(imgData);
-        }
-        Debug.Log(string.Format("ScreenTexture size: ({0},{1})", screenTexture.width, screenTexture.height));
-        gameMode = EditMode.OBJECT_MANIP;
-        screenSize = gameObject.GetComponent<Collider>().bounds.size;
     }
 
     // Update is called once per frame
