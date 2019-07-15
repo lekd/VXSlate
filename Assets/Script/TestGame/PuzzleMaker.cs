@@ -78,6 +78,7 @@ public class PuzzleMaker : MonoBehaviour
     public List<Pixel> _sketchedPixels;
 
     int _sketchedBrush = 5;
+    int _sketchedPointID = 1;
 
     //For sketch
     Vector2 _previous2DPoint = new Vector2(1000000, 1000000);
@@ -97,6 +98,7 @@ public class PuzzleMaker : MonoBehaviour
 
     [Header("Stage")]
     public bool isPuzzledDone = false;
+
     // Check sketch progress
     public bool isSketchStarted = false;
     public bool isInStartPoints = false;
@@ -105,7 +107,13 @@ public class PuzzleMaker : MonoBehaviour
     public bool isSketchingOnTrack = false;
     public bool isSketchDoneSucessfully = false;
 
+    public List<LoggingVariable> _sketchingLogList;
+
     float difLargeScreenZ = 0;
+
+    float _startSketchingTime = 0;
+    float _startSketchingPointTime = 0;
+    Vector2 _currentTouchPoint;
 
 
     // Start is called before the first frame update
@@ -675,7 +683,7 @@ public class PuzzleMaker : MonoBehaviour
     }
 
     public void CheckSketch(Vector3 rayPoint)
-    {    
+    {
         if(CheckPointPixelColor(rayPoint, _startPointsColor, _linePointsColor, _endPointsColor))
         {
             if (!isSketchDoneSucessfully)
@@ -699,12 +707,13 @@ public class PuzzleMaker : MonoBehaviour
     }
     bool CheckPointPixelColor(Vector3 rayPoint, Color startColor, Color lineColor, Color endColor)
     {
+        if (_sketchingLogList == null)
+            _sketchingLogList = new List<LoggingVariable>();
+
         bool ret = true;
 
         RaycastHit[] hits = Physics.RaycastAll(rayPoint, Vector3.forward);
 
-        //if (!Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit))
-        //    return false;
         for (int id = 0; id < hits.Length; id++)
         {
             if (hits[id].transform.name.Contains("Puzzle Done"))
@@ -723,6 +732,7 @@ public class PuzzleMaker : MonoBehaviour
 
                 pixelUV.x *= texture2D.width;
                 pixelUV.y *= texture2D.height;
+                _currentTouchPoint = pixelUV;
 
                 Color32 c;
                 c = _originalPuzzleTexture.GetPixel((int)pixelUV.x, (int)pixelUV.y);//texture2D.GetPixel((int)pixelUV.x, (int)pixelUV.y);
@@ -766,8 +776,10 @@ public class PuzzleMaker : MonoBehaviour
                     isSketchingOnTrack = false;
                     ret = false;
                 }
-
-                hit.transform.GetComponent<Renderer>().material.mainTexture = BrushSketchLines(texture2D, (int)pixelUV.x, (int)pixelUV.y);
+                
+                hit.transform.GetComponent<Renderer>().material.mainTexture = BrushSketchLines(texture2D, (int)pixelUV.x, (int)pixelUV.y, "TOUCH POINT", startColor, lineColor, endColor);
+                                
+                //For brush
 
                 Vector2 difUV = pixelUV - _previous2DPoint;
 
@@ -815,73 +827,96 @@ public class PuzzleMaker : MonoBehaviour
                             i = (int)(difXY * j);
                         }
 
-                        BrushSketchLines(texture2D, (int)_previous2DPoint.x + i * signX, (int)_previous2DPoint.y + j * signY);
+                        int x = (int)_previous2DPoint.x + i * signX;
+                        int y = (int)_previous2DPoint.y + j * signY;
+                        if (x != pixelUV.x && y != pixelUV.y)
+                        {                            
+                            BrushSketchLines(texture2D, x, y, "GENERATED TOUCH POINT", startColor, lineColor, endColor);
+                        }
                     }
                 }
 
                 _previous2DPoint = new Vector2((int)pixelUV.x, (int)pixelUV.y);
+                _sketchedPointID++;
+
+                break;
             }
         }
-        //else
-        //{
-        //    if ((_previous2DPoint - pixelUV).magnitude > 4)
-        //        Debug.Log("_previous2DPoint: " +
-        //                  _previous2DPoint.x +
-        //                  "," +
-        //                  _previous2DPoint.y +
-        //                  "; pixelUV: " +
-        //                  pixelUV.x +
-        //                  "," +
-        //                  pixelUV.y +
-        //                  ", maginitude:" +
-        //                  (_previous2DPoint - pixelUV).magnitude +
-        //                  "," +
-        //                  difX +
-        //                  "," +
-        //                  difY);
-        //}
 
         return ret;
     }
 
-    private Texture2D BrushSketchLines(Texture2D tex, int x, int y)
+    private Texture2D BrushSketchLines(Texture2D tex, int x, int y, string pointType, Color startColor, Color lineColor, Color endColor)
     {
-        for(int i = 0; i < _sketchedBrush; i++)
+        string _stage = "SKETCHING";
+        string _startTime = "";
+        string _endTime = "";
+        string _duration = "";
+        string _matchingPuzzleTime = "";
+        string _puzzleName = "";
+        string _action = "";
+        string _xFromPoint = "";
+        string _yFromPoint = "";
+        string _xToPoint = "";
+        string _yToPoint = "";
+        string _distanceMoved = "";
+        string _scaleLevel = "";
+        string _rotateAngel = "";
+        string _isTouchPoint = "";
+        string _isOnTrack = "";
+        //string _sketchingPointID = "";
+        string _xSketchPoint = x.ToString();
+        string _ySketchPoint = y.ToString();
+
+        if (_startSketchingPointTime == 0)
+            _startSketchingPointTime = Time.time;
+        else
         {
-            for(int j = 0; j < _sketchedBrush; j++)
+            _startTime = _startSketchingPointTime.ToString();
+            _endTime = Time.time.ToString();
+            _duration = (Time.time - _startSketchingPointTime).ToString();
+            _startSketchingPointTime = Time.time;
+        }
+
+        int min = (int)(_sketchedBrush / 2) * (-1);
+        int max = (int)(_sketchedBrush / 2);
+
+        for (int i = min; i < max; i++)
+        {
+            for(int j = min; j < max; j++)
             {
-                for(int sign = 0; sign < 4; sign++)
-                {
+                //for(int sign = 0; sign < 4; sign++)
+                //{
                     int a, b;
-                    a = x;
-                    b = y;
+                    a = x + i;
+                    b = y + j;
 
-                    if(sign == 0)
-                    {
-                        a += i;
-                        b += j;
-                    }
-                    else if (sign == 1)
-                    {
-                        a -= i;
-                        b += j;
-                    }
-                    else if (sign == 2)
-                    {
-                        a += i;
-                        b -= j;
-                    }
-                    else if (sign == 3)
-                    {
-                        a -= i;
-                        b -= j;
-                    }
+                    //if(sign == 0)
+                    //{
+                    //    a += i;
+                    //    b += j;
+                    //}
+                    //else if (sign == 1)
+                    //{
+                    //    a -= i;
+                    //    b += j;
+                    //}
+                    //else if (sign == 2)
+                    //{
+                    //    a += i;
+                    //    b -= j;
+                    //}
+                    //else if (sign == 3)
+                    //{
+                    //    a -= i;
+                    //    b -= j;
+                    //}
 
-                    if (a >= tex.width)
-                        a = tex.width - 1;
+                    //if (a >= tex.width)
+                    //    a = tex.width - 1;
 
-                    if (b >= tex.height)
-                        b = tex.height - 1;
+                    //if (b >= tex.height)
+                    //    b = tex.height - 1;
 
                     if (a < 0)
                         a = 0;
@@ -893,7 +928,77 @@ public class PuzzleMaker : MonoBehaviour
 
                     if (distance <= _sketchedBrush - 1)
                     {
-                        if(tex.GetPixel(a, b) != Color.black)
+                        if (distance == 0)                             
+                        {
+                            if(pointType == "TOUCH POINT")
+                                _isTouchPoint = "TOUCH POINT";
+                            else
+                                _isTouchPoint = "GENERATED TOUCH POINT";
+                        }
+                        else
+                        {
+                            if (pointType == "TOUCH POINT")
+                                _isTouchPoint = "TOUCH POINT BRUSHED";
+                            else
+                                _isTouchPoint = "GENERATED TOUCH POINT BRUSHED";
+                        }
+
+                        Color32 cCheck;
+                        cCheck = _originalPuzzleTexture.GetPixel(a, b);
+
+                        if (
+                            (
+                                Mathf.Abs(cCheck.r - startColor.r) < 20 &&
+                                Mathf.Abs(cCheck.g - startColor.g) < 20 &&
+                                Mathf.Abs(cCheck.b - startColor.b) < 20
+                            )
+                            ||
+                            (
+                                Mathf.Abs(cCheck.r - endColor.r) < 20 &&
+                                Mathf.Abs(cCheck.g - endColor.g) < 20 &&
+                                Mathf.Abs(cCheck.b - endColor.b) < 20
+                            )
+                            ||
+                            (
+                                Mathf.Abs(cCheck.r - lineColor.r) < 20 &&
+                                Mathf.Abs(cCheck.g - lineColor.g) < 20 &&
+                                Mathf.Abs(cCheck.b - lineColor.b) < 20
+                            )
+                        )
+                        { 
+
+                            _isOnTrack = "YES";
+                        }
+                        else
+                        {
+                            _isOnTrack = "NO";
+                        }
+
+                        _xSketchPoint = a.ToString();
+                        _ySketchPoint = b.ToString();
+
+                        LoggingVariable lv = new LoggingVariable(_stage,
+                                                                   _startTime,
+                                                                   _endTime,
+                                                                   _duration,
+                                                                   _matchingPuzzleTime,
+                                                                   _puzzleName,
+                                                                   _action,
+                                                                   _xFromPoint,
+                                                                   _yFromPoint,
+                                                                   _xToPoint,
+                                                                   _yToPoint,
+                                                                   _distanceMoved,
+                                                                   _scaleLevel,
+                                                                   _rotateAngel,
+                                                                   _isTouchPoint,
+                                                                   _isOnTrack,
+                                                                   _sketchedPointID.ToString(),
+                                                                   _xSketchPoint,
+                                                                   _ySketchPoint);
+                        _sketchingLogList.Add(lv);
+
+                        if (tex.GetPixel(a, b) != Color.black)
                         {
                             Pixel p = new Pixel(a, b, tex.GetPixel(a, b), Color.black);
                             tex.SetPixel(a, b, Color.black);
@@ -901,7 +1006,7 @@ public class PuzzleMaker : MonoBehaviour
                             _sketchedPixels.Add(p);
                         }
                     }                    
-                }
+               // }
             }
         }
         

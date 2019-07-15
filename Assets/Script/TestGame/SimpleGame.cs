@@ -59,6 +59,8 @@ public class SimpleGame : MonoBehaviour
 
     float _experimentStartTime;
 
+    public List<LoggingVariable> _matchingLogList;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -146,16 +148,22 @@ public class SimpleGame : MonoBehaviour
             _puzzleMaker._statusObject.GetComponent<Text>().fontSize = 4;
             _puzzleMaker._statusObject.GetComponent<Text>().alignment = TextAnchor.LowerCenter;
 
-            string extension = DateTime.Now.ToString();
-            extension.Replace('\\', '_');
-            extension.Replace('/', '_');
-            _puzzleMatchingSW = new StreamWriter(".\\PuzzleMatching\\" + _participantID + "_" + extension + ".csv");
-            _sketchingSW = new StreamWriter(".\\Sketching\\" + _participantID + "_" + extension + ".csv");
-            _summarySW = new StreamWriter(".\\Summary\\" + _participantID + "_" + extension + ".csv");
+            string extension = "";
+            extension +=  DateTime.Today.Year.ToString()
+                          + DateTime.Today.Month.ToString()
+                          + DateTime.Today.Day.ToString()
+                          + "_"
+                          + DateTime.Now.Hour.ToString()
+                          + DateTime.Now.Minute.ToString()
+                          + DateTime.Now.Second.ToString();
 
-            _puzzleMatchingSW.WriteLine("ParticipantID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,Action,DistanceMoved,ScaledLevel,RotatedAngle\n");
-            _sketchingSW.WriteLine("ParticipantID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,IsTouchPoint,IsOnTrack\n");
-            _summarySW.WriteLine("ParticipantID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration\n");
+            _puzzleMatchingSW = new StreamWriter(".\\Assets\\ExperimentResults\\PuzzleMatching\\" + _participantID + "_" + extension + ".csv");
+            _sketchingSW = new StreamWriter(".\\Assets\\ExperimentResults\\Sketching\\" + _participantID + "_" + extension + ".csv");
+            _summarySW = new StreamWriter(".\\Assets\\ExperimentResults\\Summary\\" + _participantID + "_" + extension + ".csv");
+
+            _puzzleMatchingSW.WriteLine("ParticipantID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,Action,DistanceMoved,ScaledLevel,RotatedAngle");
+            _sketchingSW.WriteLine("ParticipantID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,IsTouchPoint,IsOnTrack,SketchingPointID,XSketchingPoint,YSketchingPoint");
+            _summarySW.WriteLine("ParticipantID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration");
 
             _experimentStartTime = Time.time;
         }
@@ -186,27 +194,63 @@ public class SimpleGame : MonoBehaviour
                     _experimentStartTime = Time.time;
                 }
 
-                ////For testing
-                //_puzzleMaker.isPuzzledDone = true;
-                //////
+                //For testing
+                _puzzleMaker.isPuzzledDone = true;
+                ////
 
                 if (_puzzleMaker.isPuzzledDone && !_puzzleMaker.isSketchStarted)
                 {
                     _puzzleMaker.isSketchStarted = true;
 
-                    ////For testing
-                    //_puzzleMaker._puzzleDoneObject.SetActive(true);
-                    //////
+                    //For testing
+                    _puzzleMaker._puzzleDoneObject.SetActive(true);
+                    ////
 
                     if (_puzzleMaker._sketchedPixels == null)
                         _puzzleMaker._sketchedPixels = new List<Pixel>();
 
                     _puzzleMaker._statusObject.GetComponent<Text>().color = Color.green;
                     _puzzleMaker._statusObject.GetComponent<Text>().text = "Puzzle grid is done!\nPlease start sketching from RED to BLUE point.";
-                }                
+                }
 
                 if (_puzzleMaker.isSketchDoneSucessfully)
+                {
+                    if (_sketchingSW != null)
+                    {
+                        foreach(var e in _puzzleMaker._sketchingLogList)
+                        {
+                            _sketchingSW.WriteLine(_participantID
+                                                   + ","
+                                                   + e.Stage
+                                                   + ","
+                                                   + _usingTablet.ToString()
+                                                   + ","
+                                                   + _usingController.ToString()
+                                                   + ","
+                                                   + _usingMouse.ToString()
+                                                   + ","
+                                                   + e.StartTime
+                                                   + ","
+                                                   + e.EndTime
+                                                   + ","
+                                                   + e.Duration
+                                                   + ","
+                                                   + e.IsTouchPoint
+                                                   + ","
+                                                   + e.IsOnTrack
+                                                   + ","
+                                                   + e.SketchingPointID
+                                                   + ","
+                                                   + e.XSketchPoint
+                                                   + ","
+                                                   + e.YSketchPoint);
+                        }
+
+                        _sketchingSW.Close();
+                    }
+
                     _isExperimentFinished = true;
+                }
             }
             else
             {
