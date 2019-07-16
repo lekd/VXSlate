@@ -13,14 +13,28 @@ public class SimpleGame : MonoBehaviour
 
     [Header("Experiment Log")]
     public string _participantID;
+
+    [Space(15)]
+    [Tooltip("Select experiment session")]
+    public bool _isTraining = false;
+    public bool _isExperimental = false;
+
+    [Space(5)]
     public int _textureID = 1;
+    public int _experimentOrder = 1;
+
+    [Space(15)]
     public bool _usingTablet = false;
     public bool _usingController = false;
     public bool _usingMouse = false;
 
     [Header("Experiment Stage")]
+    [Tooltip("For observing which stage the experiment is running")]
     public bool _isExperimentStarted = false;
     public bool _isExperimentFinished = false;
+    public bool _isMatchingLog = false;
+    public bool _isSketchingLog = false;
+    public bool _isSummaryLog = false;
     public float _prepareTime = 3; //in seconds
     public float _stateChangeTime = 10; //in seconds
 
@@ -35,8 +49,10 @@ public class SimpleGame : MonoBehaviour
 
     public GameObject _virtualPadObject;
     public GameObject _gazeObject;
+    public GameObject _tabletInstructionObject;
     public GameObject _leftOculusControllerObject;
     public GameObject _rightOculusControllerObject;
+    public GameObject _oculusControllerInstructionObject;
 
     Vector2 gameSize = new Vector2();
 
@@ -104,10 +120,17 @@ public class SimpleGame : MonoBehaviour
 
                 if (_gazeObject != null)
                     _gazeObject.SetActive(false);
+
+                if (_tabletInstructionObject != null)
+                    _tabletInstructionObject.SetActive(false);
+
+                _usingTablet = false;
+                _usingMouse = false;
             }
             else if (_usingTablet)
             {
                 tabletController = tabletControllerObj.GetComponent<IRemoteController>();
+
                 if (tabletController != null)
                 {
                     tabletController.setGestureRecognizedCallback(this.handleControlGesture);
@@ -123,6 +146,12 @@ public class SimpleGame : MonoBehaviour
 
                 if (_rightOculusControllerObject != null)
                     _rightOculusControllerObject.SetActive(false);
+
+                if (_oculusControllerInstructionObject != null)
+                    _oculusControllerInstructionObject.SetActive(false);
+
+                _usingController = false;
+                _usingMouse = false;
             }
             else
             {
@@ -137,11 +166,12 @@ public class SimpleGame : MonoBehaviour
                 {
                     Debug.LogWarning("Missing Mouse Controller Object!", mouseControllerObj);
                 }
+
+                _usingController = false;
+                _usingTablet = false;
             }            
 
-            hasTouchDown = false;
-
-            
+            hasTouchDown = false;            
         }
     }
 
@@ -168,10 +198,10 @@ public class SimpleGame : MonoBehaviour
 
             Debug.Log(">> Experiment Started!");
 
-            _puzzleMaker._statusObject.GetComponent<Text>().text = "Experiment Started!";
+            _puzzleMaker._statusObject.GetComponent<Text>().text = "Experiment Started!\nPlease start marching...";
             _puzzleMaker._statusObject.GetComponent<Text>().font = _puzzleMaker._statusFont;
             _puzzleMaker._statusObject.GetComponent<Text>().color = Color.black;
-            _puzzleMaker._statusObject.GetComponent<Text>().fontSize = 4;
+            _puzzleMaker._statusObject.GetComponent<Text>().fontSize = 5;
             _puzzleMaker._statusObject.GetComponent<Text>().alignment = TextAnchor.LowerCenter;
 
             string extension = "";
@@ -183,13 +213,50 @@ public class SimpleGame : MonoBehaviour
                           + DateTime.Now.Minute.ToString()
                           + DateTime.Now.Second.ToString();
 
-            _puzzleMatchingSW = new StreamWriter(".\\Assets\\ExperimentResults\\PuzzleMatching\\Matching_" + _participantID + "_" + extension + ".csv");
-            _sketchingSW = new StreamWriter(".\\Assets\\ExperimentResults\\Sketching\\Sketching_" + _participantID + "_" + extension + ".csv");
-            _summarySW = new StreamWriter(".\\Assets\\ExperimentResults\\Summary\\Summary_" + _participantID + "_" + extension + ".csv");
+            string matchingFilename = ".\\Assets\\ExperimentResults\\";
+            string sketchingFilename = ".\\Assets\\ExperimentResults\\";
+            string summaryFilename = ".\\Assets\\ExperimentResults\\";
+            if (_isTraining)
+            {
+                matchingFilename += "Training\\";
+                sketchingFilename += "Training\\";
+                summaryFilename += "Training\\";
+            }
+            else
+            {
+                matchingFilename += "Experimental\\";
+                sketchingFilename += "Experimental\\";
+                summaryFilename += "Experimental\\";
+            }
 
-            _puzzleMatchingSW.WriteLine("ParticipantID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,MatchingPuzzleTime,PuzzleName,Action,DistanceMoved,ScaledLevel,RotatedAngle");
-            _sketchingSW.WriteLine("ParticipantID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,IsTouchPoint,IsOnTrack,SketchingPointID,XSketchingPoint,YSketchingPoint");
-            _summarySW.WriteLine("ParticipantID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration");
+            matchingFilename += "PuzzleMatching\\Matching_" + _participantID + "_" + extension;
+            sketchingFilename += "Sketching\\Sketching_" + _participantID + "_" + extension;
+            summaryFilename += "Summary\\Summary_" + _participantID + "_" + extension;
+
+            if (_isTraining)
+            {
+                matchingFilename += "_Training";
+                sketchingFilename += "_Training";
+                summaryFilename += "_Training";
+            }
+            else
+            {
+                matchingFilename += "_Experimental";
+                sketchingFilename += "_Experimental";
+                summaryFilename += "_Experimental";
+            }
+
+            matchingFilename += ".csv";
+            sketchingFilename += ".csv";
+            summaryFilename += ".csv";
+
+            _puzzleMatchingSW = new StreamWriter(matchingFilename);
+            _sketchingSW = new StreamWriter(sketchingFilename);
+            _summarySW = new StreamWriter(summaryFilename);
+
+            _puzzleMatchingSW.WriteLine("ParticipantID,IsTraining,ExperimentOrder,TextureID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,MatchingPuzzleTime,PuzzleName,Action,DistanceMoved,ScaledLevel,RotatedAngle");
+            _sketchingSW.WriteLine("ParticipantID,IsTraining,ExperimentOrder,TextureID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,IsTouchPoint,IsOnTrack,SketchingPointID,XSketchingPoint,YSketchingPoint");
+            _summarySW.WriteLine("ParticipantID,IsTraining,ExperimentOrder,TextureID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration");
 
             _experimentStartTime = Time.time;
         }
@@ -204,7 +271,14 @@ public class SimpleGame : MonoBehaviour
                     _puzzleMaker.isPuzzledDone = true;
 
                     _summarySW.WriteLine(_participantID
-                                         + ",MATCHING,"
+                                         + ","
+                                         + _isTraining.ToString()
+                                         + ","
+                                         + _experimentOrder.ToString()
+                                         + ","
+                                         + _textureID.ToString()
+                                         + ","
+                                         + "MATCHING,"
                                          + _usingTablet.ToString()
                                          + ","
                                          + _usingController.ToString()
@@ -220,48 +294,51 @@ public class SimpleGame : MonoBehaviour
                     _sketchingTime = Time.time;
                 }
 
-
-
-
-
                 ////For testing
                 //_puzzleMaker.isPuzzledDone = true;
                 //////
                 if (_puzzleMaker.isPuzzledDone)
                 {
-                    if (_puzzleMatchingSW != null)
+                    if (_puzzleMatchingSW != null && !_isMatchingLog)
                     {
                         foreach (var e in _matchingLogList)
                         {
                             _puzzleMatchingSW.WriteLine(_participantID
-                                                   + ","
-                                                   + "MATCHING"
-                                                   + ","
-                                                   + _usingTablet.ToString()
-                                                   + ","
-                                                   + _usingController.ToString()
-                                                   + ","
-                                                   + _usingMouse.ToString()
-                                                   + ","
-                                                   + e.StartTime
-                                                   + ","
-                                                   + e.EndTime
-                                                   + ","
-                                                   + e.Duration
-                                                   + ","
-                                                   + e.MatchingPuzzleTime
-                                                   + ","
-                                                   + e.PuzzleName
-                                                   + ","
-                                                   + e.Action
-                                                   + ","
-                                                   + e.DistanceMoved
-                                                   + ","
-                                                   + e.ScaleLevel
-                                                   + ","
-                                                   + e.RotateAngel);
+                                                        + ","
+                                                        + _isTraining.ToString()
+                                                        + ","
+                                                        + _experimentOrder.ToString()
+                                                        + ","
+                                                        + _textureID.ToString()
+                                                        + ","
+                                                        + "MATCHING"
+                                                        + ","
+                                                        + _usingTablet.ToString()
+                                                        + ","
+                                                        + _usingController.ToString()
+                                                        + ","
+                                                        + _usingMouse.ToString()
+                                                        + ","
+                                                        + e.StartTime
+                                                        + ","
+                                                        + e.EndTime
+                                                        + ","
+                                                        + e.Duration
+                                                        + ","
+                                                        + e.MatchingPuzzleTime
+                                                        + ","
+                                                        + e.PuzzleName
+                                                        + ","
+                                                        + e.Action
+                                                        + ","
+                                                        + e.DistanceMoved
+                                                        + ","
+                                                        + e.ScaleLevel
+                                                        + ","
+                                                        + e.RotateAngel);
                         }
 
+                        _isMatchingLog = true;
                         _puzzleMatchingSW.Close();
                     }
 
@@ -277,26 +354,27 @@ public class SimpleGame : MonoBehaviour
                         if (_puzzleMaker._sketchedPixels == null)
                             _puzzleMaker._sketchedPixels = new List<Pixel>();
 
-                        _puzzleMaker._statusObject.GetComponent<Text>().color = Color.green;
-                        _puzzleMaker._statusObject.GetComponent<Text>().fontSize = 4;
+                        _puzzleMaker._statusObject.GetComponent<Text>().color = Color.black;
+                        _puzzleMaker._statusObject.GetComponent<Text>().fontSize = 5;
                         _puzzleMaker._statusObject.GetComponent<Text>().alignment = TextAnchor.LowerCenter;
                         _puzzleMaker._statusObject.GetComponent<Text>().text = "Please start sketching from RED point to BLUE point.";
                     }
                     else if(_stateChangeTime > 0)
                     {
-                        _puzzleMaker._statusObject.GetComponent<Text>().color = Color.green;
                         _puzzleMaker._statusObject.GetComponent<Text>().alignment = TextAnchor.MiddleCenter;
                         _puzzleMaker._statusObject.GetComponent<Text>().fontSize = 10;
 
-                        if (_stateChangeTime < 8)
+                        if (_stateChangeTime < 10)
                         {
                             _puzzleMaker._puzzleDoneObject.SetActive(true);
                             _puzzleMaker.puzzleMasterObject.SetActive(false);
-                            _puzzleMaker._statusObject.GetComponent<Text>().text = "Please start sketching from RED point to BLUE point.\n" + ((int)_stateChangeTime + 1).ToString();
+                            _puzzleMaker._statusObject.GetComponent<Text>().color = Color.blue;
+                            _puzzleMaker._statusObject.GetComponent<Text>().text = "Please start sketching\nfrom RED point to BLUE point.\n\nin " + ((int)_stateChangeTime + 1).ToString() + " seconds";
                         }
                         else
                         {
-                            _puzzleMaker._statusObject.GetComponent<Text>().text = "Puzzle grid is done!" + ((int)_stateChangeTime + 1).ToString();
+                            _puzzleMaker._statusObject.GetComponent<Text>().color = Color.green;
+                            _puzzleMaker._statusObject.GetComponent<Text>().text = "PUZZLE MATCHING IS SUCCESSFULLY DONE!\n\n" + ((int)_stateChangeTime + 1).ToString();
                         }
 
                         _stateChangeTime -= Time.deltaTime;                    
@@ -306,11 +384,17 @@ public class SimpleGame : MonoBehaviour
 
                 if (_puzzleMaker.isSketchDoneSucessfully)
                 {
-                    if (_sketchingSW != null)
+                    if (_sketchingSW != null && !_isSketchingLog)
                     {
                         foreach(var e in _puzzleMaker._sketchingLogList)
                         {
                             _sketchingSW.WriteLine(_participantID
+                                                   + ","
+                                                   + _isTraining.ToString()
+                                                   + ","
+                                                   + _experimentOrder.ToString()
+                                                   + ","
+                                                   + _textureID.ToString()
                                                    + ","
                                                    + e.Stage
                                                    + ","
@@ -337,13 +421,21 @@ public class SimpleGame : MonoBehaviour
                                                    + e.YSketchPoint);
                         }
 
+                        _isSketchingLog = true;
                         _sketchingSW.Close();
                     }
 
-                    if (_summarySW != null)
+                    if (_summarySW != null && !_isSummaryLog)
                     {
                         _summarySW.WriteLine(_participantID
-                                             + ",SKETCHING,"
+                                             + ","
+                                             + _isTraining.ToString()
+                                             + ","
+                                             + _experimentOrder.ToString()
+                                             + ","
+                                             + _textureID.ToString()
+                                             + ","
+                                             + "SKETCHING,"
                                              + _usingTablet.ToString()
                                              + ","
                                              + _usingController.ToString()
@@ -356,6 +448,7 @@ public class SimpleGame : MonoBehaviour
                                              + ","
                                              + (Time.time - _sketchingStartTime).ToString());
 
+                        _isSummaryLog = true;
                         _summarySW.Close();
                     }
 
@@ -364,10 +457,14 @@ public class SimpleGame : MonoBehaviour
             }
             else
             {
-                _puzzleMaker._statusObject.GetComponent<Text>().color = Color.blue;
+                _puzzleMaker._statusObject.GetComponent<Text>().color = Color.magenta;
                 _puzzleMaker._statusObject.GetComponent<Text>().alignment = TextAnchor.MiddleCenter;
                 _puzzleMaker._statusObject.GetComponent<Text>().fontSize = 10;
-                _puzzleMaker._statusObject.GetComponent<Text>().text = "THE TASK IS FINISHED!\nPlease take off the HMD.";
+
+                if(_isTraining)
+                    _puzzleMaker._statusObject.GetComponent<Text>().text = "THE TRAINING TASK IS FINISHED!\nPlease take off the HMD.";
+                else
+                    _puzzleMaker._statusObject.GetComponent<Text>().text = "THE EXPERIMENTAL TASK IS FINISHED!\nPlease take off the HMD.";
             }
         }
 
@@ -440,12 +537,14 @@ public class SimpleGame : MonoBehaviour
             _currentGesture = _latestTouchDown;
             _latestTouchDown = null;
         }*/
-        if (_currentGesture!= null && _currentGesture.GestureType == GestureType.OBJECT_ROTATING ||
-                    _currentGesture.GestureType == GestureType.OBJECT_SCALING)
+
+        if (_currentGesture!= null && (_currentGesture.GestureType == GestureType.OBJECT_ROTATING ||
+                    _currentGesture.GestureType == GestureType.OBJECT_SCALING))
         {
             Vector2[] gesture_params = (Vector2[])_currentGesture.MetaData;
             Debug.Log(string.Format("CURRENT: {0} with ({1},{2})", _currentGesture.GestureType, gesture_params[0].x, gesture_params[0].y));
         }
+
         if (_puzzleMaker == null && _puzzleMakerObject != null)
         {
             _puzzleMaker = _puzzleMakerObject.GetComponent<PuzzleMaker>();
@@ -479,7 +578,7 @@ public class SimpleGame : MonoBehaviour
                         
                         hasTouchDown = true;
 
-                        Vector2 local2DPos = ConvertLocalToGlobal((Vector2)_currentGesture.MetaData);
+                        Vector2 local2DPos = ConvertLocalToGlobal(((Vector2[])_currentGesture.MetaData)[0]);
 
                         Vector3 rayPoint = new Vector3(local2DPos.x,
                                                         local2DPos.y,
@@ -549,8 +648,8 @@ public class SimpleGame : MonoBehaviour
 
                                         //
                                         //Debug.Log(_puzzleMaker._puzzlePieces[j].GameObject.transform.position);
-                                        Debug.Log(">>>> SELECTED PIECE: " + hits[i].transform.gameObject.name);
-                                        Debug.Log(">>>> SELECTED PIECE: " + piece.GameObject.name);
+                                        //Debug.Log(">>>> SELECTED PIECE: " + hits[i].transform.gameObject.name);
+                                        //Debug.Log(">>>> SELECTED PIECE: " + piece.GameObject.name);
 
                                         break;
                                     }
@@ -582,7 +681,10 @@ public class SimpleGame : MonoBehaviour
 
                         if(_selectedPiece != null)
                         {
-                            LoggingVariable lv = new LoggingVariable("MATCHING",
+                            LoggingVariable lv = new LoggingVariable(_isTraining.ToString(),
+                                                                     _experimentOrder.ToString(),
+                                                                     _textureID.ToString(),
+                                                                     "MATCHING",
                                                                      _matchingActionStartTime.ToString(),
                                                                      Time.time.ToString(),
                                                                      (Time.time - _matchingActionStartTime).ToString(),
@@ -612,7 +714,7 @@ public class SimpleGame : MonoBehaviour
                     {
                         if (_selectedPiece != null && _currentGesture != null && _currentGesture.GestureType == GestureType.SINGLE_TOUCH_MOVE)
                         {
-                            Vector2 local2DPos = ConvertLocalToGlobal((Vector2)_currentGesture.MetaData);
+                            Vector2 local2DPos = ConvertLocalToGlobal(((Vector2[])_currentGesture.MetaData)[0]);
 
                             Vector3 rayPoint = new Vector3(local2DPos.x,
                                                            local2DPos.y,
@@ -622,7 +724,10 @@ public class SimpleGame : MonoBehaviour
                             Vector3 difV = rayPoint - difPosition;
                             Vector3 moveV = difV - _selectedPiece.GameObject.transform.position;
 
-                            LoggingVariable lv = new LoggingVariable("MATCHING",
+                            LoggingVariable lv = new LoggingVariable(_isTraining.ToString(),
+                                                                     _experimentOrder.ToString(),
+                                                                     _textureID.ToString(),
+                                                                     "MATCHING",
                                                                      _matchingActionStartTime.ToString(),
                                                                      Time.time.ToString(),
                                                                      (Time.time - _matchingActionStartTime).ToString(),
@@ -660,7 +765,10 @@ public class SimpleGame : MonoBehaviour
                                                                                           _selectedPiece.GameObject.transform.localScale.z);
                             Debug.Log("New scale: " + string.Format("({0},{1})", _selectedPiece.GameObject.transform.localScale.x, _selectedPiece.GameObject.transform.localScale.y));
 
-                            LoggingVariable lv = new LoggingVariable("MATCHING",
+                            LoggingVariable lv = new LoggingVariable(_isTraining.ToString(),
+                                                                     _experimentOrder.ToString(),
+                                                                     _textureID.ToString(),
+                                                                     "MATCHING",
                                                                      _matchingActionStartTime.ToString(),
                                                                      Time.time.ToString(),
                                                                      (Time.time - _matchingActionStartTime).ToString(),
@@ -694,7 +802,10 @@ public class SimpleGame : MonoBehaviour
                             _selectedPiece.GameObject.transform.RotateAround(_selectedPiece.GameObject.transform.position, _selectedPiece.GameObject.transform.forward, local2DRotation.x);
                             Debug.Log("New rotation");
 
-                            LoggingVariable lv = new LoggingVariable("MATCHING",
+                            LoggingVariable lv = new LoggingVariable(_isTraining.ToString(),
+                                                                     _experimentOrder.ToString(),
+                                                                     _textureID.ToString(),
+                                                                     "MATCHING",
                                                                      _matchingActionStartTime.ToString(),
                                                                      Time.time.ToString(),
                                                                      (Time.time - _matchingActionStartTime).ToString(),
@@ -729,25 +840,28 @@ public class SimpleGame : MonoBehaviour
                                 _selectedPiece.GameObject.GetComponent<Renderer>().material.mainTexture = _selectedPiece.Original;
                                 _selectedPiece = null;
 
-                                LoggingVariable lv = new LoggingVariable("MATCHING",
-                                                                     _matchingActionStartTime.ToString(),
-                                                                     Time.time.ToString(),
-                                                                     (Time.time - _matchingActionStartTime).ToString(),
-                                                                     _matchingPuzzleClickDown.ToString(),
-                                                                     _selectedPiece.GameObject.name,
-                                                                     "UP",
-                                                                     _selectedPiece.GameObject.transform.position.x.ToString(),
-                                                                     _selectedPiece.GameObject.transform.position.y.ToString(),
-                                                                     _selectedPiece.GameObject.transform.position.x.ToString(),
-                                                                     _selectedPiece.GameObject.transform.position.y.ToString(),
-                                                                     "0",
-                                                                     "0",
-                                                                     "0",
-                                                                     "",
-                                                                     "",
-                                                                     "",
-                                                                     "",
-                                                                     "");
+                                LoggingVariable lv = new LoggingVariable(_isTraining.ToString(),
+                                                                         _experimentOrder.ToString(),
+                                                                         _textureID.ToString(),
+                                                                         "MATCHING",
+                                                                         _matchingActionStartTime.ToString(),
+                                                                         Time.time.ToString(),
+                                                                         (Time.time - _matchingActionStartTime).ToString(),
+                                                                         _matchingPuzzleClickDown.ToString(),
+                                                                         _selectedPiece.GameObject.name,
+                                                                         "UP",
+                                                                         _selectedPiece.GameObject.transform.position.x.ToString(),
+                                                                         _selectedPiece.GameObject.transform.position.y.ToString(),
+                                                                         _selectedPiece.GameObject.transform.position.x.ToString(),
+                                                                         _selectedPiece.GameObject.transform.position.y.ToString(),
+                                                                         "0",
+                                                                         "0",
+                                                                         "0",
+                                                                         "",
+                                                                         "",
+                                                                         "",
+                                                                         "",
+                                                                         "");
 
                                 _matchingLogList.Add(lv);
                                 _matchingActionStartTime = Time.time;
@@ -775,25 +889,28 @@ public class SimpleGame : MonoBehaviour
                 {
                     if (_selectedPiece != null)
                     {
-                        LoggingVariable lv = new LoggingVariable("MATCHING",
-                                                                     _matchingActionStartTime.ToString(),
-                                                                     Time.time.ToString(),
-                                                                     (Time.time - _matchingActionStartTime).ToString(),
-                                                                     _matchingPuzzleClickDown.ToString(),
-                                                                     _selectedPiece.GameObject.name,
-                                                                     "UP",
-                                                                     _selectedPiece.GameObject.transform.position.x.ToString(),
-                                                                     _selectedPiece.GameObject.transform.position.y.ToString(),
-                                                                     _selectedPiece.GameObject.transform.position.x.ToString(),
-                                                                     _selectedPiece.GameObject.transform.position.y.ToString(),
-                                                                     "0",
-                                                                     "0",
-                                                                     "0",
-                                                                     "",
-                                                                     "",
-                                                                     "",
-                                                                     "",
-                                                                     "");
+                        LoggingVariable lv = new LoggingVariable(_isTraining.ToString(),
+                                                                 _experimentOrder.ToString(),
+                                                                 _textureID.ToString(),
+                                                                 "MATCHING",
+                                                                 _matchingActionStartTime.ToString(),
+                                                                 Time.time.ToString(),
+                                                                 (Time.time - _matchingActionStartTime).ToString(),
+                                                                 _matchingPuzzleClickDown.ToString(),
+                                                                 _selectedPiece.GameObject.name,
+                                                                 "UP",
+                                                                 _selectedPiece.GameObject.transform.position.x.ToString(),
+                                                                 _selectedPiece.GameObject.transform.position.y.ToString(),
+                                                                 _selectedPiece.GameObject.transform.position.x.ToString(),
+                                                                 _selectedPiece.GameObject.transform.position.y.ToString(),
+                                                                 "0",
+                                                                 "0",
+                                                                 "0",
+                                                                 "",
+                                                                 "",
+                                                                 "",
+                                                                 "",
+                                                                 "");
 
                         _matchingLogList.Add(lv);
 
@@ -810,7 +927,7 @@ public class SimpleGame : MonoBehaviour
 
                             hasTouchDown = true;
 
-                            Vector2 local2DPos = ConvertLocalToGlobal((Vector2)_currentGesture.MetaData);
+                            Vector2 local2DPos = ConvertLocalToGlobal(((Vector2[])_currentGesture.MetaData)[0]);
 
                             Vector3 rayPoint = new Vector3(local2DPos.x,
                                                            local2DPos.y,
@@ -829,7 +946,7 @@ public class SimpleGame : MonoBehaviour
                 {
                     hasTouchDown = true;
 
-                    Vector2 local2DPos = ConvertLocalToGlobal((Vector2)_currentGesture.MetaData);
+                    Vector2 local2DPos = ConvertLocalToGlobal(((Vector2[])_currentGesture.MetaData)[0]);
 
                     Vector3 rayPoint = new Vector3(local2DPos.x,
                                                    local2DPos.y,
@@ -841,7 +958,7 @@ public class SimpleGame : MonoBehaviour
                     {
                         if (_puzzleMaker._startButtonObject.gameObject.name == hitInfo.transform.gameObject.name)
                         {
-                            _puzzleMaker.Init(_textureID, _prepareTime);
+                            _puzzleMaker.Init(_isTraining, _experimentOrder, _textureID, _prepareTime);
 
                             _puzzleMaker._startButtonObject.SetActive(false);
                             _startTimer = true;
