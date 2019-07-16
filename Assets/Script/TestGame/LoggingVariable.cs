@@ -1,5 +1,8 @@
 ﻿public class LoggingVariable
 {
+    string _isTraining;
+    string _experimentOrder;
+    string _textureID;
     string _stage;
     string _startTime;
     string _endTime;
@@ -20,8 +23,11 @@
     string _xSketchPoint;
     string _ySketchPoint;
 
-    public LoggingVariable(string stage, string startTime, string endTime, string duration, string matchingPuzzleTime, string puzzleName, string action, string xFromPoint, string yFromPoint, string xToPoint, string yToPoint, string distanceMoved, string scaleLevel, string rotateAngel, string isTouchPoint, string isOnTrack, string sketchingPointID, string xSketchPoint, string ySketchPoint)
+    public LoggingVariable(string isTraining, string experimentOrder, string textureID, string stage, string startTime, string endTime, string duration, string matchingPuzzleTime, string puzzleName, string action, string xFromPoint, string yFromPoint, string xToPoint, string yToPoint, string distanceMoved, string scaleLevel, string rotateAngel, string isTouchPoint, string isOnTrack, string sketchingPointID, string xSketchPoint, string ySketchPoint)
     {
+        _isTraining = isTraining;
+        _experimentOrder = experimentOrder;
+        _textureID = textureID;
         _stage = stage;
         _startTime = startTime;
         _endTime = endTime;
@@ -43,6 +49,9 @@
         _ySketchPoint = ySketchPoint;
     }
 
+    public string IsTraining { get => _isTraining; set => _isTraining = value; }
+    public string ExperimentOrder { get => _experimentOrder; set => _experimentOrder = value; }
+    public string TextureID { get => _textureID; set => _textureID = value; }
     public string Stage { get => _stage; set => _stage = value; }
     public string StartTime { get => _startTime; set => _startTime = value; }
     public string EndTime { get => _endTime; set => _endTime = value; }

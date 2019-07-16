@@ -36,8 +36,12 @@ public class OculusController : MonoBehaviour, IRemoteController
     void Start()
     {
         _laserLine = GetComponent<LineRenderer>();
-        _laserLine.startWidth = 0.0075f;
-        _laserLine.endWidth = 0.25f;
+        _laserLine.startWidth = 0.0025f;
+        _laserLine.endWidth = 0.01f;
+        //_laserLine.startColor = Color.cyan;
+        //_laserLine.endColor = Color.cyan;
+        //_laserLine.material = _laserLine.materials[0];
+        //_laserLine.material.color = Color.cyan;
         previousGesture = new TouchGesture();
         previousGesture.GestureType = GestureType.NONE;
 
@@ -77,7 +81,7 @@ public class OculusController : MonoBehaviour, IRemoteController
                 _isRightControllerDown = true;
 
                 touchDownGesture.GestureType = GestureType.SINGLE_TOUCH_DOWN;
-                touchDownGesture.MetaData = _currentMousePosition;// new Vector2(0, 0);//some mouse down position normalized to -0.5 and 0.5
+                touchDownGesture.MetaData = new Vector2[] { _currentMousePosition, Vector2.zero, Vector2.zero }; // new Vector2(0, 0);//some mouse down position normalized to -0.5 and 0.5
                                                                   //then notify the game to know about the event
 
                 _previousMousePosition = _currentMousePosition;
@@ -100,7 +104,7 @@ public class OculusController : MonoBehaviour, IRemoteController
             if (previousGesture.GestureType != GestureType.NONE)
             {
                 touchDownGesture.GestureType = GestureType.NONE;
-                touchDownGesture.MetaData = new Vector2(0, 0);//some mouse down position normalized to -0.5 and 0.5
+                touchDownGesture.MetaData = new Vector2[] { Vector2.zero, Vector2.zero, Vector2.zero }; //some mouse down position normalized to -0.5 and 0.5
                                                               //then notify the game to know about the event
                 if (gestureRecognizedBroadcaster != null)
                 {
@@ -139,10 +143,10 @@ public class OculusController : MonoBehaviour, IRemoteController
                 float newDif = (_rightController.transform.position - _leftController.transform.position).magnitude;
                 float disRatio = newDif / previousDif;
 
-                if(disRatio < 0.95f || disRatio > 1.05f)
+                if(disRatio < 0.965f || disRatio > 1.035f)
                 {
                     touchDownGesture.GestureType = GestureType.OBJECT_SCALING;
-                    touchDownGesture.MetaData = new Vector2(disRatio, disRatio);//some mouse down position normalized to -0.5 and 0.5
+                    touchDownGesture.MetaData = new Vector2[] { new Vector2(disRatio, disRatio), Vector2.zero, Vector2.zero }; //some mouse down position normalized to -0.5 and 0.5
                                                                         //then notify the game to know about the event
                     if (gestureRecognizedBroadcaster != null)
                     {
@@ -161,7 +165,7 @@ public class OculusController : MonoBehaviour, IRemoteController
 
                 float angle = Vector3.Angle(previousDirection, afterDirection);
 
-                if (angle > 2.5f)
+                if (angle > 2f)
                 {
                     float a = Mathf.Atan2(previousDirection.x * afterDirection.y - previousDirection.y * afterDirection.x, previousDirection.x * afterDirection.x + previousDirection.y * afterDirection.y) * Mathf.Rad2Deg;
 
@@ -169,8 +173,8 @@ public class OculusController : MonoBehaviour, IRemoteController
                         angle *= -1;
 
                     touchDownGesture.GestureType = GestureType.OBJECT_ROTATING;
-                    touchDownGesture.MetaData = new Vector2(a, a);//some mouse down position normalized to -0.5 and 0.5
-                                                                                    //then notify the game to know about the event
+                    touchDownGesture.MetaData = new Vector2[] { new Vector2(angle, angle), Vector2.zero, Vector2.zero }; //some mouse down position normalized to -0.5 and 0.5
+                                                                                                                               //then notify the game to know about the event
                     if (gestureRecognizedBroadcaster != null)
                     {
                         gestureRecognizedBroadcaster(touchDownGesture);
@@ -260,8 +264,8 @@ public class OculusController : MonoBehaviour, IRemoteController
                 if (_previousMousePosition != null && _previousMousePosition != _currentMousePosition)
                 {
                     touchDownGesture.GestureType = GestureType.SINGLE_TOUCH_MOVE;
-                    touchDownGesture.MetaData = _currentMousePosition;// new Vector2(0, 0);//some mouse down position normalized to -0.5 and 0.5
-                                                                      //then notify the game to know about the event
+                    touchDownGesture.MetaData = new Vector2[] { _currentMousePosition, Vector2.zero, Vector2.zero }; // new Vector2(0, 0);//some mouse down position normalized to -0.5 and 0.5
+                                                                                                                               //then notify the game to know about the event
                     _previousMousePosition = _currentMousePosition;
 
                     if (gestureRecognizedBroadcaster != null)

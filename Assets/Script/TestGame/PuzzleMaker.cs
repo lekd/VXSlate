@@ -24,11 +24,14 @@ public class PuzzleMaker : MonoBehaviour
     public Texture2D _puzzle1L;
     public Texture2D _puzzle2O;
     public Texture2D _puzzle2L;
+    public Texture2D _trainingO;
+    public Texture2D _trainingL;
     public Texture2D _startButtonTexture;
 
     Texture2D _mainPuzzleTexture;
     Texture2D _drawPuzzleTexture;
     Texture2D _originalPuzzleTexture;
+    Texture2D _sampleTexture;
 
     public Texture2D _gridPieceTexture;
 
@@ -107,6 +110,11 @@ public class PuzzleMaker : MonoBehaviour
     public bool isInEndPoints = false;
     public bool isSketchingOnTrack = false;
     public bool isSketchDoneSucessfully = false;
+
+    bool _isTraining;
+    int _textureID;
+    int _experimentOrder;
+
 
 
     float difLargeScreenZ = 0;
@@ -246,22 +254,41 @@ public class PuzzleMaker : MonoBehaviour
         //}
     }
 
-    public void Init(int _textureID, float _prepareTime)
+    public void Init(bool isTraining, int experimentOrder, int textureID, float _prepareTime)
     {
         _listOfGameObjects = new List<GameObject>();
 
-        if (_textureID == 1)
+        _isTraining = isTraining;
+        _textureID = textureID;
+        _experimentOrder = experimentOrder;
+
+        if (isTraining)
         {
-            _mainPuzzleTexture = _puzzle1O;
-            _drawPuzzleTexture = _puzzle1L;
-            //_originalPuzzleTexture = _puzzle1L;
+            _mainPuzzleTexture = _trainingO;
+            _drawPuzzleTexture = _trainingL;
+            _x = 2;
+            _y = 2;
+            _percentageForMargins = 0.125f;
         }
         else
         {
-            _mainPuzzleTexture = _puzzle2O;
-            _drawPuzzleTexture = _puzzle2L;
-            //_originalPuzzleTexture = _puzzle2L;
-        }
+            _x = 4;
+            _y = 4;
+            _percentageForMargins = 0.05f;
+
+            if (textureID == 1)
+            {
+                _mainPuzzleTexture = _puzzle1O;
+                _drawPuzzleTexture = _puzzle1L;
+                //_originalPuzzleTexture = _puzzle1L;
+            }
+            else
+            {
+                _mainPuzzleTexture = _puzzle2O;
+                _drawPuzzleTexture = _puzzle2L;
+                //_originalPuzzleTexture = _puzzle2L;
+            }
+        }       
 
         _originalPuzzleTexture = new Texture2D(_drawPuzzleTexture.width, _drawPuzzleTexture.height);
         _originalPuzzleTexture.SetPixels(_drawPuzzleTexture.GetPixels());
@@ -294,17 +321,10 @@ public class PuzzleMaker : MonoBehaviour
             _largeScreenWidth = ConvertMetersToPixels(7f);
             _largeScreenHeight = ConvertMetersToPixels(3f);
 
-            //_largeScreenWidth = ConvertMetersToPixels(15f);
-            //_largeScreenHeight = ConvertMetersToPixels(3f);
-
             _largeScreenObject.transform.position = new Vector3(0, 2.5f, 0);
             _largeScreenObject.transform.rotation = Quaternion.identity;
             _largeScreenObject.transform.localScale = new Vector3(ConvertPixelsToMeters(_largeScreenWidth), ConvertPixelsToMeters(_largeScreenHeight), 0.01f);
-
-
-            //_largeScreenObject.AddComponent<MeshFilter>();
-            //_largeScreenObject.AddComponent<MeshRenderer>();
-
+            
             if (_screenMaterial != null)
             {
                 _largeScreenObject.GetComponent<Renderer>().material = _screenMaterial;
@@ -326,7 +346,7 @@ public class PuzzleMaker : MonoBehaviour
 
             _marginSize = _largeScreenWidth * _percentageForMargins;
 
-            Vector2 _mainTextureArea = new Vector2(0.4f * (_largeScreenWidth - 4 * _marginSize), _largeScreenHeight - 2 * _marginSize);
+            Vector2 _mainTextureArea = new Vector2(0.33f * (_largeScreenWidth - 4 * _marginSize), _largeScreenHeight - 2 * _marginSize);
 
             _mainTextureArea = RescaleArea(_mainTextureArea, new Vector2(_mainPuzzleTexture.width, _mainPuzzleTexture.height));
 
@@ -335,7 +355,10 @@ public class PuzzleMaker : MonoBehaviour
             /// Sample Screen Area
             /// 
 
-            Vector2 _sampleScreenArea = new Vector2(0.2f * (_largeScreenWidth - 4 * _marginSize), _largeScreenHeight - 2 * _marginSize);
+            int puzzlePieceWidth = (int)(_mainPuzzleTexture.width / _x);
+            int puzzlePieceHeight = (int)(_mainPuzzleTexture.height / _y);
+
+            Vector2 _sampleScreenArea = new Vector2(0.33f * (_largeScreenWidth - 4 * _marginSize), _largeScreenHeight - 2 * _marginSize);
 
             _sampleScreenArea = RescaleArea(_sampleScreenArea, new Vector2(_mainPuzzleTexture.width, _mainPuzzleTexture.height));
 
@@ -344,6 +367,31 @@ public class PuzzleMaker : MonoBehaviour
 
             Quaternion sampleScreenRotation = new Quaternion();
             sampleScreenRotation.eulerAngles = new Vector3(0, 0, 180);
+
+            _sampleTexture = new Texture2D(_mainPuzzleTexture.width, _mainPuzzleTexture.height);
+
+            for (int i = 0; i < _x; i++)
+            {
+                for (int j = 0; j < _y; j++)
+                {
+                    for (int k = 0; k < puzzlePieceWidth; k++)
+                    {
+                        for (int l = 0; l < puzzlePieceWidth; l++)
+                        {
+                            if ((k < 15) || (k > puzzlePieceWidth - 15) || (l < 15) || (l > puzzlePieceHeight - 15))
+                            {
+                                _sampleTexture.SetPixel(i * puzzlePieceWidth + k, j * puzzlePieceHeight + l, Color.gray);
+                            }
+                            else
+                            {
+                                _sampleTexture.SetPixel(i * puzzlePieceWidth + k, j * puzzlePieceHeight + l, _mainPuzzleTexture.GetPixel(i * puzzlePieceWidth + k, j * puzzlePieceHeight + l));
+                            }
+                        }
+                    }
+                }
+            }
+
+            _sampleTexture.Apply();
 
             GameObject sampleScreenObject = CreateCubeGameObject("Sample Screen",
                                                             new Vector3(_largeScreenObject.transform.position.x + ConvertPixelsToMeters(_largeScreenWidth * 0.5f -
@@ -356,15 +404,14 @@ public class PuzzleMaker : MonoBehaviour
                                                                         ConvertPixelsToMeters(_sampleScreenArea.y),
                                                                         0.01f),
                                                             null,
-                                                            _mainPuzzleTexture,
+                                                            _sampleTexture,
                                                             Color.white);
 
             /// Puzzle Area
             /// 
 
-            Vector2 puzzleArea = new Vector2(0.4f * (_largeScreenWidth - 4 * _marginSize), _largeScreenHeight - 2 * _marginSize);
-
-            //puzzleArea = RescaleArea(puzzleArea, new Vector2(_mainPuzzleTexture.width, _mainPuzzleTexture.height));
+            //Vector2 puzzleArea = new Vector2(0.33f * (_largeScreenWidth - 4 * _marginSize), _largeScreenHeight - 2 * _marginSize);
+            Vector2 puzzleArea = new Vector2(0.33f * (_largeScreenWidth - 4 * _marginSize), 0.33f * (_largeScreenWidth - 4 * _marginSize));
 
             Quaternion puzzleAreaRotation = new Quaternion();
             sampleScreenRotation.eulerAngles = new Vector3(0, 0, 180);
@@ -442,8 +489,8 @@ public class PuzzleMaker : MonoBehaviour
 
                 _overlapThreshold = ConvertPixelsToMeters(puzzlePieceHeightScaledUp / 5);
 
-                int puzzlePieceWidth = (int)(_mainPuzzleTexture.width / _x);
-                int puzzlePieceHeight = (int)(_mainPuzzleTexture.height / _y);
+                //int puzzlePieceWidth = (int)(_mainPuzzleTexture.width / _x);
+                //int puzzlePieceHeight = (int)(_mainPuzzleTexture.height / _y);
 
                 _startStopPoints = new List<Vector2>();
                 _linePoints = new List<Vector2>();
@@ -498,10 +545,16 @@ public class PuzzleMaker : MonoBehaviour
 
                                 if ((x < 15) || (x > puzzlePieceWidth - 15) || (y < 15) || (y > puzzlePieceHeight - 15))
                                 {
-                                    puzzleTextureHighlighted.SetPixel(x, y, Color.black);
+                                    puzzleTextureHighlighted.SetPixel(x, y, Color.red);
+
+                                    //_sampleTexture.SetPixel(i * puzzlePieceWidth + x, j * puzzlePieceHeight * y, Color.gray);
                                 }
                                 else
+                                {
                                     puzzleTextureHighlighted.SetPixel(x, y, color);
+
+                                    //_sampleTexture.SetPixel(i * puzzlePieceWidth + x, j * puzzlePieceHeight * y, color);
+                                }
 
 
                                 // Get Start, Stop, and Line Points
@@ -625,18 +678,17 @@ public class PuzzleMaker : MonoBehaviour
                         }
                     }
                 }*/
-
-
-                _listOfGameObjects.Add(_largeScreenObject);
-                _listOfGameObjects.Add(sampleScreenObject);
-                //_listOfGameObjects.Add(puzzleMasterObject);
-                //_listOfGameObjects.Add(gridMasterObject);
-                _listOfGameObjects.Add(puzzleAreaObject);
             }
             else
             {
                 Debug.LogWarning("Missing grid piece texture!", _gridPieceTexture);
             }
+
+            _listOfGameObjects.Add(_largeScreenObject);
+            _listOfGameObjects.Add(sampleScreenObject);
+            //_listOfGameObjects.Add(puzzleMasterObject);
+            //_listOfGameObjects.Add(gridMasterObject);
+            _listOfGameObjects.Add(puzzleAreaObject);
         }
         else
         {
@@ -665,7 +717,7 @@ public class PuzzleMaker : MonoBehaviour
         _statusObject.GetComponent<Text>().text = "Please start to sketch!";
         _statusObject.GetComponent<Text>().font = _statusFont;
         _statusObject.GetComponent<Text>().color = Color.black;
-        _statusObject.GetComponent<Text>().fontSize = 4;
+        _statusObject.GetComponent<Text>().fontSize = 5;
         _statusObject.GetComponent<Text>().alignment = TextAnchor.LowerCenter;
         _statusObject.GetComponent<RectTransform>().localScale = new Vector3(1, 1, 1);
         _statusObject.GetComponent<RectTransform>().localPosition = new Vector3(0, 0.75f, 0);
@@ -983,26 +1035,29 @@ public class PuzzleMaker : MonoBehaviour
 
                         _xSketchPoint = a.ToString();
                         _ySketchPoint = b.ToString();
-
-                        LoggingVariable lv = new LoggingVariable(_stage,
-                                                                   _startTime,
-                                                                   _endTime,
-                                                                   _duration,
-                                                                   _matchingPuzzleTime,
-                                                                   _puzzleName,
-                                                                   _action,
-                                                                   _xFromPoint,
-                                                                   _yFromPoint,
-                                                                   _xToPoint,
-                                                                   _yToPoint,
-                                                                   _distanceMoved,
-                                                                   _scaleLevel,
-                                                                   _rotateAngel,
-                                                                   _isTouchPoint,
-                                                                   _isOnTrack,
-                                                                   _sketchedPointID.ToString(),
-                                                                   _xSketchPoint,
-                                                                   _ySketchPoint);
+                                            
+                        LoggingVariable lv = new LoggingVariable(_isTraining.ToString(),
+                                                                 _experimentOrder.ToString(),
+                                                                 _textureID.ToString(),
+                                                                 _stage,
+                                                                 _startTime,
+                                                                 _endTime,
+                                                                 _duration,
+                                                                 _matchingPuzzleTime,
+                                                                 _puzzleName,
+                                                                 _action,
+                                                                 _xFromPoint,
+                                                                 _yFromPoint,
+                                                                 _xToPoint,
+                                                                 _yToPoint,
+                                                                 _distanceMoved,
+                                                                 _scaleLevel,
+                                                                 _rotateAngel,
+                                                                 _isTouchPoint,
+                                                                 _isOnTrack,
+                                                                 _sketchedPointID.ToString(),
+                                                                 _xSketchPoint,
+                                                                 _ySketchPoint);
                         _sketchingLogList.Add(lv);
 
                         if (tex.GetPixel(a, b) != Color.black)

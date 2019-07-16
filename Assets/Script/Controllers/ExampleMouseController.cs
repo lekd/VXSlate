@@ -38,7 +38,7 @@ public class ExampleMouseController : MonoBehaviour, IRemoteController
                 _isMouseDown = true;
 
                 touchDownGesture.GestureType = GestureType.SINGLE_TOUCH_DOWN;
-                touchDownGesture.MetaData = _currentMousePosition;// new Vector2(0, 0);//some mouse down position normalized to -0.5 and 0.5
+                touchDownGesture.MetaData = new Vector2[] { _currentMousePosition, Vector2.zero, Vector2.zero }; // new Vector2(0, 0);//some mouse down position normalized to -0.5 and 0.5
                                                                    //then notify the game to know about the event
 
                 _previousMousePosition = _currentMousePosition;
@@ -58,8 +58,8 @@ public class ExampleMouseController : MonoBehaviour, IRemoteController
                 if (Input.GetKeyDown(KeyCode.DownArrow) && _isMouseDown)
                 {
                     touchDownGesture.GestureType = GestureType.OBJECT_SCALING;
-                    touchDownGesture.MetaData = new Vector2(0.9f, 0.9f);//some mouse down position normalized to -0.5 and 0.5
-                                                                  //then notify the game to know about the event
+                    touchDownGesture.MetaData = new Vector2[] { new Vector2(0.9f, 0.9f), Vector2.zero, Vector2.zero }; //some mouse down position normalized to -0.5 and 0.5
+                                                                                                                      //then notify the game to know about the event
                     if (gestureRecognizedBroadcaster != null)
                     {
                         gestureRecognizedBroadcaster(touchDownGesture);
@@ -71,7 +71,7 @@ public class ExampleMouseController : MonoBehaviour, IRemoteController
                 else if (Input.GetKeyUp(KeyCode.UpArrow) && _isMouseDown)
                 {
                     touchDownGesture.GestureType = GestureType.OBJECT_SCALING;
-                    touchDownGesture.MetaData = new Vector2(1.1f, 1.1f);//some mouse down position normalized to -0.5 and 0.5
+                    touchDownGesture.MetaData = new Vector2[] { new Vector2(1.1f, 1.1f), Vector2.zero, Vector2.zero }; //some mouse down position normalized to -0.5 and 0.5
                                                                   //then notify the game to know about the event
                     if (gestureRecognizedBroadcaster != null)
                     {
@@ -85,8 +85,8 @@ public class ExampleMouseController : MonoBehaviour, IRemoteController
                 if (Input.GetKeyDown(KeyCode.LeftArrow) && _isMouseDown)
                 {
                     touchDownGesture.GestureType = GestureType.OBJECT_ROTATING;
-                    touchDownGesture.MetaData = new Vector2(-5, -5);//some mouse down position normalized to -0.5 and 0.5
-                                                                  //then notify the game to know about the event
+                    touchDownGesture.MetaData = new Vector2[] { new Vector2(-5, -5), Vector2.zero, Vector2.zero };//some mouse down position normalized to -0.5 and 0.5
+                                                                                                                //then notify the game to know about the event
                     if (gestureRecognizedBroadcaster != null)
                     {
                         gestureRecognizedBroadcaster(touchDownGesture);
@@ -98,7 +98,7 @@ public class ExampleMouseController : MonoBehaviour, IRemoteController
                 else if (Input.GetKeyUp(KeyCode.RightArrow) && _isMouseDown)
                 {
                     touchDownGesture.GestureType = GestureType.OBJECT_ROTATING;
-                    touchDownGesture.MetaData = new Vector2(5 , 5);//some mouse down position normalized to -0.5 and 0.5
+                    touchDownGesture.MetaData = new Vector2[] { new Vector2(5, 5), Vector2.zero, Vector2.zero }; //some mouse down position normalized to -0.5 and 0.5
                                                                   //then notify the game to know about the event
                     if (gestureRecognizedBroadcaster != null)
                     {
@@ -112,7 +112,7 @@ public class ExampleMouseController : MonoBehaviour, IRemoteController
                 if(_previousMousePosition != null && _previousMousePosition != _currentMousePosition)
                 {
                     touchDownGesture.GestureType = GestureType.SINGLE_TOUCH_MOVE;
-                    touchDownGesture.MetaData = _currentMousePosition;// new Vector2(0, 0);//some mouse down position normalized to -0.5 and 0.5
+                    touchDownGesture.MetaData = new Vector2[] { _currentMousePosition, Vector2.zero, Vector2.zero }; // new Vector2(0, 0);//some mouse down position normalized to -0.5 and 0.5
                                                                       //then notify the game to know about the event
                     _previousMousePosition = _currentMousePosition;
                     
@@ -139,7 +139,7 @@ public class ExampleMouseController : MonoBehaviour, IRemoteController
             if (previousGesture.GestureType != GestureType.NONE)
             {
                 touchDownGesture.GestureType = GestureType.NONE;
-                touchDownGesture.MetaData = new Vector2(0, 0);//some mouse down position normalized to -0.5 and 0.5
+                touchDownGesture.MetaData = new Vector2[] { new Vector2(0, 0) , Vector2.zero, Vector2.zero}; //some mouse down position normalized to -0.5 and 0.5
                                                               //then notify the game to know about the event
                 if (gestureRecognizedBroadcaster != null)
                 {
