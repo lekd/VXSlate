@@ -124,6 +124,12 @@ public class SimpleGame : MonoBehaviour
                 if (_tabletInstructionObject != null)
                     _tabletInstructionObject.SetActive(false);
 
+                if (tabletControllerObj != null)
+                    tabletControllerObj.SetActive(false);
+
+                if (mouseControllerObj!= null)
+                    mouseControllerObj.SetActive(false);
+
                 _usingTablet = false;
                 _usingMouse = false;
             }
@@ -149,6 +155,12 @@ public class SimpleGame : MonoBehaviour
 
                 if (_oculusControllerInstructionObject != null)
                     _oculusControllerInstructionObject.SetActive(false);
+
+                if (oculusControllerObj != null)
+                    oculusControllerObj.SetActive(false);
+
+                if (mouseControllerObj != null)
+                    mouseControllerObj.SetActive(false);
 
                 _usingController = false;
                 _usingMouse = false;
@@ -185,6 +197,12 @@ public class SimpleGame : MonoBehaviour
 
                 if (_tabletInstructionObject != null)
                     _tabletInstructionObject.SetActive(false);
+
+                if (oculusControllerObj != null)
+                    oculusControllerObj.SetActive(false);
+
+                if (tabletControllerObj != null)
+                    tabletControllerObj.SetActive(false);
 
                 _usingController = false;
                 _usingTablet = false;
