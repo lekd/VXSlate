@@ -143,7 +143,7 @@ public class OculusController : MonoBehaviour, IRemoteController
                 float newDif = (_rightController.transform.position - _leftController.transform.position).magnitude;
                 float disRatio = newDif / previousDif;
 
-                if(disRatio < 0.965f || disRatio > 1.035f)
+                if(disRatio < 0.975f || disRatio > 1.025f)
                 {
                     touchDownGesture.GestureType = GestureType.OBJECT_SCALING;
                     touchDownGesture.MetaData = new Vector2[] { new Vector2(disRatio, disRatio), Vector2.zero, Vector2.zero }; //some mouse down position normalized to -0.5 and 0.5
@@ -165,7 +165,7 @@ public class OculusController : MonoBehaviour, IRemoteController
 
                 float angle = Vector3.Angle(previousDirection, afterDirection);
 
-                if (angle > 2f)
+                if (angle > 1.75f)
                 {
                     float a = Mathf.Atan2(previousDirection.x * afterDirection.y - previousDirection.y * afterDirection.x, previousDirection.x * afterDirection.x + previousDirection.y * afterDirection.y) * Mathf.Rad2Deg;
 
