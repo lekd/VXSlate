@@ -167,6 +167,25 @@ public class SimpleGame : MonoBehaviour
                     Debug.LogWarning("Missing Mouse Controller Object!", mouseControllerObj);
                 }
 
+
+                if (_leftOculusControllerObject != null)
+                    _leftOculusControllerObject.SetActive(false);
+
+                if (_rightOculusControllerObject != null)
+                    _rightOculusControllerObject.SetActive(false);
+
+                if (_oculusControllerInstructionObject != null)
+                    _oculusControllerInstructionObject.SetActive(false);
+
+                if (_virtualPadObject != null)
+                    _virtualPadObject.SetActive(false);
+
+                if (_gazeObject != null)
+                    _gazeObject.SetActive(false);
+
+                if (_tabletInstructionObject != null)
+                    _tabletInstructionObject.SetActive(false);
+
                 _usingController = false;
                 _usingTablet = false;
             }            
