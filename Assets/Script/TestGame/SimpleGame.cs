@@ -38,6 +38,10 @@ public class SimpleGame : MonoBehaviour
     public float _prepareTime = 3; //in seconds
     public float _stateChangeTime = 10; //in seconds
 
+
+    [Header("For Testing")]
+    public bool _isSketchTesting = false;
+
     bool _startTimer = false;
 
     [Header("Experiment Objects")]
@@ -331,12 +335,12 @@ public class SimpleGame : MonoBehaviour
                     _sketchingTime = Time.time;
                 }
 
-                ////For testing
-                //_puzzleMaker.isPuzzledDone = true;
-                //////
+                if(_isSketchTesting)
+                    _puzzleMaker.isPuzzledDone = true;
+
                 if (_puzzleMaker.isPuzzledDone)
                 {
-                    if (_puzzleMatchingSW != null && !_isMatchingLog)
+                    if (_puzzleMatchingSW != null && !_isMatchingLog && !_isSketchTesting)
                     {
                         foreach (var e in _matchingLogList)
                         {
@@ -384,9 +388,9 @@ public class SimpleGame : MonoBehaviour
                         _puzzleMaker.isSketchStarted = true;
                         _sketchingStartTime = Time.time;
 
-                        ////For testing
-                        //_puzzleMaker._puzzleDoneObject.SetActive(true);
-                        //////
+                        //For testing
+                        _puzzleMaker._puzzleDoneObject.SetActive(true);
+                        ////
 
                         if (_puzzleMaker._sketchedPixels == null)
                             _puzzleMaker._sketchedPixels = new List<Pixel>();
@@ -406,7 +410,7 @@ public class SimpleGame : MonoBehaviour
                             _puzzleMaker._puzzleDoneObject.SetActive(true);
                             _puzzleMaker.puzzleMasterObject.SetActive(false);
                             _puzzleMaker._statusObject.GetComponent<Text>().color = Color.blue;
-                            _puzzleMaker._statusObject.GetComponent<Text>().text = "Please start sketching\nfrom RED point to BLUE point.\n\nin " + ((int)_stateChangeTime + 1).ToString() + " seconds";
+                            _puzzleMaker._statusObject.GetComponent<Text>().text = "Please start sketching\nfrom RED point to BLUE point.\n\nafter " + ((int)_stateChangeTime + 1).ToString() + " seconds";
                         }
                         else
                         {

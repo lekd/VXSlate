@@ -502,17 +502,22 @@
     <None Include="Assets\Oculus\Avatar\Resources\Materials\Version1.5\Avatar_PC_SingleComponent.shader" />
     <None Include="Assets\Oculus\Avatar\Samples\CrossPlatform\Readme.txt" />
     <None Include="Assets\Oculus\SampleFramework\Core\CustomHands\Materials\Hands_DiffBump.shader" />
+    <None Include="Assets\ExperimentResults\Training\Sketching\README.txt" />
     <None Include="Assets\Oculus\SampleFramework\Usage\Stereo180Video\Resources\Multiview Stereo.shader" />
+    <None Include="Assets\ExperimentResults\Training\PuzzleMatching\README.txt" />
     <None Include="Assets\GoogleVR\Shaders\GvrUIOverlayFont.shader" />
     <None Include="Assets\Oculus\SampleFramework\Usage\Locomotion\Shaders\TriPlanarWorld.shader" />
     <None Include="Assets\Oculus\SampleFramework\Core\CustomHands\Materials\Hands_Transparent.shader" />
     <None Include="Assets\Oculus\Avatar\Resources\Materials\Version1.5\Avatar_Mobile_Loader.shader" />
+    <None Include="Assets\ExperimentResults\Experimental\Sketching\README.txt" />
     <None Include="Assets\GoogleVR\Shaders\GvrAdditiveOverlay.shader" />
     <None Include="Assets\Resources\VRSlateServerAddress.txt" />
     <None Include="Assets\Oculus\SampleFramework\Core\CustomHands\Shaders\Hands_02.shader" />
     <None Include="Assets\Oculus\SampleFramework\Usage\Stereo180Video\Plugins\Android\Audio360\ThirdPartyNotices.txt" />
+    <None Include="Assets\ExperimentResults\Experimental\Summary\README.txt" />
     <None Include="Assets\Oculus\Avatar\Resources\Materials\AvatarSurfaceShaderSelfOccluding.shader" />
     <None Include="Assets\GoogleVR\Shaders\GvrController.shader" />
+    <None Include="Assets\ExperimentResults\Training\Summary\README.txt" />
     <None Include="Assets\Oculus\Avatar\Resources\Materials\AvatarSurfaceShaderPBS.shader" />
     <None Include="Assets\GoogleVR\Shaders\GvrUnlitTransparentOverlay.shader" />
     <None Include="Assets\Oculus\Avatar\Samples\SocialStarter\README.txt" />
@@ -543,6 +548,7 @@
     <None Include="Assets\Oculus\Avatar\Resources\Materials\AvatarSurfaceShader.shader" />
     <None Include="Assets\GoogleVR\Plugins\Android\AndroidManifest-Cardboard.xml" />
     <None Include="Assets\Oculus\SampleFramework\Usage\DistanceGrab\Materials\ToyCubeWithOutline.shader" />
+    <None Include="Assets\ExperimentResults\Experimental\PuzzleMatching\README.txt" />
     <None Include="Assets\Oculus\SampleFramework\Usage\DistanceGrab\Materials\CrosshairZCheat.shader" />
     <Reference Include="Unity.TextMeshPro.Editor">
       <HintPath>D:/GitHub/VXSlate/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
