@@ -166,7 +166,7 @@ MonoBehaviour:
   m_MinSize: {x: 911, y: 374}
   m_MaxSize: {x: 22006, y: 14024}
   vertical: 0
-  controlID: 153
+  controlID: 80
 --- !u!114 &8
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -191,7 +191,7 @@ MonoBehaviour:
   m_MinSize: {x: 634, y: 374}
   m_MaxSize: {x: 18004, y: 14024}
   vertical: 1
-  controlID: 107
+  controlID: 81
 --- !u!114 &9
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -217,7 +217,7 @@ MonoBehaviour:
   m_MinSize: {x: 634, y: 274}
   m_MaxSize: {x: 18004, y: 10024}
   vertical: 0
-  controlID: 108
+  controlID: 82
 --- !u!114 &10
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -406,9 +406,9 @@ MonoBehaviour:
   m_SceneHierarchy:
     m_TreeViewState:
       scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: c0b9ffff
-      m_LastClickedID: -17984
-      m_ExpandedIDs: 42f3ffff26f5ffff2af5ffffa8fbffff
+      m_SelectedIDs: 163e0000
+      m_LastClickedID: 15894
+      m_ExpandedIDs: b2fbffff
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -494,9 +494,9 @@ MonoBehaviour:
       speed: 2
       m_Value: 0
   m_Rotation:
-    m_Target: {x: 0.09156325, y: 0.095495306, z: -0.008822052, w: 0.9911706}
+    m_Target: {x: -0.09156324, y: -0.0954953, z: 0.008822051, w: -0.9911705}
     speed: 2
-    m_Value: {x: 0.09156325, y: 0.095495306, z: -0.008822052, w: 0.9911706}
+    m_Value: {x: -0.09156324, y: -0.0954953, z: 0.008822051, w: -0.9911705}
   m_Size:
     m_Target: 7.0266576
     speed: 2
@@ -550,20 +550,20 @@ MonoBehaviour:
     m_ShowAllHits: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/Textures
+    - Assets/Script/TestGame
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - Assets/Textures
+  - Assets/Script/TestGame
   m_LastFoldersGridSize: -1
-  m_LastProjectPath: D:\GitHub\VXSlate
+  m_LastProjectPath: C:\Users\duy\VXSlate\VXSlate_virtualpad_Oculus
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
     scrollPos: {x: 0, y: 0}
-    m_SelectedIDs: d02e0000
-    m_LastClickedID: 11984
-    m_ExpandedIDs: 00000000a22c0000d22f00004e3000005e300000e8310000263200002a330000e0330000e43800009639000000ca9a3b
+    m_SelectedIDs: 80380000
+    m_LastClickedID: 14464
+    m_ExpandedIDs: 00000000bc2c0000f42f00006e3000007e3000000c3200004c320000543300001234000014390000ca39000000ca9a3b
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -591,7 +591,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 00000000a22c0000d22f00004e3000005e300000e8310000263200002a330000e0330000e438000096390000
+    m_ExpandedIDs: 00000000bc2c0000f42f00006e3000007e3000000c3200004c320000543300001234000014390000ca390000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 

@@ -808,6 +808,7 @@ MonoBehaviour:
   finger5: {fileID: 1256595129}
   menuManip: {fileID: 874528300}
   menuDraw: {fileID: 272478431}
+  _gazeCanShiftWithOneFinger: 1
 --- !u!65 &788566890
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1805,12 +1806,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _participantID: 
-  _isTraining: 1
-  _isExperimental: 0
-  _textureID: 22
+  _isTraining: 0
+  _isExperimental: 1
+  _textureID: 1
   _experimentOrder: 1
   _usingTablet: 0
-  _usingController: 0
+  _usingController: 1
   _usingMouse: 0
   _isExperimentStarted: 0
   _isExperimentFinished: 0
@@ -1818,7 +1819,8 @@ MonoBehaviour:
   _isSketchingLog: 0
   _isSummaryLog: 0
   _prepareTime: 3
-  _stateChangeTime: 15
+  _stateChangeTime: 3
+  _isSketchTesting: 0
   _puzzleMakerObject: {fileID: 1827507204}
   tabletControllerObj: {fileID: 788566888}
   oculusControllerObj: {fileID: 1349240420}

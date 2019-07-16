@@ -36,6 +36,7 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
     event MenuItemListener.EditModeSelectedCallBack editModeChangedListener = null;
 
     bool _gazeCanShift = true;
+    public bool _gazeCanShiftWithOneFinger = true;
     Vector3 latestGazeInPad = new Vector3();
     EditMode _currentMode;
     public EditMode CurrentMode
@@ -362,6 +363,10 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
             {
                 if (!isMultiTouch)
                 {
+                    if(!_gazeCanShiftWithOneFinger)
+                    {
+                        _gazeCanShift = false;
+                    }
                     Vector2 rawTouchLocalPos = (Vector2)recognizedGesture.MetaData;
                     /*if(recognizedGesture.GestureType != GestureType.SINGLE_TOUCH_MOVE)
                     {
@@ -374,7 +379,10 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                     }*/
                     Vector2 localPosOnPad = GlobalUtilities.ConvertMobileRelPosToUnityRelPos(rawTouchLocalPos);
                     Vector2 localPosOnBoard = toLocalPosOnBoard(localPosOnPad);
-                    recognizedGesture.MetaData = localPosOnBoard;
+                    Vector2[] eventData = new Vector2[3];
+                    eventData[0] = localPosOnBoard;
+                    eventData[1] = eventData[2] = new Vector2();
+                    recognizedGesture.MetaData = eventData;
                     if(recognizedGesture.GestureType == GestureType.SINGLE_TOUCH_DOWN)
                     {
                         //latestSingleTouchDown = recognizedGesture;

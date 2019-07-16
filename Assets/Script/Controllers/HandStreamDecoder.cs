@@ -30,8 +30,8 @@ public class HandStreamDecoder : MonoBehaviour
     void Start()
     {
         mainHandMaterial = GetComponent<Renderer>().material;
-        handVisTexture = new Texture2D(initWidth, initHeight, TextureFormat.RGBA4444, false);
-        handVisTexture.alphaIsTransparency = true;
+        handVisTexture = new Texture2D(initWidth, initHeight, TextureFormat.ARGB32,false);
+        //handVisTexture.alphaIsTransparency = true;
         frameInterval = 1000 / FPS;
         timer = 0;
         startStreamingTask();
@@ -97,7 +97,7 @@ public class HandStreamDecoder : MonoBehaviour
             if (timer > frameInterval)
             {
                 handVisTexture.LoadImage(handFrameStream.GetBuffer());
-                //handVisTexture.alphaIsTransparency = true;
+                handVisTexture.alphaIsTransparency = true;
                 mainHandMaterial.mainTexture = handVisTexture;
                 updateFrame = false;
                 timer = timer % frameInterval;

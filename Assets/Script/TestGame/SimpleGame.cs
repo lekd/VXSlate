@@ -219,6 +219,7 @@ public class SimpleGame : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        
         if (_startTimer && _prepareTime > 0)
         {
             _puzzleMaker._statusObject.GetComponent<Text>().text = "ARE YOU READY?\n" + ((int)_prepareTime + 1).ToString();
@@ -402,6 +403,11 @@ public class SimpleGame : MonoBehaviour
                     }
                     else if(_stateChangeTime > 0)
                     {
+                        //VXSlate: change the virtual pad to not shifting by gaze while there are fingers in sketching
+                        if(_usingTablet)
+                        {
+                            (tabletController as VirtualPadController)._gazeCanShiftWithOneFinger = false;
+                        }
                         _puzzleMaker._statusObject.GetComponent<Text>().alignment = TextAnchor.MiddleCenter;
                         _puzzleMaker._statusObject.GetComponent<Text>().fontSize = 10;
 
@@ -425,6 +431,12 @@ public class SimpleGame : MonoBehaviour
 
                 if (_puzzleMaker.isSketchDoneSucessfully)
                 {
+                    //VXSlate: restore to allow shifting virtual pad with gaze while one finger is touching
+                    if (_usingTablet)
+                    {
+                        (tabletController as VirtualPadController)._gazeCanShiftWithOneFinger = true;
+                    }
+
                     if (_sketchingSW != null && !_isSketchingLog)
                     {
                         foreach(var e in _puzzleMaker._sketchingLogList)

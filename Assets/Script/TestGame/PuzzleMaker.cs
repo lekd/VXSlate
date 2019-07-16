@@ -487,7 +487,7 @@ public class PuzzleMaker : MonoBehaviour
                 int puzzlePieceWidthScaledUp = (int)(_mainTextureArea.x / _x);
                 int puzzlePieceHeightScaledUp = (int)(_mainTextureArea.y / _y);
 
-                _overlapThreshold = ConvertPixelsToMeters(puzzlePieceHeightScaledUp / 5);
+                _overlapThreshold = ConvertPixelsToMeters(puzzlePieceHeightScaledUp / 20);
 
                 //int puzzlePieceWidth = (int)(_mainPuzzleTexture.width / _x);
                 //int puzzlePieceHeight = (int)(_mainPuzzleTexture.height / _y);
