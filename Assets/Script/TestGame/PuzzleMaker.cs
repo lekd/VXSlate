@@ -393,10 +393,22 @@ public class PuzzleMaker : MonoBehaviour
 
             _sampleTexture.Apply();
 
+            //GameObject sampleScreenObject = CreateCubeGameObject("Sample Screen",
+            //                                                new Vector3(_largeScreenObject.transform.position.x + ConvertPixelsToMeters(_largeScreenWidth * 0.5f -
+            //                                                                                                                            _marginSize -
+            //                                                                                                                            (int)_sampleScreenArea.x / 2),
+            //                                                            _largeScreenObject.transform.position.y,
+            //                                                            difLargeScreenZ - 0.0001f),
+            //                                                sampleScreenRotation,
+            //                                                new Vector3(ConvertPixelsToMeters(_sampleScreenArea.x),
+            //                                                            ConvertPixelsToMeters(_sampleScreenArea.y),
+            //                                                            0.01f),
+            //                                                null,
+            //                                                _sampleTexture,
+            //                                                Color.white);
+
             GameObject sampleScreenObject = CreateCubeGameObject("Sample Screen",
-                                                            new Vector3(_largeScreenObject.transform.position.x + ConvertPixelsToMeters(_largeScreenWidth * 0.5f -
-                                                                                                                                        _marginSize -
-                                                                                                                                        (int)_sampleScreenArea.x / 2),
+                                                            new Vector3(_largeScreenObject.transform.position.x - ConvertPixelsToMeters(_largeScreenCenter.x - _marginSize - _mainTextureArea.x / 2),
                                                                         _largeScreenObject.transform.position.y,
                                                                         difLargeScreenZ - 0.0001f),
                                                             sampleScreenRotation,
@@ -406,6 +418,8 @@ public class PuzzleMaker : MonoBehaviour
                                                             null,
                                                             _sampleTexture,
                                                             Color.white);
+
+            
 
             /// Puzzle Area
             /// 
@@ -422,10 +436,24 @@ public class PuzzleMaker : MonoBehaviour
 
             float puzzlePositionX = puzzleArea.x / 2 + shift;
 
+            //GameObject puzzleAreaObject = CreateCubeGameObject("Puzzle Area",
+            //                                                    new Vector3(_largeScreenObject.transform.position.x - ConvertPixelsToMeters(puzzlePositionX),
+            //                                                                _largeScreenObject.transform.position.y,
+            //                                                                difLargeScreenZ - 0.0001f),
+            //                                                    puzzleAreaRotation,
+            //                                                    new Vector3(ConvertPixelsToMeters(puzzleArea.x),
+            //                                                                ConvertPixelsToMeters(puzzleArea.y),
+            //                                                                0.01f),
+            //                                                    null,
+            //                                                    null,
+            //                                                    Color.white);
+
             GameObject puzzleAreaObject = CreateCubeGameObject("Puzzle Area",
-                                                                new Vector3(_largeScreenObject.transform.position.x - ConvertPixelsToMeters(puzzlePositionX),
-                                                                            _largeScreenObject.transform.position.y,
-                                                                            difLargeScreenZ - 0.0001f),
+                                                                new Vector3(_largeScreenObject.transform.position.x + ConvertPixelsToMeters(_largeScreenWidth * 0.5f -
+                                                                                                                                            _marginSize -
+                                                                                                                                            (int)_sampleScreenArea.x / 2),
+                                                                        _largeScreenObject.transform.position.y,
+                                                                        difLargeScreenZ - 0.0001f),
                                                                 puzzleAreaRotation,
                                                                 new Vector3(ConvertPixelsToMeters(puzzleArea.x),
                                                                             ConvertPixelsToMeters(puzzleArea.y),
@@ -433,6 +461,9 @@ public class PuzzleMaker : MonoBehaviour
                                                                 null,
                                                                 null,
                                                                 Color.white);
+
+            
+
 
             /// Puzzle Grid Area
             /// 
@@ -443,7 +474,11 @@ public class PuzzleMaker : MonoBehaviour
 
                 Vector3 puzzleDonePosition = Vector3.zero;
 
-                puzzleDonePosition.x = _largeScreenObject.transform.position.x - ConvertPixelsToMeters(_largeScreenCenter.x - _marginSize - _mainTextureArea.x / 2);
+                //puzzleDonePosition.x = _largeScreenObject.transform.position.x - ConvertPixelsToMeters(_largeScreenCenter.x - _marginSize - _mainTextureArea.x / 2);
+                //puzzleDonePosition.y = _largeScreenObject.transform.position.y;
+                //puzzleDonePosition.z = difLargeScreenZ - 0.005f;
+
+                puzzleDonePosition.x = _largeScreenObject.transform.position.x - ConvertPixelsToMeters(puzzlePositionX);
                 puzzleDonePosition.y = _largeScreenObject.transform.position.y;
                 puzzleDonePosition.z = difLargeScreenZ - 0.005f;
 
@@ -476,13 +511,26 @@ public class PuzzleMaker : MonoBehaviour
                 //Vector2 _firstGridPosition = new Vector2(_largeScreenObject.transform.position.x - ConvertPixelsToMeters(_largeScreenCenter.x - _marginSize - _gridPieceWidth / 2),
                 //                                         _largeScreenObject.transform.position.y + ConvertPixelsToMeters(_largeScreenCenter.y - _marginSize - _gridPieceHeight / 2));
 
-                Vector2 _firstGridPosition = new Vector2(_largeScreenObject.transform.position.x - ConvertPixelsToMeters(_largeScreenCenter.x - _marginSize - _gridPieceWidth / 2),
-                                                         _largeScreenObject.transform.position.y + ConvertPixelsToMeters((_y/2)* _gridPieceHeight - _gridPieceHeight / 2));
+                //Vector2 _firstGridPosition = new Vector2(_largeScreenObject.transform.position.x - ConvertPixelsToMeters(_largeScreenCenter.x - _marginSize - _gridPieceWidth / 2),
+                //                                         _largeScreenObject.transform.position.y + ConvertPixelsToMeters((_y/2)* _gridPieceHeight - _gridPieceHeight / 2));
+
+
+
+                //_firstGridPixelPosition = new Vector2(_largeScreenObject.transform.position.x - ConvertPixelsToMeters(_largeScreenCenter.x - _marginSize),
+                //                                      _largeScreenObject.transform.position.y - ConvertPixelsToMeters(_largeScreenCenter.y - _marginSize));
+
+                Vector2 _firstGridPosition = new Vector2(_largeScreenObject.transform.position.x
+                                       - (_x / 2)
+                                       * ConvertPixelsToMeters(_gridPieceWidth)
+                                       + ConvertPixelsToMeters(_gridPieceWidth)
+                                       / 2,
+                                                         _largeScreenObject.transform.position.y
+                                       + (_y / 2)
+                                       * ConvertPixelsToMeters(_gridPieceHeight)
+                                       - ConvertPixelsToMeters(_gridPieceHeight)
+                                       / 2);
+
                 
-
-
-                _firstGridPixelPosition = new Vector2(_largeScreenObject.transform.position.x - ConvertPixelsToMeters(_largeScreenCenter.x - _marginSize),
-                                                      _largeScreenObject.transform.position.y - ConvertPixelsToMeters(_largeScreenCenter.y - _marginSize));
 
                 int puzzlePieceWidthScaledUp = (int)(_mainTextureArea.x / _x);
                 int puzzlePieceHeightScaledUp = (int)(_mainTextureArea.y / _y);
