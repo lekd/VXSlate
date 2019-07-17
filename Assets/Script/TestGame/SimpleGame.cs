@@ -306,7 +306,7 @@ public class SimpleGame : MonoBehaviour
         {
             if (!_isExperimentFinished)
             {
-                _puzzleMaker.HighlightGridPiece();
+                //_puzzleMaker.HighlightGridPiece();
 
                 if (!_puzzleMaker.isPuzzledDone && _puzzleMaker.CheckPuzzlesDone())
                 {
