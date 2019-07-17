@@ -29,10 +29,11 @@ public class ExampleMouseController : MonoBehaviour, IRemoteController
     void Update()
     {
         TouchGesture touchDownGesture = new TouchGesture();
-       
+
         if (Input.GetMouseButton(0))
         {
             _currentMousePosition = GetMousePosition();
+
             if (!_isMouseDown)
             {
                 _isMouseDown = true;
@@ -46,9 +47,9 @@ public class ExampleMouseController : MonoBehaviour, IRemoteController
                 if (gestureRecognizedBroadcaster != null)
                 {
                     gestureRecognizedBroadcaster(touchDownGesture);
-                    
-                    //Debug.Log("MouseDown called: " + touchDownCallRaised);
                     previousGesture = touchDownGesture;
+
+                    //Debug.Log("MouseDown called: " + touchDownCallRaised);
                 }
 
                 Debug.Log("Mouse is down at (" + _currentMousePosition + ")");
@@ -132,11 +133,12 @@ public class ExampleMouseController : MonoBehaviour, IRemoteController
                 
             //}
         }
-        else
+
+        if (Input.GetMouseButtonUp(0))
         {
             _isMouseDown = false;
             
-            if (previousGesture.GestureType != GestureType.NONE)
+            if (previousGesture != null && previousGesture.GestureType != GestureType.NONE)
             {
                 touchDownGesture.GestureType = GestureType.NONE;
                 touchDownGesture.MetaData = new Vector2[] { new Vector2(0, 0) , Vector2.zero, Vector2.zero}; //some mouse down position normalized to -0.5 and 0.5

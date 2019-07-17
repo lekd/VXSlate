@@ -1806,8 +1806,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _participantID: 
-  _isTraining: 0
-  _isExperimental: 1
+  _isTraining: 1
+  _isExperimental: 0
   _textureID: 1
   _experimentOrder: 1
   _usingTablet: 0
@@ -1818,9 +1818,9 @@ MonoBehaviour:
   _isMatchingLog: 0
   _isSketchingLog: 0
   _isSummaryLog: 0
-  _prepareTime: 3
-  _stateChangeTime: 3
-  _isSketchTesting: 1
+  _prepareTime: 5
+  _stateChangeTime: 10
+  _isSketchTesting: 0
   _puzzleMakerObject: {fileID: 1827507204}
   tabletControllerObj: {fileID: 788566888}
   oculusControllerObj: {fileID: 1349240420}

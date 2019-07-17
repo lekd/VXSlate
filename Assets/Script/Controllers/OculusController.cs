@@ -92,7 +92,7 @@ public class OculusController : MonoBehaviour, IRemoteController
                     previousGesture = touchDownGesture;
                 }
 
-                Debug.Log("Controller is down at (" + _currentMousePosition + ")");
+                //Debug.Log("Controller is down at (" + _currentMousePosition + ")");
             }            
         }
 
@@ -112,7 +112,7 @@ public class OculusController : MonoBehaviour, IRemoteController
                     previousGesture = touchDownGesture;
                 }
 
-                Debug.Log("Mouse is up!");
+                //Debug.Log("Mouse is up!");
             }
         }
 
@@ -154,7 +154,7 @@ public class OculusController : MonoBehaviour, IRemoteController
                         previousGesture = touchDownGesture;
                     }
 
-                    Debug.Log("Puzzle piece is scaled by" + disRatio + "!");
+                    //Debug.Log("Puzzle piece is scaled by" + disRatio + "!");
 
                     _previousLeftControllerPosition = _leftController.transform.position;
                     _previousRightControllerPosition = _rightController.transform.position;
@@ -181,7 +181,7 @@ public class OculusController : MonoBehaviour, IRemoteController
                         previousGesture = touchDownGesture;
                     }
 
-                    Debug.Log("Puzzle piece is rotated by " + angle + " degrees!");
+                    //Debug.Log("Puzzle piece is rotated by " + angle + " degrees!");
 
                     _previousLeftControllerPosition = _leftController.transform.position;
                     _previousRightControllerPosition = _rightController.transform.position;
@@ -274,7 +274,7 @@ public class OculusController : MonoBehaviour, IRemoteController
                         previousGesture = touchDownGesture;
                     }
 
-                    Debug.Log("Controller is moved to (" + _currentMousePosition + ")");
+                    //Debug.Log("Controller is moved to (" + _currentMousePosition + ")");
                 }
             }
         }        
