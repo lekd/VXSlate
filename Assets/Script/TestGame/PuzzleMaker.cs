@@ -22,10 +22,13 @@ public class PuzzleMaker : MonoBehaviour
 
     public Texture2D _puzzle1O;
     public Texture2D _puzzle1L;
+    public Texture2D _puzzle1L_Reverted;
     public Texture2D _puzzle2O;
     public Texture2D _puzzle2L;
+    public Texture2D _puzzle2L_Reverted;
     public Texture2D _trainingO;
     public Texture2D _trainingL;
+    public Texture2D _trainingL_Reverted;
     public Texture2D _startButtonTexture;
 
     Texture2D _mainPuzzleTexture;
@@ -81,7 +84,7 @@ public class PuzzleMaker : MonoBehaviour
 
     public List<Pixel> _sketchedPixels;
 
-    int _sketchedBrush = 5;
+    public int _sketchedBrush = 20;
     int _sketchedPointID = 1;
 
     //For sketch
@@ -109,13 +112,13 @@ public class PuzzleMaker : MonoBehaviour
     public bool isInLinePoints = false;
     public bool isInEndPoints = false;
     public bool isSketchingOnTrack = false;
+    public bool isFirstSketchDone = false;
+    public bool isTexturePointsReverted = false;
     public bool isSketchDoneSucessfully = false;
 
     bool _isTraining;
     int _textureID;
     int _experimentOrder;
-
-
 
     float difLargeScreenZ = 0;
 
@@ -152,106 +155,7 @@ public class PuzzleMaker : MonoBehaviour
 
     // Update is called once per frame
     void Update()
-    {
-        //if (_startTimer && _prepareTime > 0)
-        //{
-        //    _statusObject.GetComponent<Text>().text = "ARE YOU READY?\n" + ((int)_prepareTime + 1).ToString();
-        //    _statusObject.GetComponent<Text>().font = _statusFont;
-        //    _statusObject.GetComponent<Text>().color = Color.blue;
-        //    _statusObject.GetComponent<Text>().fontSize = 28;
-        //    _statusObject.GetComponent<Text>().alignment = TextAnchor.MiddleCenter;
-
-        //    _prepareTime -= Time.deltaTime;
-        //}
-
-        //if(_prepareTime < 0 && !_isExperimentStarted && _isInit)
-        //{
-        //    _prepareTime = 0;
-        //    _isExperimentStarted = true;
-        //    _startTimer = false;
-
-        //    foreach(var e in _listOfGameObjects)
-        //    {
-        //        e.SetActive(true);
-        //    }
-
-        //    Debug.Log("Experiment Started!");
-
-        //    _statusObject.GetComponent<Text>().text = "Experiment Started!";
-        //    _statusObject.GetComponent<Text>().font = _statusFont;
-        //    _statusObject.GetComponent<Text>().color = Color.black;
-        //    _statusObject.GetComponent<Text>().fontSize = 4;
-        //    _statusObject.GetComponent<Text>().alignment = TextAnchor.LowerCenter;
-        //}
-
-        //OnMouseDown();
-        //OnMouseUp();
-
-        //if (_isExperimentStarted && _isInit)
-        //{            
-        //    if(!_isExperimentFinished)
-        //    {
-        //        UpdatePiecePosition();
-        //        HighlightGridPiece();
-
-        //        if (!isPuzzledDone && CheckPuzzlesDone())
-        //        {
-        //            isPuzzledDone = CheckPuzzlesDone();
-        //        }
-
-        //        if (isPuzzledDone && !isSketchStarted)
-        //        {
-        //            isSketchStarted = true;
-
-        //            if (_sketchedPixels == null)
-        //                _sketchedPixels = new List<Pixel>();
-
-        //            _statusObject.GetComponent<Text>().color = Color.green;
-        //            _statusObject.GetComponent<Text>().text = "Puzzle grid is done!\nPlease start sketching from RED to BLUE point.";
-        //        }
-
-        //        CheckSketch();
-
-        //        if (Input.GetKeyDown(KeyCode.DownArrow) && _selectedPiece != null)
-        //        {
-        //            _selectedPiece = PuzzlePieceScaleDown(_selectedPiece);
-
-        //            Debug.Log("Puzzle piece is scaled down!");
-        //            _statusObject.GetComponent<Text>().text = "Puzzle piece is scaled down!";
-        //        }
-
-        //        if (Input.GetKeyUp(KeyCode.UpArrow) && _selectedPiece != null)
-        //        {
-        //            _selectedPiece = PuzzlePieceScaleUp(_selectedPiece);
-
-        //            Debug.Log("Puzzle piece is scaled up!");
-        //            _statusObject.GetComponent<Text>().text = "Puzzle piece is scaled up!";
-        //        }
-
-        //        if (Input.GetKeyDown(KeyCode.LeftArrow) && _selectedPiece != null)
-        //        {
-        //            _selectedPiece = PuzzlePieceRotateLeft(_selectedPiece);
-
-        //            Debug.Log("Puzzle piece is rotated left!");
-        //            _statusObject.GetComponent<Text>().text = "Puzzle piece is rotated left!";
-        //        }
-
-        //        if (Input.GetKeyUp(KeyCode.RightArrow) && _selectedPiece != null)
-        //        {
-        //            _selectedPiece = PuzzlePieceRotateRight(_selectedPiece);
-
-        //            Debug.Log("Puzzle piece is rotated right!");
-        //            _statusObject.GetComponent<Text>().text = "Puzzle piece is rotated right!";
-        //        }
-        //    }
-        //    else
-        //    {
-        //        _statusObject.GetComponent<Text>().color = Color.blue;
-        //        _statusObject.GetComponent<Text>().alignment = TextAnchor.MiddleCenter;
-        //        _statusObject.GetComponent<Text>().fontSize = 10;
-        //        _statusObject.GetComponent<Text>().text = "THE TASK IS FINISHED!\nPlease take off the HMD.";
-        //    }
-        //}
+    {       
     }
 
     public void Init(bool isTraining, int experimentOrder, int textureID, float _prepareTime)
@@ -508,16 +412,6 @@ public class PuzzleMaker : MonoBehaviour
 
                 float _gridPieceWidth = _mainTextureArea.x / _x;
                 float _gridPieceHeight = _mainTextureArea.y / _y;
-                //Vector2 _firstGridPosition = new Vector2(_largeScreenObject.transform.position.x - ConvertPixelsToMeters(_largeScreenCenter.x - _marginSize - _gridPieceWidth / 2),
-                //                                         _largeScreenObject.transform.position.y + ConvertPixelsToMeters(_largeScreenCenter.y - _marginSize - _gridPieceHeight / 2));
-
-                //Vector2 _firstGridPosition = new Vector2(_largeScreenObject.transform.position.x - ConvertPixelsToMeters(_largeScreenCenter.x - _marginSize - _gridPieceWidth / 2),
-                //                                         _largeScreenObject.transform.position.y + ConvertPixelsToMeters((_y/2)* _gridPieceHeight - _gridPieceHeight / 2));
-
-
-
-                //_firstGridPixelPosition = new Vector2(_largeScreenObject.transform.position.x - ConvertPixelsToMeters(_largeScreenCenter.x - _marginSize),
-                //                                      _largeScreenObject.transform.position.y - ConvertPixelsToMeters(_largeScreenCenter.y - _marginSize));
 
                 Vector2 _firstGridPosition = new Vector2(_largeScreenObject.transform.position.x
                                        - (_x / 2)
@@ -536,9 +430,6 @@ public class PuzzleMaker : MonoBehaviour
                 int puzzlePieceHeightScaledUp = (int)(_mainTextureArea.y / _y);
 
                 _overlapThreshold = ConvertPixelsToMeters(puzzlePieceHeightScaledUp / 20);
-
-                //int puzzlePieceWidth = (int)(_mainPuzzleTexture.width / _x);
-                //int puzzlePieceHeight = (int)(_mainPuzzleTexture.height / _y);
 
                 _startStopPoints = new List<Vector2>();
                 _linePoints = new List<Vector2>();
@@ -705,27 +596,7 @@ public class PuzzleMaker : MonoBehaviour
 
                 SortPieces();
 
-                //isInit = true;
                 Debug.Log("Init finished!");
-
-                //For testing
-                /*_puzzleDoneObject.SetActive(true);
-                foreach (var grid in _gridPieces)
-                {
-                    foreach (var puzzle in _puzzlePieces)
-                    {
-                        if (grid.Name == puzzle.Name)
-                        {
-                            puzzle.GameObject.transform.position = new Vector3(grid.GameObject.transform.position.x,
-                                                                               grid.GameObject.transform.position.y,
-                                                                               puzzle.GameObject.transform.position.z);
-                            puzzle.GameObject.transform.rotation = grid.GameObject.transform.rotation;
-                            puzzle.GameObject.transform.localScale = grid.GameObject.transform.localScale;
-
-                            puzzle.GameObject.SetActive(false);
-                        }
-                    }
-                }*/
             }
             else
             {
@@ -775,10 +646,6 @@ public class PuzzleMaker : MonoBehaviour
         if (_prepareTime > 0)
         {
             SetObjectsTransparency(0.5f);
-            //foreach (var e in _listOfGameObjects)
-            //{
-            //    e.SetActive(false);
-            //}
         }
         else
         {
@@ -788,19 +655,32 @@ public class PuzzleMaker : MonoBehaviour
         _isInit = true;
     }
 
-    public void CheckSketch(Vector3 rayPoint)
+    public void CheckSketch(Vector3 rayPoint, StreamWriter sketchWriter, string _participantID, bool isTraining,
+                                       int experimentOrder, int textureID, bool usingTablet, bool usingController, bool usingMouse)
     {
-        if(CheckPointPixelColor(rayPoint, _startPointsColor, _linePointsColor, _endPointsColor))
+        if(CheckPointPixelColor(rayPoint, _startPointsColor, _linePointsColor, _endPointsColor, sketchWriter, _participantID, isTraining,
+                                       experimentOrder, textureID, usingTablet, usingController, usingMouse))
         {
-            if (!isSketchDoneSucessfully)
+            if(!isSketchDoneSucessfully)
             {
-                _statusObject.GetComponent<Text>().text = "Sketching...";
-                _statusObject.GetComponent<Text>().color = Color.black;
+                if (isFirstSketchDone && !isTexturePointsReverted)
+                {                    
+                    isSketchStarted = false;
+                    isInStartPoints = false;
+                    isInLinePoints = false;
+                    isInEndPoints = false;
+
+                    _sketchedPointID = 1;
+                }
+                else
+                {
+                    _statusObject.GetComponent<Text>().text = "Sketching...";
+                    _statusObject.GetComponent<Text>().color = Color.black;
+                }
             }
             else
             {
                 Debug.Log("Sketch is successfully done!");
-                isSketchDoneSucessfully = true;
                 _statusObject.GetComponent<Text>().text = "Sketch is successfully done!";
             }
         }
@@ -811,7 +691,8 @@ public class PuzzleMaker : MonoBehaviour
             _statusObject.GetComponent<Text>().text = "Please keep sketching on track!";
         }
     }
-    bool CheckPointPixelColor(Vector3 rayPoint, Color startColor, Color lineColor, Color endColor)
+    bool CheckPointPixelColor(Vector3 rayPoint, Color startColor, Color lineColor, Color endColor, StreamWriter sketchWriter, string _participantID, bool isTraining,
+                                       int experimentOrder, int textureID, bool usingTablet, bool usingController, bool usingMouse)
     {
         if (_sketchingLogList == null)
             _sketchingLogList = new List<LoggingVariable>();
@@ -864,7 +745,15 @@ public class PuzzleMaker : MonoBehaviour
                     isInEndPoints = true;
 
                     isSketchingOnTrack = true;
-                    isSketchDoneSucessfully = true;
+
+                    if (!isFirstSketchDone)
+                    {
+                        isFirstSketchDone = true;
+                    }
+                    else
+                    {
+                        isSketchDoneSucessfully = true;
+                    }
                 }
                 else if (isInStartPoints &&
                          Mathf.Abs(c.r - lineColor.r) < 20 &&
@@ -883,68 +772,74 @@ public class PuzzleMaker : MonoBehaviour
                     ret = false;
                 }
                 
-                hit.transform.GetComponent<Renderer>().material.mainTexture = BrushSketchLines(texture2D, (int)pixelUV.x, (int)pixelUV.y, "TOUCH POINT", startColor, lineColor, endColor);
-                                
+                hit.transform.GetComponent<Renderer>().material.mainTexture = BrushSketchLines(texture2D, (int)pixelUV.x, (int)pixelUV.y, "TOUCH POINT", startColor, lineColor, endColor, sketchWriter, _participantID, isTraining,
+                                       experimentOrder, textureID, usingTablet, usingController, usingMouse);
+
                 //For brush
 
-                Vector2 difUV = pixelUV - _previous2DPoint;
-
-                int signX = 1;
-                int signY = 1;
-
-                int difX = (int)pixelUV.x - (int)_previous2DPoint.x;
-
-                if ((int)pixelUV.x < _previous2DPoint.x)
+                if (_previous2DPoint != new Vector2(1000000, 1000000))
                 {
-                    signX = (-1);
-                }
+                    Vector2 difUV = pixelUV - _previous2DPoint;
 
-                int difY = (int)pixelUV.y - (int)_previous2DPoint.y;
+                    int signX = 1;
+                    int signY = 1;
 
-                if ((int)pixelUV.y < _previous2DPoint.y)
-                {
-                    signY = (-1);
-                }
+                    int difX = (int)pixelUV.x - (int)_previous2DPoint.x;
 
-                difX *= signX;
-                difY *= signY;
-
-                float difXY = (float)difX / difY;
-                float difYX = (float)difY / difX;
-
-                if (difUV.magnitude > 0 &&
-                    difUV.magnitude < 75)
-                {
-                    for (int i = 0, j = 0; i < difX - 1 || j < difY - 1;)
+                    if ((int)pixelUV.x < _previous2DPoint.x)
                     {
-                        if (difX > difY)
-                        {
-                            i += 1;
-                            j = (int)(difYX * i);
-                        }
-                        else if (difX == difY)
-                        {
-                            i++;
-                            j++;
-                        }
-                        else
-                        {
-                            j += 1;
-                            i = (int)(difXY * j);
-                        }
+                        signX = (-1);
+                    }
 
-                        int x = (int)_previous2DPoint.x + i * signX;
-                        int y = (int)_previous2DPoint.y + j * signY;
-                        if (x != pixelUV.x && y != pixelUV.y)
-                        {                            
-                            BrushSketchLines(texture2D, x, y, "GENERATED TOUCH POINT", startColor, lineColor, endColor);
+                    int difY = (int)pixelUV.y - (int)_previous2DPoint.y;
+
+                    if ((int)pixelUV.y < _previous2DPoint.y)
+                    {
+                        signY = (-1);
+                    }
+
+                    difX *= signX;
+                    difY *= signY;
+
+                    float difXY = (float)difX / difY;
+                    float difYX = (float)difY / difX;
+
+                    if (difUV.magnitude > _sketchedBrush/2 &&
+                        difUV.magnitude < 100)
+                    {
+                        for (int i = 0, j = 0; i < difX - 1 || j < difY - 1;)
+                        {
+                            if (difX > difY)
+                            {
+                                i += 1;
+                                j = (int)(difYX * i);
+                            }
+                            else if (difX == difY)
+                            {
+                                i++;
+                                j++;
+                            }
+                            else
+                            {
+                                j += 1;
+                                i = (int)(difXY * j);
+                            }
+
+                            int x = (int)_previous2DPoint.x + i * signX;
+                            int y = (int)_previous2DPoint.y + j * signY;
+
+                            if (x != pixelUV.x && y != pixelUV.y)
+                            {
+                                BrushSketchLines(texture2D, x, y, "GENERATED TOUCH POINT", startColor, lineColor, endColor, sketchWriter, _participantID, isTraining,
+                                       experimentOrder, textureID, usingTablet, usingController, usingMouse);
+                            }
                         }
                     }
-                }
 
-                _previous2DPoint = new Vector2((int)pixelUV.x, (int)pixelUV.y);
+                    _previous2DPoint = new Vector2((int)pixelUV.x, (int)pixelUV.y);
+                    _startSketchingPointTime = Time.time;
+                }
                 _sketchedPointID++;
-                _startSketchingPointTime = Time.time;
 
                 break;
             }
@@ -953,7 +848,9 @@ public class PuzzleMaker : MonoBehaviour
         return ret;
     }
 
-    private Texture2D BrushSketchLines(Texture2D tex, int x, int y, string pointType, Color startColor, Color lineColor, Color endColor)
+    private Texture2D BrushSketchLines(Texture2D tex, int x, int y, string pointType, Color startColor, Color lineColor,
+                                       Color endColor, StreamWriter sketchWriter, string _participantID, bool isTraining,
+                                       int experimentOrder, int textureID, bool usingTablet, bool usingController, bool usingMouse)
     {
         string _stage = "SKETCHING";
         string _startTime = "";
@@ -974,14 +871,17 @@ public class PuzzleMaker : MonoBehaviour
         //string _sketchingPointID = "";
         string _xSketchPoint = x.ToString();
         string _ySketchPoint = y.ToString();
+        string _isReverted = "FALSE";
+
+        if (isTexturePointsReverted)
+            _isReverted = "TRUE";
 
         if (_startSketchingPointTime == 0)
-            _startSketchingPointTime = Time.time;
-        else
         {
-            _startTime = _startSketchingPointTime.ToString();            
+            _startSketchingPointTime = Time.time;
         }
 
+        _startTime = _startSketchingPointTime.ToString();
         _endTime = Time.time.ToString();
         _duration = (Time.time - _startSketchingPointTime).ToString();
         
@@ -991,138 +891,174 @@ public class PuzzleMaker : MonoBehaviour
         for (int i = min; i < max; i++)
         {
             for(int j = min; j < max; j++)
-            {
-                //for(int sign = 0; sign < 4; sign++)
-                //{
-                    int a, b;
-                    a = x + i;
-                    b = y + j;
+            {                
+                int a, b;
+                a = x + i;
+                b = y + j;
 
-                    //if(sign == 0)
-                    //{
-                    //    a += i;
-                    //    b += j;
-                    //}
-                    //else if (sign == 1)
-                    //{
-                    //    a -= i;
-                    //    b += j;
-                    //}
-                    //else if (sign == 2)
-                    //{
-                    //    a += i;
-                    //    b -= j;
-                    //}
-                    //else if (sign == 3)
-                    //{
-                    //    a -= i;
-                    //    b -= j;
-                    //}
+                if (a < 0)
+                    a = 0;
 
-                    //if (a >= tex.width)
-                    //    a = tex.width - 1;
+                if (b < 0)
+                    b = 0;
 
-                    //if (b >= tex.height)
-                    //    b = tex.height - 1;
+                int distance = (int)(new Vector2(a, b) - new Vector2(x, y)).magnitude;
+                int halfBrush = (int)(_sketchedBrush / 2);
 
-                    if (a < 0)
-                        a = 0;
-
-                    if (b < 0)
-                        b = 0;
-
-                    float distance = (new Vector2(a, b) - new Vector2(x, y)).magnitude;
-
-                    if (distance <= _sketchedBrush - 1)
+                if (distance <= halfBrush)
+                {
+                    if (distance == 0)                             
                     {
-                        if (distance == 0)                             
-                        {
-                            if(pointType == "TOUCH POINT")
-                                _isTouchPoint = "TOUCH POINT";
-                            else
-                                _isTouchPoint = "GENERATED TOUCH POINT";
-                        }
+                        if(pointType == "TOUCH POINT")
+                            _isTouchPoint = "TOUCH POINT";
                         else
-                        {
-                            if (pointType == "TOUCH POINT")
-                                _isTouchPoint = "TOUCH POINT BRUSHED";
-                            else
-                                _isTouchPoint = "GENERATED TOUCH POINT BRUSHED";
-                        }
+                            _isTouchPoint = "GENERATED TOUCH POINT";
+                    }
+                    else
+                    {
+                        if (pointType == "TOUCH POINT")
+                            _isTouchPoint = "TOUCH POINT BRUSHED";
+                        else
+                            _isTouchPoint = "GENERATED TOUCH POINT BRUSHED";
+                    }
+                                       
+                    Color32 cCheck;
+                    cCheck = _originalPuzzleTexture.GetPixel(a, b);
 
-                        Color32 cCheck;
-                        cCheck = _originalPuzzleTexture.GetPixel(a, b);
-
-                        if (
-                            (
-                                Mathf.Abs(cCheck.r - startColor.r) < 20 &&
-                                Mathf.Abs(cCheck.g - startColor.g) < 20 &&
-                                Mathf.Abs(cCheck.b - startColor.b) < 20
-                            )
-                            ||
-                            (
-                                Mathf.Abs(cCheck.r - endColor.r) < 20 &&
-                                Mathf.Abs(cCheck.g - endColor.g) < 20 &&
-                                Mathf.Abs(cCheck.b - endColor.b) < 20
-                            )
-                            ||
-                            (
-                                Mathf.Abs(cCheck.r - lineColor.r) < 20 &&
-                                Mathf.Abs(cCheck.g - lineColor.g) < 20 &&
-                                Mathf.Abs(cCheck.b - lineColor.b) < 20
-                            )
+                    if (
+                        (
+                            Mathf.Abs(cCheck.r - startColor.r) < 20 &&
+                            Mathf.Abs(cCheck.g - startColor.g) < 20 &&
+                            Mathf.Abs(cCheck.b - startColor.b) < 20
                         )
-                        { 
+                        ||
+                        (
+                            Mathf.Abs(cCheck.r - endColor.r) < 20 &&
+                            Mathf.Abs(cCheck.g - endColor.g) < 20 &&
+                            Mathf.Abs(cCheck.b - endColor.b) < 20
+                        )
+                        ||
+                        (
+                            Mathf.Abs(cCheck.r - lineColor.r) < 20 &&
+                            Mathf.Abs(cCheck.g - lineColor.g) < 20 &&
+                            Mathf.Abs(cCheck.b - lineColor.b) < 20
+                        )
+                    )
+                    { 
+                        _isOnTrack = "YES";
+                    }
+                    else
+                    {
+                        _isOnTrack = "NO";
+                    }
 
-                            _isOnTrack = "YES";
-                        }
-                        else
-                        {
-                            _isOnTrack = "NO";
-                        }
+                    _xSketchPoint = a.ToString();
+                    _ySketchPoint = b.ToString();
 
-                        _xSketchPoint = a.ToString();
-                        _ySketchPoint = b.ToString();
-                                            
-                        LoggingVariable lv = new LoggingVariable(_isTraining.ToString(),
-                                                                 _experimentOrder.ToString(),
-                                                                 _textureID.ToString(),
-                                                                 _stage,
-                                                                 _startTime,
-                                                                 _endTime,
-                                                                 _duration,
-                                                                 _matchingPuzzleTime,
-                                                                 _puzzleName,
-                                                                 _action,
-                                                                 _xFromPoint,
-                                                                 _yFromPoint,
-                                                                 _xToPoint,
-                                                                 _yToPoint,
-                                                                 _distanceMoved,
-                                                                 _scaleLevel,
-                                                                 _rotateAngel,
-                                                                 _isTouchPoint,
-                                                                 _isOnTrack,
-                                                                 _sketchedPointID.ToString(),
-                                                                 _xSketchPoint,
-                                                                 _ySketchPoint);
-                        _sketchingLogList.Add(lv);
+                    sketchWriter.WriteLine(_participantID
+                                                   + ","
+                                                   + isTraining.ToString()
+                                                   + ","
+                                                   + experimentOrder.ToString()
+                                                   + ","
+                                                   + textureID.ToString()
+                                                   + ","
+                                                   + _stage
+                                                   + ","
+                                                   + usingTablet.ToString()
+                                                   + ","
+                                                   + usingController.ToString()
+                                                   + ","
+                                                   + usingMouse.ToString()
+                                                   + ","
+                                                   + _startTime
+                                                   + ","
+                                                   + _endTime
+                                                   + ","
+                                                   + _duration
+                                                   + ","
+                                                   + _isTouchPoint
+                                                   + ","
+                                                   + _isOnTrack
+                                                   + ","
+                                                   + _sketchedPointID.ToString()
+                                                   + ","
+                                                   + _xSketchPoint
+                                                   + ","
+                                                   + _xSketchPoint
+                                                   + ","
+                                                   + _isReverted
+                                                   );
 
-                        if (tex.GetPixel(a, b) != Color.black)
-                        {
-                            Pixel p = new Pixel(a, b, tex.GetPixel(a, b), Color.black);
-                            tex.SetPixel(a, b, Color.black);
+                    //LoggingVariable lv = new LoggingVariable(_isTraining.ToString(),
+                    //                                            _experimentOrder.ToString(),
+                    //                                            _textureID.ToString(),
+                    //                                            _stage,
+                    //                                            _startTime,
+                    //                                            _endTime,
+                    //                                            _duration,
+                    //                                            _matchingPuzzleTime,
+                    //                                            _puzzleName,
+                    //                                            _action,
+                    //                                            _xFromPoint,
+                    //                                            _yFromPoint,
+                    //                                            _xToPoint,
+                    //                                            _yToPoint,
+                    //                                            _distanceMoved,
+                    //                                            _scaleLevel,
+                    //                                            _rotateAngel,
+                    //                                            _isTouchPoint,
+                    //                                            _isOnTrack,
+                    //                                            _sketchedPointID.ToString(),
+                    //                                            _xSketchPoint,
+                    //                                            _xSketchPoint);
+                    //_sketchingLogList.Add(lv);
 
-                            _sketchedPixels.Add(p);
-                        }
-                    }                    
+                    if (tex.GetPixel(a, b) != Color.black)
+                    {
+                        Pixel p = new Pixel(a, b, tex.GetPixel(a, b), Color.black);
+                        tex.SetPixel(a, b, Color.black);
+
+                        _sketchedPixels.Add(p);
+                    }
+                }                    
                // }
             }
         }
         
         tex.Apply();
 
+        _startSketchingPointTime = Time.time;
+
         return tex;
+    }
+
+    public void ReverseTexturePoints(bool isTraining, int textureID)
+    {
+        ResetTexture();
+
+        _originalPuzzleTexture = new Texture2D(_puzzleDoneObject.gameObject.GetComponent<Renderer>().material.mainTexture.width, _puzzleDoneObject.gameObject.GetComponent<Renderer>().material.mainTexture.height);
+
+        if (isTraining)
+        {
+            _puzzleDoneObject.gameObject.GetComponent<Renderer>().material.mainTexture = _trainingL_Reverted;
+            _originalPuzzleTexture.SetPixels(_trainingL_Reverted.GetPixels());
+        }
+        else
+        {
+            if (textureID == 1)
+            {
+                _puzzleDoneObject.gameObject.GetComponent<Renderer>().material.mainTexture = _puzzle1L_Reverted;
+                _originalPuzzleTexture.SetPixels(_puzzle1L_Reverted.GetPixels());
+            }
+            else
+            {
+                _puzzleDoneObject.gameObject.GetComponent<Renderer>().material.mainTexture = _puzzle2L_Reverted;
+                _originalPuzzleTexture.SetPixels(_puzzle2L_Reverted.GetPixels());
+            }
+        }
+
+        _originalPuzzleTexture.Apply();
     }
 
     public bool CheckPuzzlesDone()
@@ -1223,8 +1159,7 @@ public class PuzzleMaker : MonoBehaviour
                 gridPiece.GameObject.GetComponent<Renderer>().material.color = Color.white;
         }
     }
-
-    
+        
     Vector2 ConvertPositionToPixelPosition(Vector2 position)
     {
         Vector2 ret = Vector2.zero;
@@ -1266,12 +1201,9 @@ public class PuzzleMaker : MonoBehaviour
 
         return false;
     }
-
-    
-
+       
     private void ResetTexture()
-    {
-        
+    {        
         if (_puzzleDoneObject != null)
         {
             Texture2D texture2D = _puzzleDoneObject.gameObject.GetComponent<Renderer>().material.mainTexture as Texture2D;
@@ -1290,8 +1222,6 @@ public class PuzzleMaker : MonoBehaviour
             _puzzleDoneObject.gameObject.GetComponent<Renderer>().material.mainTexture = texture2D;
         }
     }
-
-   
 
     public void SortPieces()
     {

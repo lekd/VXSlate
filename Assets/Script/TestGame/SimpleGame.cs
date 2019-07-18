@@ -37,6 +37,7 @@ public class SimpleGame : MonoBehaviour
     public bool _isSummaryLog = false;
     public float _prepareTime = 3; //in seconds
     public float _stateChangeTime = 10; //in seconds
+    public float _betweenSketchesTime = 10; //in seconds
 
 
     [Header("For Testing")]
@@ -82,6 +83,7 @@ public class SimpleGame : MonoBehaviour
 
     StreamWriter _puzzleMatchingSW;
     StreamWriter _sketchingSW;
+    StreamWriter _sketchingSWReverted;
     StreamWriter _summarySW;
 
     float _experimentStartTime;
@@ -94,10 +96,18 @@ public class SimpleGame : MonoBehaviour
     int _matchingPuzzleClickDown = 1;
     float _sketchingStartTime = 0;
 
+    bool isSummaryLogForNonReverted = false;
+
     // Start is called before the first frame update
     void Start()
     {
         //gameCharacterObj.transform.localPosition.Set(0, 0, -0.00001f);
+        _isExperimentStarted = false;
+        _isExperimentFinished = false;
+        _isMatchingLog = false;
+        _isSketchingLog = false;
+        _isSummaryLog = false;
+
 
         if (!_usingController && !_usingMouse && !_usingTablet)
         {
@@ -257,47 +267,57 @@ public class SimpleGame : MonoBehaviour
 
             string matchingFilename = ".\\Assets\\ExperimentResults\\";
             string sketchingFilename = ".\\Assets\\ExperimentResults\\";
+            string sketchingRevertedFilename = ".\\Assets\\ExperimentResults\\";
             string summaryFilename = ".\\Assets\\ExperimentResults\\";
             if (_isTraining)
             {
                 matchingFilename += "Training\\";
                 sketchingFilename += "Training\\";
+                sketchingRevertedFilename += "Training\\";
                 summaryFilename += "Training\\";
             }
             else
             {
                 matchingFilename += "Experimental\\";
                 sketchingFilename += "Experimental\\";
+                sketchingRevertedFilename += "Experimental\\";
                 summaryFilename += "Experimental\\";
             }
 
             matchingFilename += "PuzzleMatching\\Matching_" + _participantID + "_" + extension;
             sketchingFilename += "Sketching\\Sketching_" + _participantID + "_" + extension;
+            sketchingRevertedFilename += "Sketching\\SketchingReverted_" + _participantID + "_" + extension;
             summaryFilename += "Summary\\Summary_" + _participantID + "_" + extension;
 
             if (_isTraining)
             {
                 matchingFilename += "_Training";
                 sketchingFilename += "_Training";
+                sketchingRevertedFilename += "_Training";
                 summaryFilename += "_Training";
             }
             else
             {
                 matchingFilename += "_Experimental";
                 sketchingFilename += "_Experimental";
+                sketchingRevertedFilename += "_Experimental";
                 summaryFilename += "_Experimental";
             }
 
             matchingFilename += ".csv";
             sketchingFilename += ".csv";
+            sketchingRevertedFilename += ".csv";
             summaryFilename += ".csv";
 
             _puzzleMatchingSW = new StreamWriter(matchingFilename);
             _sketchingSW = new StreamWriter(sketchingFilename);
+            _sketchingSWReverted = new StreamWriter(sketchingRevertedFilename);
             _summarySW = new StreamWriter(summaryFilename);
 
             _puzzleMatchingSW.WriteLine("ParticipantID,IsTraining,ExperimentOrder,TextureID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,MatchingPuzzleTime,PuzzleName,Action,DistanceMoved,ScaledLevel,RotatedAngle");
-            _sketchingSW.WriteLine("ParticipantID,IsTraining,ExperimentOrder,TextureID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,IsTouchPoint,IsOnTrack,SketchingPointID,XSketchingPoint,YSketchingPoint");
+            _sketchingSW.WriteLine("ParticipantID,IsTraining,ExperimentOrder,TextureID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,IsTouchPoint,IsOnTrack,SketchingPointID,XSketchingPoint,YSketchingPoint,IsReversed");
+            _sketchingSWReverted.WriteLine("ParticipantID,IsTraining,ExperimentOrder,TextureID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,IsTouchPoint,IsOnTrack,SketchingPointID,XSketchingPoint,YSketchingPoint,IsReversed");
+
             _summarySW.WriteLine("ParticipantID,IsTraining,ExperimentOrder,TextureID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration");
 
             _experimentStartTime = Time.time;
@@ -384,7 +404,39 @@ public class SimpleGame : MonoBehaviour
                         _puzzleMatchingSW.Close();
                     }
 
-                    if (!_puzzleMaker.isSketchStarted && _stateChangeTime < 0)
+                    if(_puzzleMaker.isFirstSketchDone && !_puzzleMaker.isTexturePointsReverted)
+                    {
+                        if(!isSummaryLogForNonReverted)
+                        {
+                            _summarySW.WriteLine(_participantID
+                                             + ","
+                                             + _isTraining.ToString()
+                                             + ","
+                                             + _experimentOrder.ToString()
+                                             + ","
+                                             + _textureID.ToString()
+                                             + ","
+                                             + "SKETCHING,"
+                                             + _usingTablet.ToString()
+                                             + ","
+                                             + _usingController.ToString()
+                                             + ","
+                                             + _usingMouse.ToString()
+                                             + ","
+                                             + _sketchingStartTime.ToString()
+                                             + ","
+                                             + Time.time.ToString()
+                                             + ","
+                                             + (Time.time - _sketchingStartTime).ToString());
+
+                            isSummaryLogForNonReverted = true;
+                        }
+
+                        _puzzleMaker.ReverseTexturePoints(_isTraining, _textureID);
+                        _puzzleMaker.isTexturePointsReverted = true;
+                        _stateChangeTime = _betweenSketchesTime - 0.001f;
+                    }
+                    else if (!_puzzleMaker.isSketchStarted && _stateChangeTime < 0 && (!_puzzleMaker.isFirstSketchDone || (_puzzleMaker.isFirstSketchDone && _puzzleMaker.isTexturePointsReverted)))
                     {
                         _puzzleMaker.isSketchStarted = true;
                         _sketchingStartTime = Time.time;
@@ -409,19 +461,23 @@ public class SimpleGame : MonoBehaviour
                             (tabletController as VirtualPadController)._gazeCanShiftWithOneFinger = false;
                         }
                         _puzzleMaker._statusObject.GetComponent<Text>().alignment = TextAnchor.MiddleCenter;
-                        _puzzleMaker._statusObject.GetComponent<Text>().fontSize = 10;
+                        _puzzleMaker._statusObject.GetComponent<Text>().fontSize = 8;
 
                         if (_stateChangeTime < 10)
                         {
                             _puzzleMaker._puzzleDoneObject.SetActive(true);
                             _puzzleMaker.puzzleMasterObject.SetActive(false);
                             _puzzleMaker._statusObject.GetComponent<Text>().color = Color.blue;
-                            _puzzleMaker._statusObject.GetComponent<Text>().text = "Please start sketching\nfrom RED point to BLUE point.\n\nafter " + ((int)_stateChangeTime + 1).ToString() + " seconds";
+
+                            if (!_puzzleMaker.isFirstSketchDone)
+                                _puzzleMaker._statusObject.GetComponent<Text>().text = "FIRST SKETCH\n\n" + ((int)_stateChangeTime + 1).ToString() + "s \n\nPlease start sketching\nfrom RED point to BLUE point.";
+                            else
+                                _puzzleMaker._statusObject.GetComponent<Text>().text = "SECOND SKETCH\n\n" + ((int)_stateChangeTime + 1).ToString() + "s \n\nPlease start sketching\nfrom RED point to BLUE point.";
                         }
                         else
                         {
                             _puzzleMaker._statusObject.GetComponent<Text>().color = Color.green;
-                            _puzzleMaker._statusObject.GetComponent<Text>().text = "PUZZLE MATCHING IS SUCCESSFULLY DONE!\n\n" + ((int)_stateChangeTime + 1).ToString();
+                            _puzzleMaker._statusObject.GetComponent<Text>().text = "PUZZLE MATCHING IS SUCCESSFULLY DONE!\n\nNext task instruction will be presented in\n" + ((int)_stateChangeTime + 1 - 10).ToString() + "s";
                         }
 
                         _stateChangeTime -= Time.deltaTime;                    
@@ -437,46 +493,53 @@ public class SimpleGame : MonoBehaviour
                         (tabletController as VirtualPadController)._gazeCanShiftWithOneFinger = true;
                     }
 
-                    if (_sketchingSW != null && !_isSketchingLog)
+                    if(!_isSketchingLog)
                     {
-                        foreach(var e in _puzzleMaker._sketchingLogList)
-                        {
-                            _sketchingSW.WriteLine(_participantID
-                                                   + ","
-                                                   + _isTraining.ToString()
-                                                   + ","
-                                                   + _experimentOrder.ToString()
-                                                   + ","
-                                                   + _textureID.ToString()
-                                                   + ","
-                                                   + e.Stage
-                                                   + ","
-                                                   + _usingTablet.ToString()
-                                                   + ","
-                                                   + _usingController.ToString()
-                                                   + ","
-                                                   + _usingMouse.ToString()
-                                                   + ","
-                                                   + e.StartTime
-                                                   + ","
-                                                   + e.EndTime
-                                                   + ","
-                                                   + e.Duration
-                                                   + ","
-                                                   + e.IsTouchPoint
-                                                   + ","
-                                                   + e.IsOnTrack
-                                                   + ","
-                                                   + e.SketchingPointID
-                                                   + ","
-                                                   + e.XSketchPoint
-                                                   + ","
-                                                   + e.YSketchPoint);
-                        }
-
                         _isSketchingLog = true;
                         _sketchingSW.Close();
+                        _sketchingSWReverted.Close();
                     }
+
+                    //if (_sketchingSW != null && !_isSketchingLog)
+                    //{
+                    //    foreach(var e in _puzzleMaker._sketchingLogList)
+                    //    {
+                    //        _sketchingSW.WriteLine(_participantID
+                    //                               + ","
+                    //                               + _isTraining.ToString()
+                    //                               + ","
+                    //                               + _experimentOrder.ToString()
+                    //                               + ","
+                    //                               + _textureID.ToString()
+                    //                               + ","
+                    //                               + e.Stage
+                    //                               + ","
+                    //                               + _usingTablet.ToString()
+                    //                               + ","
+                    //                               + _usingController.ToString()
+                    //                               + ","
+                    //                               + _usingMouse.ToString()
+                    //                               + ","
+                    //                               + e.StartTime
+                    //                               + ","
+                    //                               + e.EndTime
+                    //                               + ","
+                    //                               + e.Duration
+                    //                               + ","
+                    //                               + e.IsTouchPoint
+                    //                               + ","
+                    //                               + e.IsOnTrack
+                    //                               + ","
+                    //                               + e.SketchingPointID
+                    //                               + ","
+                    //                               + e.XSketchPoint
+                    //                               + ","
+                    //                               + e.YSketchPoint);
+                    //    }
+
+                    //    _isSketchingLog = true;
+                    //    _sketchingSW.Close();
+                    //}
 
                     if (_summarySW != null && !_isSummaryLog)
                     {
@@ -488,7 +551,7 @@ public class SimpleGame : MonoBehaviour
                                              + ","
                                              + _textureID.ToString()
                                              + ","
-                                             + "SKETCHING,"
+                                             + "SKETCHING_REVERTED,"
                                              + _usingTablet.ToString()
                                              + ","
                                              + _usingController.ToString()
@@ -986,7 +1049,10 @@ public class SimpleGame : MonoBehaviour
                                                            local2DPos.y,
                                                            _puzzleMaker._largeScreenObject.transform.position.z - 1.5f);
 
-                            _puzzleMaker.CheckSketch(rayPoint);
+                            if(_puzzleMaker.isFirstSketchDone)
+                                _puzzleMaker.CheckSketch(rayPoint, _sketchingSWReverted, _participantID, _isTraining, _experimentOrder, _textureID, _usingTablet, _usingController, _usingMouse);
+                            else
+                                _puzzleMaker.CheckSketch(rayPoint, _sketchingSW, _participantID, _isTraining, _experimentOrder, _textureID, _usingTablet, _usingController, _usingMouse);
 
                             _currentGesture = null;
                         }
@@ -1033,10 +1099,13 @@ public class SimpleGame : MonoBehaviour
         if(_puzzleMatchingSW != null)
             _puzzleMatchingSW.Close();
 
-        if(_sketchingSW != null)
+        if (_sketchingSW != null)
             _sketchingSW.Close();
 
-        if(_summarySW != null)
+        if (_sketchingSWReverted != null)
+            _sketchingSWReverted.Close();
+
+        if (_summarySW != null)
             _summarySW.Close();
     }
 }

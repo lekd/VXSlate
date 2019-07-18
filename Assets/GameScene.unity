@@ -1810,8 +1810,8 @@ MonoBehaviour:
   _isExperimental: 0
   _textureID: 1
   _experimentOrder: 1
-  _usingTablet: 1
-  _usingController: 0
+  _usingTablet: 0
+  _usingController: 1
   _usingMouse: 0
   _isExperimentStarted: 0
   _isExperimentFinished: 0
@@ -1819,7 +1819,8 @@ MonoBehaviour:
   _isSketchingLog: 0
   _isSummaryLog: 0
   _prepareTime: 5
-  _stateChangeTime: 10
+  _stateChangeTime: 15
+  _betweenSketchesTime: 9.9
   _isSketchTesting: 1
   _puzzleMakerObject: {fileID: 1827507204}
   tabletControllerObj: {fileID: 788566888}
@@ -2366,14 +2367,18 @@ MonoBehaviour:
   _screenMaterial: {fileID: 2100000, guid: 0162f4feda0d23649aa23abbd612410f, type: 2}
   _puzzle1O: {fileID: 2800000, guid: 60285f7aea92b934e9cccff60ddbb87e, type: 3}
   _puzzle1L: {fileID: 2800000, guid: 441b27734cedfd64cb9ece71333f8e51, type: 3}
+  _puzzle1L_Reverted: {fileID: 2800000, guid: 7816ef78517fc214aa0cb725ba9eb88d, type: 3}
   _puzzle2O: {fileID: 2800000, guid: 9485571002e0c94478ff948a6539d773, type: 3}
   _puzzle2L: {fileID: 2800000, guid: 75422f0c866c2cd4fada274295100740, type: 3}
+  _puzzle2L_Reverted: {fileID: 2800000, guid: 8fa586bcd80a48c41ac1f1cfc23df3f2, type: 3}
   _trainingO: {fileID: 2800000, guid: fe5137867b7f94147bc69691c07da2a4, type: 3}
   _trainingL: {fileID: 2800000, guid: e1d1d1d88d8ef314d8a98c4c3abefe04, type: 3}
+  _trainingL_Reverted: {fileID: 2800000, guid: f0065e3842c4941479a8a5741190e2af, type: 3}
   _startButtonTexture: {fileID: 2800000, guid: eef9bc0f3ce2186468416101a598ae68, type: 3}
   _gridPieceTexture: {fileID: 2800000, guid: 48b8100379888e148adc6ca96f78871b, type: 3}
   _sampleMaterial: {fileID: 0}
   puzzleMasterObject: {fileID: 0}
+  _sketchedBrush: 20
   _statusFont: {fileID: 12800000, guid: 8aecb189dbe04544898c10896c953cf9, type: 3}
   _puzzleDoneObject: {fileID: 0}
   _statusObject: {fileID: 0}
@@ -2384,6 +2389,8 @@ MonoBehaviour:
   isInLinePoints: 0
   isInEndPoints: 0
   isSketchingOnTrack: 0
+  isFirstSketchDone: 0
+  isTexturePointsReverted: 0
   isSketchDoneSucessfully: 0
 --- !u!4 &1827507206
 Transform:
