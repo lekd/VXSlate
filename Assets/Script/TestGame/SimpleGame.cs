@@ -235,7 +235,7 @@ public class SimpleGame : MonoBehaviour
             _puzzleMaker._statusObject.GetComponent<Text>().text = "ARE YOU READY?\n" + ((int)_prepareTime + 1).ToString();
             _puzzleMaker._statusObject.GetComponent<Text>().font = _puzzleMaker._statusFont;
             _puzzleMaker._statusObject.GetComponent<Text>().color = Color.blue;
-            _puzzleMaker._statusObject.GetComponent<Text>().fontSize = 28;
+            _puzzleMaker._statusObject.GetComponent<Text>().fontSize = 30;
             _puzzleMaker._statusObject.GetComponent<Text>().alignment = TextAnchor.MiddleCenter;
 
             _prepareTime -= Time.deltaTime;
@@ -451,7 +451,7 @@ public class SimpleGame : MonoBehaviour
                         _puzzleMaker._statusObject.GetComponent<Text>().color = Color.black;
                         _puzzleMaker._statusObject.GetComponent<Text>().fontSize = 5;
                         _puzzleMaker._statusObject.GetComponent<Text>().alignment = TextAnchor.LowerCenter;
-                        _puzzleMaker._statusObject.GetComponent<Text>().text = "Please start sketching from RED point to BLUE point.";
+                        _puzzleMaker._statusObject.GetComponent<Text>().text = "Please start sketching from the RED point to the BLUE point.";
                     }
                     else if(_stateChangeTime > 0)
                     {
@@ -461,7 +461,7 @@ public class SimpleGame : MonoBehaviour
                             (tabletController as VirtualPadController)._gazeCanShiftWithOneFinger = false;
                         }
                         _puzzleMaker._statusObject.GetComponent<Text>().alignment = TextAnchor.MiddleCenter;
-                        _puzzleMaker._statusObject.GetComponent<Text>().fontSize = 8;
+                        _puzzleMaker._statusObject.GetComponent<Text>().fontSize = 7;
 
                         if (_stateChangeTime < 10)
                         {
@@ -470,9 +470,9 @@ public class SimpleGame : MonoBehaviour
                             _puzzleMaker._statusObject.GetComponent<Text>().color = Color.blue;
 
                             if (!_puzzleMaker.isFirstSketchDone)
-                                _puzzleMaker._statusObject.GetComponent<Text>().text = "FIRST SKETCH\n\n" + ((int)_stateChangeTime + 1).ToString() + "s \n\nPlease start sketching\nfrom RED point to BLUE point.";
+                                _puzzleMaker._statusObject.GetComponent<Text>().text = "FIRST SKETCH\n\n" + ((int)_stateChangeTime + 1).ToString() + "s \n\nPlease start sketching\nfrom the RED point to the BLUE point.";
                             else
-                                _puzzleMaker._statusObject.GetComponent<Text>().text = "SECOND SKETCH\n\n" + ((int)_stateChangeTime + 1).ToString() + "s \n\nPlease start sketching\nfrom RED point to BLUE point.";
+                                _puzzleMaker._statusObject.GetComponent<Text>().text = "SECOND SKETCH\n\n" + ((int)_stateChangeTime + 1).ToString() + "s \n\nPlease start sketching\nfrom the RED point to the BLUE point.";
                         }
                         else
                         {
