@@ -1085,7 +1085,7 @@ public class PuzzleMaker : MonoBehaviour
                         //puzzlePiece.GameObject.transform.position = gridPiece.GameObject.transform.position;
                         //puzzlePiece.GameObject.transform.rotation = gridPiece.GameObject.transform.rotation;
                         //puzzlePiece.GameObject.transform.localScale = gridPiece.GameObject.transform.localScale;
-                        Debug.Log(puzzlePiece.Name + " is located correctly!");
+                        //Debug.Log(puzzlePiece.Name + " is located correctly!");
                     }
                     else
                     {
