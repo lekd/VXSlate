@@ -17,8 +17,10 @@ public class OculusController : MonoBehaviour, IRemoteController
     event GestureRecognizedEventCallback gestureRecognizedBroadcaster = null;
     TouchGesture previousGesture;
 
-    Vector2 _currentMousePosition;
-    Vector2 _previousMousePosition;
+    Vector2 _currentLeftPosition;
+    Vector2 _currentRightPosition;
+    Vector2 _previousLeftPosition;
+    Vector2 _previousRightPosition;
 
     Vector3 _previousLeftControllerPosition;
     Vector3 _currentLeftControllerPosition;
@@ -28,8 +30,9 @@ public class OculusController : MonoBehaviour, IRemoteController
     Vector3 _previousLeftControllerOrientation;
     Vector3 _previousRightControllerOrientation;
 
-    bool _isLeftControllerDown;
-    bool _isRightControllerDown;
+    bool _isLeftFirst = false;
+    bool _isLeftControllerDown = false;
+    bool _isRightControllerDown = false;
     bool _isPreviousPositionLogReset = false;
 
     // Start is called before the first frame update
@@ -38,10 +41,7 @@ public class OculusController : MonoBehaviour, IRemoteController
         _laserLine = GetComponent<LineRenderer>();
         _laserLine.startWidth = 0.0025f;
         _laserLine.endWidth = 0.01f;
-        //_laserLine.startColor = Color.cyan;
-        //_laserLine.endColor = Color.cyan;
-        //_laserLine.material = _laserLine.materials[0];
-        //_laserLine.material.color = Color.cyan;
+
         previousGesture = new TouchGesture();
         previousGesture.GestureType = GestureType.NONE;
 
@@ -52,84 +52,58 @@ public class OculusController : MonoBehaviour, IRemoteController
     // Update is called once per frame
     void Update()
     {
-        if (_rightController != null)
-        {
-            _laserLine.SetPosition(0, _rightController.transform.position);
-
-            RaycastHit hitInfo = new RaycastHit();
-
-            bool hit = Physics.Raycast(_rightController.transform.position, _rightController.transform.rotation * Vector3.forward, out hitInfo);
-
-            if(hit)
-            {               
-                _laserLine.SetPosition(1, hitInfo.point);
-            }
-        }
-        else
-        {
-            _laserLine.SetPosition(0, new Vector3(0, 0, 0));
-        }
-
         TouchGesture touchDownGesture = new TouchGesture();
 
-        _currentMousePosition = GetMousePosition();
+        _currentLeftPosition = GetPosition(true);
+        _currentRightPosition = GetPosition(false);
 
-        if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.RTouch))
+        if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.RTouch) || OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.LTouch))
         {
-            if (!_isRightControllerDown)
+            if (!_isLeftControllerDown && !_isRightControllerDown)
+            {
+                touchDownGesture.GestureType = GestureType.SINGLE_TOUCH_DOWN;
+
+                if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.RTouch))
+                {
+                    _isRightControllerDown = true;
+
+                    _isLeftFirst = true;
+                    touchDownGesture.MetaData = new Vector2[] { _currentRightPosition, Vector2.zero, Vector2.zero }; // new Vector2(0, 0);//some mouse down position normalized to -0.5 and 0.5 //then notify the game to know about the event
+
+                    Debug.Log("Controller is down at (" + _currentRightPosition + ")");
+                }
+                else if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.LTouch))
+                {
+                    _isLeftControllerDown = true;
+                    _isLeftFirst = true;
+                    touchDownGesture.MetaData = new Vector2[] { _currentLeftPosition, Vector2.zero, Vector2.zero }; // new Vector2(0, 0);//some mouse down position normalized to -0.5 and 0.5 //then notify the game to know about the event
+                    
+                    Debug.Log("Controller is down at (" + _currentLeftPosition + ")");
+                }
+
+                _previousLeftPosition = _currentLeftPosition;
+                _previousRightPosition = _currentRightPosition;
+
+                if (gestureRecognizedBroadcaster != null)
+                {
+                    gestureRecognizedBroadcaster(touchDownGesture);
+                    previousGesture = touchDownGesture;
+                }
+            }
+
+            if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.LTouch))
+            {
+                _isLeftControllerDown = true;
+            }
+            if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.RTouch))
             {
                 _isRightControllerDown = true;
-
-                touchDownGesture.GestureType = GestureType.SINGLE_TOUCH_DOWN;
-                touchDownGesture.MetaData = new Vector2[] { _currentMousePosition, Vector2.zero, Vector2.zero }; // new Vector2(0, 0);//some mouse down position normalized to -0.5 and 0.5
-                                                                  //then notify the game to know about the event
-
-                _previousMousePosition = _currentMousePosition;
-
-                if (gestureRecognizedBroadcaster != null)
-                {
-                    gestureRecognizedBroadcaster(touchDownGesture);
-                    previousGesture = touchDownGesture;
-                }
-
-                Debug.Log("Controller is down at (" + _currentMousePosition + ")");
-            }            
-        }
-
-        if (OVRInput.GetUp(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.RTouch))
-        {
-            _isRightControllerDown = false;
-            _isPreviousPositionLogReset = false;
-
-            if (previousGesture.GestureType != GestureType.NONE)
-            {
-                touchDownGesture.GestureType = GestureType.NONE;
-                touchDownGesture.MetaData = new Vector2[] { Vector2.zero, Vector2.zero, Vector2.zero }; //some mouse down position normalized to -0.5 and 0.5
-                                                              //then notify the game to know about the event
-                if (gestureRecognizedBroadcaster != null)
-                {
-                    gestureRecognizedBroadcaster(touchDownGesture);
-                    previousGesture = touchDownGesture;
-                }
-
-                Debug.Log("Mouse is up!");
             }
         }
-
-        if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.LTouch))
-        {
-            _isLeftControllerDown = true;
-        }
-
-        if (OVRInput.GetUp(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.LTouch))
-        {
-            _isLeftControllerDown = false;
-            _isPreviousPositionLogReset = false;
-        }
         
-        if (_isRightControllerDown)
+        if (_isRightControllerDown || _isLeftControllerDown)
         {
-            if(_isLeftControllerDown)
+            if(_isLeftControllerDown && _isRightControllerDown)
             {
                 if (!_isPreviousPositionLogReset)
                 {
@@ -261,28 +235,116 @@ public class OculusController : MonoBehaviour, IRemoteController
             }
             else
             {
-                if (_previousMousePosition != null && _previousMousePosition != _currentMousePosition)
+                if(_isLeftFirst)
                 {
-                    touchDownGesture.GestureType = GestureType.SINGLE_TOUCH_MOVE;
-                    touchDownGesture.MetaData = new Vector2[] { _currentMousePosition, Vector2.zero, Vector2.zero }; // new Vector2(0, 0);//some mouse down position normalized to -0.5 and 0.5
-                                                                                                                               //then notify the game to know about the event
-                    _previousMousePosition = _currentMousePosition;
-
-                    if (gestureRecognizedBroadcaster != null)
+                    if (_isLeftControllerDown && _isLeftFirst && _previousLeftPosition != null && _previousLeftPosition != _currentLeftPosition)
                     {
-                        gestureRecognizedBroadcaster(touchDownGesture);
-                        previousGesture = touchDownGesture;
-                    }
+                        touchDownGesture.GestureType = GestureType.SINGLE_TOUCH_MOVE;
+                        touchDownGesture.MetaData = new Vector2[] { _currentLeftPosition, Vector2.zero, Vector2.zero }; // new Vector2(0, 0);//some mouse down position normalized to -0.5 and 0.5
+                                                                                                                        //then notify the game to know about the event
+                        _previousLeftPosition = _currentLeftPosition;
 
-                    Debug.Log("Controller is moved to (" + _currentMousePosition + ")");
+                        if (gestureRecognizedBroadcaster != null)
+                        {
+                            gestureRecognizedBroadcaster(touchDownGesture);
+                            previousGesture = touchDownGesture;
+                        }
+
+                        Debug.Log("Left Controller is moved to (" + _currentLeftPosition + ")");
+                    }
+                    else if (!_isLeftControllerDown && _isRightControllerDown && _previousRightPosition != null && _previousRightPosition != _currentRightPosition)
+                    {
+                        touchDownGesture.GestureType = GestureType.SINGLE_TOUCH_MOVE;
+                        touchDownGesture.MetaData = new Vector2[] { _currentRightPosition, Vector2.zero, Vector2.zero }; // new Vector2(0, 0);//some mouse down position normalized to -0.5 and 0.5
+                                                                                                                         //then notify the game to know about the event
+                        _previousRightPosition = _currentRightPosition;
+
+                        if (gestureRecognizedBroadcaster != null)
+                        {
+                            gestureRecognizedBroadcaster(touchDownGesture);
+                            previousGesture = touchDownGesture;
+                        }
+
+                        Debug.Log("Right Controller is moved to (" + _currentRightPosition + ")");
+                    }
                 }
+                else
+                {
+                    if (_isRightControllerDown && _previousRightPosition != null && _previousRightPosition != _currentRightPosition)
+                    {
+                        touchDownGesture.GestureType = GestureType.SINGLE_TOUCH_MOVE;
+                        touchDownGesture.MetaData = new Vector2[] { _currentRightPosition, Vector2.zero, Vector2.zero }; // new Vector2(0, 0);//some mouse down position normalized to -0.5 and 0.5
+                                                                                                                         //then notify the game to know about the event
+                        _previousRightPosition = _currentRightPosition;
+
+                        if (gestureRecognizedBroadcaster != null)
+                        {
+                            gestureRecognizedBroadcaster(touchDownGesture);
+                            previousGesture = touchDownGesture;
+                        }
+
+                        Debug.Log("Right Controller is moved to (" + _currentRightPosition + ")");
+                    }
+                    else if (!_isRightControllerDown && _isLeftControllerDown && _previousLeftPosition != null && _previousLeftPosition != _currentLeftPosition)
+                    {
+                        touchDownGesture.GestureType = GestureType.SINGLE_TOUCH_MOVE;
+                        touchDownGesture.MetaData = new Vector2[] { _currentLeftPosition, Vector2.zero, Vector2.zero }; // new Vector2(0, 0);//some mouse down position normalized to -0.5 and 0.5
+                                                                                                                        //then notify the game to know about the event
+                        _previousLeftPosition = _currentLeftPosition;
+
+                        if (gestureRecognizedBroadcaster != null)
+                        {
+                            gestureRecognizedBroadcaster(touchDownGesture);
+                            previousGesture = touchDownGesture;
+                        }
+
+                        Debug.Log("Left Controller is moved to (" + _currentLeftPosition + ")");
+                    }
+                }
+                
             }
-        }        
+        }
+
+        if (OVRInput.GetUp(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.RTouch))
+        {
+            _isRightControllerDown = false;
+            _isPreviousPositionLogReset = false;            
+        }
+
+        if (OVRInput.GetUp(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.LTouch))
+        {
+            _isLeftControllerDown = false;
+            _isPreviousPositionLogReset = false;
+        }
+
+        if(!_isLeftControllerDown && !_isRightControllerDown)
+        {
+            if (previousGesture.GestureType != GestureType.NONE)
+            {
+                touchDownGesture.GestureType = GestureType.NONE;
+                touchDownGesture.MetaData = new Vector2[] { Vector2.zero, Vector2.zero, Vector2.zero }; //some mouse down position normalized to -0.5 and 0.5
+                                                                                                        //then notify the game to know about the event
+                if (gestureRecognizedBroadcaster != null)
+                {
+                    gestureRecognizedBroadcaster(touchDownGesture);
+                    previousGesture = touchDownGesture;
+                }
+
+                _isLeftFirst = false;
+
+                Debug.Log("Mouse is up!");
+            }
+        }
     }
 
-    private Vector2 GetMousePosition()
+    private Vector2 GetPosition(bool isLeft)
     {
-        RaycastHit[] hits = Physics.RaycastAll(_rightController.transform.position, _rightController.transform.rotation * Vector3.forward);
+        RaycastHit[] hits;
+        
+        if(isLeft)
+            hits = Physics.RaycastAll(_leftController.transform.position, _leftController.transform.rotation * Vector3.forward);
+        else
+            hits = Physics.RaycastAll(_rightController.transform.position, _rightController.transform.rotation * Vector3.forward);
 
         foreach (var hitInfo in hits)
         {
