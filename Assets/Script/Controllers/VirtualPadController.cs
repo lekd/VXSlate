@@ -452,8 +452,10 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                         {
                             latestSingleTouchDown = new TouchGesture();
                             latestSingleTouchDown.GestureType = GestureType.SINGLE_TOUCH_DOWN;
-                            latestSingleTouchDown.MetaData = new Vector2((gestureData[1].x+gestureData[2].x)/2,
-                                                                        (gestureData[1].y + gestureData[2].y)/ 2);
+                            Vector2[] singleTouchData = new Vector2[3];
+                            singleTouchData[0] = new Vector2((gestureData[1].x + gestureData[2].x) / 2,
+                                                                        (gestureData[1].y + gestureData[2].y) / 2);
+                            latestSingleTouchDown.MetaData = singleTouchData;
                         }
                         gestureRecognizedBroadcaster(latestSingleTouchDown);
                         //latestSingleTouchDown = null;

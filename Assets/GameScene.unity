@@ -1917,8 +1917,8 @@ MonoBehaviour:
   _isExperimental: 0
   _textureID: 1
   _experimentOrder: 1
-  _usingTablet: 0
-  _usingController: 1
+  _usingTablet: 1
+  _usingController: 0
   _usingMouse: 0
   _isExperimentStarted: 0
   _isExperimentFinished: 0
