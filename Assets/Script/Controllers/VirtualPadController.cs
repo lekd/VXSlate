@@ -197,40 +197,40 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                     break;
                 }
             }
-            if(!isHittingPad)
+            for (int i = 0; i < allHits.Length; i++)
             {
-                for (int i = 0; i < allHits.Length; i++)
+                if (allHits[i].collider.name.CompareTo(boardObject.name) == 0)
                 {
-                    if (allHits[i].collider.name.CompareTo(boardObject.name) == 0)
+                    Vector3 hitPos = allHits[i].point;
+                    //Vector3 curGazeAreaCenter = gazeAreaObject.transform.position;
+                    //Vector3 newGazeAreaCenter = new Vector3(hitPos.x, hitPos.y, curGazeAreaCenter.z);
+                    //newGazeAreaCenter = GlobalUtilities.boundPointToContainer(newGazeAreaCenter, board2DBound);
+                    //gazeAreaObject.transform.Translate(newGazeAreaCenter - curGazeAreaCenter);
+                    if (!isHittingPad)
                     {
-                        Vector3 hitPos = allHits[i].point;
-                        hitPos.z = PAD_Z;
+                        Vector3 padHitPos = hitPos;
+                        padHitPos.z = PAD_Z;
                         Vector3 curPadCenter = gameObject.transform.position;
-                        Vector2 transDistance2D = new Vector2(hitPos.x - latestGazeInPad.x, hitPos.y - latestGazeInPad.y);
+                        Vector2 transDistance2D = new Vector2(padHitPos.x - latestGazeInPad.x, padHitPos.y - latestGazeInPad.y);
                         Vector3 newPadCenter = new Vector3(curPadCenter.x + transDistance2D.x, curPadCenter.y + transDistance2D.y, PAD_Z);
                         newPadCenter = GlobalUtilities.boundPointToContainer(newPadCenter, board2DBound);
                         if (_gazeCanShift)
                         {
                             gameObject.transform.Translate(newPadCenter.x - curPadCenter.x, newPadCenter.y - curPadCenter.y, 0);
-                            latestGazeInPad = hitPos;
+                            latestGazeInPad = padHitPos;
                         }
                         //Vector3 newPadPos = GlobalUtilities.boundPointToContainer(hitPos, board2DBound);
                         //gameObject.transform.Translate(new Vector3(newPadPos.x - curPadPos.x, newPadPos.y - curPadPos.y, newPadPos.z - curPadPos.z + VIRTUALPAD_DEPTHOFFSET));
 
                         break;
                     }
-                }
-            }
-            else
-            {
-                for (int i = 0; i < allHits.Length; i++)
-                {
-                    if (allHits[i].collider.name.CompareTo(boardObject.name) == 0)
+                    else
                     {
                         latestGazeInPad = allHits[i].point;
                         latestGazeInPad.z = PAD_Z;
                         break;
                     }
+                        
                 }
             }
         }
