@@ -1086,7 +1086,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &597902544
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1394,7 +1394,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &788566889
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2712,6 +2712,7 @@ MonoBehaviour:
   _usingTablet: 1
   _usingController: 0
   _usingMouse: 0
+  _usingTabletEF: 0
   _isExperimentStarted: 0
   _isExperimentFinished: 0
   _isMatchingLog: 0
@@ -2722,10 +2723,12 @@ MonoBehaviour:
   _betweenSketchesTime: 9.9
   _isSketchTesting: 0
   _puzzleMakerObject: {fileID: 1827507204}
-  tabletControllerObj: {fileID: 597902543}
+  tabletControllerObj: {fileID: 788566888}
+  efTabletControllerObj: {fileID: 597902543}
   oculusControllerObj: {fileID: 1349240420}
   mouseControllerObj: {fileID: 1132650032}
-  _virtualPadObject: {fileID: 597902543}
+  _virtualPadObject: {fileID: 788566888}
+  _virtualPadEFObject: {fileID: 597902543}
   _gazeObject: {fileID: 2079460649}
   _tabletInstructionObject: {fileID: 1605168026}
   _leftOculusControllerObject: {fileID: 1395257180}

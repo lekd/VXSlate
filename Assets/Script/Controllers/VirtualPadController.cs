@@ -299,7 +299,9 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
     TouchGesture latestSingleTouchDown = null;
     void gestureRecognizedHandler(TouchGesture recognizedGesture)
     {
-        if(recognizedGesture.GestureType == GestureType.NONE)
+        Debug.Log("Tablet Received " + recognizedGesture.GestureType);
+
+        if (recognizedGesture.GestureType == GestureType.NONE)
         {
             isMultiTouch = false;
         }
@@ -385,6 +387,8 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                     recognizedGesture.MetaData = eventData;
                     if(recognizedGesture.GestureType == GestureType.SINGLE_TOUCH_DOWN)
                     {
+
+                        
                         //latestSingleTouchDown = recognizedGesture;
                         if (gestureRecognizedBroadcaster != null)
                         {
@@ -452,8 +456,10 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                         {
                             latestSingleTouchDown = new TouchGesture();
                             latestSingleTouchDown.GestureType = GestureType.SINGLE_TOUCH_DOWN;
-                            latestSingleTouchDown.MetaData = new Vector2((gestureData[1].x+gestureData[2].x)/2,
-                                                                        (gestureData[1].y + gestureData[2].y)/ 2);
+                            Vector2[] tempTouchData = new Vector2[3];
+                            tempTouchData[0] = new Vector2((gestureData[1].x + gestureData[2].x) / 2,
+                                                                        (gestureData[1].y + gestureData[2].y) / 2);
+                            latestSingleTouchDown.MetaData = tempTouchData;
                         }
                         gestureRecognizedBroadcaster(latestSingleTouchDown);
                         //latestSingleTouchDown = null;

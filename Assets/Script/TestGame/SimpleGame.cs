@@ -27,6 +27,7 @@ public class SimpleGame : MonoBehaviour
     public bool _usingTablet = false;
     public bool _usingController = false;
     public bool _usingMouse = false;
+    public bool _usingTabletEF = false;
 
     [Header("Experiment Stage")]
     [Tooltip("For observing which stage the experiment is running")]
@@ -48,11 +49,13 @@ public class SimpleGame : MonoBehaviour
     [Header("Experiment Objects")]
     public GameObject _puzzleMakerObject;
     public GameObject tabletControllerObj;
+    public GameObject efTabletControllerObj;
     public GameObject oculusControllerObj;
     public GameObject mouseControllerObj;
     private Texture2D screenTexture;
 
     public GameObject _virtualPadObject;
+    public GameObject _virtualPadEFObject;
     public GameObject _gazeObject;
     public GameObject _tabletInstructionObject;
     public GameObject _leftOculusControllerObject;
@@ -62,6 +65,7 @@ public class SimpleGame : MonoBehaviour
     Vector2 gameSize = new Vector2();
 
     IRemoteController tabletController;
+    IRemoteController efTabletController;
     IRemoteController mouseController;
     IRemoteController oculusController;
 
@@ -109,7 +113,7 @@ public class SimpleGame : MonoBehaviour
         _isSummaryLog = false;
 
 
-        if (!_usingController && !_usingMouse && !_usingTablet)
+        if (!_usingController && !_usingMouse && !_usingTablet && !_usingTabletEF)
         {
             Debug.LogError("No interaction technique is selected! Please to using Controler or using Tablet or using Mouse.");
         }
@@ -132,6 +136,11 @@ public class SimpleGame : MonoBehaviour
                 if (_virtualPadObject != null)
                     _virtualPadObject.SetActive(false);
 
+                if (_virtualPadEFObject != null)
+                {
+                    _virtualPadEFObject.SetActive(false);
+                }
+
                 if (_gazeObject != null)
                     _gazeObject.SetActive(false);
 
@@ -141,11 +150,17 @@ public class SimpleGame : MonoBehaviour
                 if (tabletControllerObj != null)
                     tabletControllerObj.SetActive(false);
 
+                if (efTabletControllerObj != null)
+                {
+                    efTabletControllerObj.SetActive(false);
+                }
+
                 if (mouseControllerObj!= null)
                     mouseControllerObj.SetActive(false);
 
                 _usingTablet = false;
                 _usingMouse = false;
+                _usingTabletEF = false;
             }
             else if (_usingTablet)
             {
@@ -159,6 +174,10 @@ public class SimpleGame : MonoBehaviour
                 else
                 {
                     Debug.LogWarning("Missing Tablet Controller Object!", tabletControllerObj);
+                }
+                if (efTabletControllerObj != null)
+                {
+                    efTabletControllerObj.SetActive(false);
                 }
 
                 if (_leftOculusControllerObject != null)
@@ -176,8 +195,53 @@ public class SimpleGame : MonoBehaviour
                 if (mouseControllerObj != null)
                     mouseControllerObj.SetActive(false);
 
+                if (_virtualPadEFObject != null)
+                {
+                    _virtualPadEFObject.SetActive(false);
+                }
+
                 _usingController = false;
                 _usingMouse = false;
+                _usingTabletEF = false;
+            }
+            else if(_usingTabletEF)
+            {
+                efTabletController = efTabletControllerObj.GetComponent<IRemoteController>();
+                if(efTabletController != null)
+                {
+                    efTabletController.setGestureRecognizedCallback(this.handleControlGesture);
+                    efTabletController.setModeSwitchedCallback(this.handleEditModeChanged);
+                }
+                else
+                {
+                    Debug.LogWarning("Missing Eye-Free Tablet Controller Object!", tabletControllerObj);
+                }
+                if(tabletControllerObj != null)
+                {
+                    tabletControllerObj.SetActive(false);
+                }
+
+                if (_leftOculusControllerObject != null)
+                    _leftOculusControllerObject.SetActive(false);
+
+                if (_rightOculusControllerObject != null)
+                    _rightOculusControllerObject.SetActive(false);
+
+                if (_oculusControllerInstructionObject != null)
+                    _oculusControllerInstructionObject.SetActive(false);
+
+                if (oculusControllerObj != null)
+                    oculusControllerObj.SetActive(false);
+
+                if (mouseControllerObj != null)
+                    mouseControllerObj.SetActive(false);
+
+                if (_virtualPadObject != null)
+                    _virtualPadObject.SetActive(false);
+
+                _usingController = false;
+                _usingMouse = false;
+                _usingTablet = false;
             }
             else
             {
@@ -192,7 +256,13 @@ public class SimpleGame : MonoBehaviour
                 {
                     Debug.LogWarning("Missing Mouse Controller Object!", mouseControllerObj);
                 }
+                if (tabletControllerObj != null)
+                    tabletControllerObj.SetActive(false);
 
+                if (efTabletControllerObj != null)
+                {
+                    efTabletControllerObj.SetActive(false);
+                }
 
                 if (_leftOculusControllerObject != null)
                     _leftOculusControllerObject.SetActive(false);
@@ -203,8 +273,6 @@ public class SimpleGame : MonoBehaviour
                 if (_oculusControllerInstructionObject != null)
                     _oculusControllerInstructionObject.SetActive(false);
 
-                if (_virtualPadObject != null)
-                    _virtualPadObject.SetActive(false);
 
                 if (_gazeObject != null)
                     _gazeObject.SetActive(false);
@@ -215,11 +283,17 @@ public class SimpleGame : MonoBehaviour
                 if (oculusControllerObj != null)
                     oculusControllerObj.SetActive(false);
 
-                if (tabletControllerObj != null)
-                    tabletControllerObj.SetActive(false);
+                if (_virtualPadObject != null)
+                    _virtualPadObject.SetActive(false);
+
+                if (_virtualPadEFObject != null)
+                {
+                    _virtualPadEFObject.SetActive(false);
+                }
 
                 _usingController = false;
                 _usingTablet = false;
+                _usingTabletEF = false;
             }            
 
             hasTouchDown = false;            
@@ -314,11 +388,11 @@ public class SimpleGame : MonoBehaviour
             _sketchingSWReverted = new StreamWriter(sketchingRevertedFilename);
             _summarySW = new StreamWriter(summaryFilename);
 
-            _puzzleMatchingSW.WriteLine("ParticipantID,IsTraining,ExperimentOrder,TextureID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,MatchingPuzzleTime,PuzzleName,Action,DistanceMoved,ScaledLevel,RotatedAngle");
-            _sketchingSW.WriteLine("ParticipantID,IsTraining,ExperimentOrder,TextureID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,IsTouchPoint,IsOnTrack,SketchingPointID,XSketchingPoint,YSketchingPoint,IsReversed");
-            _sketchingSWReverted.WriteLine("ParticipantID,IsTraining,ExperimentOrder,TextureID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,IsTouchPoint,IsOnTrack,SketchingPointID,XSketchingPoint,YSketchingPoint,IsReversed");
+            _puzzleMatchingSW.WriteLine("ParticipantID,IsTraining,ExperimentOrder,TextureID,Stage,IsTablet,IsTabletEF,IsController,IsMouse,StartTime,EndTime,Duration,MatchingPuzzleTime,PuzzleName,Action,DistanceMoved,ScaledLevel,RotatedAngle");
+            _sketchingSW.WriteLine("ParticipantID,IsTraining,ExperimentOrder,TextureID,Stage,IsTablet,IsTabletEF,IsController,IsMouse,StartTime,EndTime,Duration,IsTouchPoint,IsOnTrack,SketchingPointID,XSketchingPoint,YSketchingPoint,IsReversed");
+            _sketchingSWReverted.WriteLine("ParticipantID,IsTraining,ExperimentOrder,TextureID,Stage,IsTablet,IsTabletEF,IsController,IsMouse,StartTime,EndTime,Duration,IsTouchPoint,IsOnTrack,SketchingPointID,XSketchingPoint,YSketchingPoint,IsReversed");
 
-            _summarySW.WriteLine("ParticipantID,IsTraining,ExperimentOrder,TextureID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration");
+            _summarySW.WriteLine("ParticipantID,IsTraining,ExperimentOrder,TextureID,Stage,IsTablet,IsTabletEF,IsController,IsMouse,StartTime,EndTime,Duration");
 
             _experimentStartTime = Time.time;
         }
@@ -342,6 +416,8 @@ public class SimpleGame : MonoBehaviour
                                          + ","
                                          + "MATCHING,"
                                          + _usingTablet.ToString()
+                                         + ","
+                                         + _usingTabletEF.ToString()
                                          + ","
                                          + _usingController.ToString()
                                          + ","
@@ -376,6 +452,8 @@ public class SimpleGame : MonoBehaviour
                                                         + "MATCHING"
                                                         + ","
                                                         + _usingTablet.ToString()
+                                                        + ","
+                                                        + _usingTabletEF.ToString()
                                                         + ","
                                                         + _usingController.ToString()
                                                         + ","
@@ -418,6 +496,8 @@ public class SimpleGame : MonoBehaviour
                                              + ","
                                              + "SKETCHING,"
                                              + _usingTablet.ToString()
+                                             + ","
+                                             + _usingTabletEF.ToString()
                                              + ","
                                              + _usingController.ToString()
                                              + ","
@@ -516,6 +596,8 @@ public class SimpleGame : MonoBehaviour
                     //                               + ","
                     //                               + _usingTablet.ToString()
                     //                               + ","
+                    //                               + _usingTabletEF.ToString()
+                    //                               +","
                     //                               + _usingController.ToString()
                     //                               + ","
                     //                               + _usingMouse.ToString()
@@ -553,6 +635,8 @@ public class SimpleGame : MonoBehaviour
                                              + ","
                                              + "SKETCHING_REVERTED,"
                                              + _usingTablet.ToString()
+                                             + ","
+                                             + _usingTabletEF.ToString()
                                              + ","
                                              + _usingController.ToString()
                                              + ","
