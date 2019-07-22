@@ -1086,7 +1086,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &597902544
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1394,7 +1394,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &788566889
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2320,7 +2320,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1395257180}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ca0a454d8b61ff3428181c285c349766, type: 3}
+  m_Script: {fileID: 11500000, guid: 1e6c816aec45d44448685537b68d038b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!120 &1395257182
@@ -2705,14 +2705,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _participantID: 
-  _isTraining: 1
-  _isExperimental: 0
-  _textureID: 1
+  _isTraining: 0
+  _isExperimental: 1
+  _textureID: 2
   _experimentOrder: 1
-  _usingTablet: 1
+  _usingTablet: 0
   _usingController: 0
   _usingMouse: 0
-  _usingTabletEF: 0
+  _usingTabletEF: 1
   _isExperimentStarted: 0
   _isExperimentFinished: 0
   _isMatchingLog: 0
@@ -3692,7 +3692,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1966686000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ca0a454d8b61ff3428181c285c349766, type: 3}
+  m_Script: {fileID: 11500000, guid: 1e6c816aec45d44448685537b68d038b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &1974273748

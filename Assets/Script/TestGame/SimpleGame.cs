@@ -540,6 +540,10 @@ public class SimpleGame : MonoBehaviour
                         {
                             (tabletController as VirtualPadController)._gazeCanShiftWithOneFinger = false;
                         }
+                        if(_usingTabletEF)
+                        {
+                            (efTabletController as VXSlateEFController)._gazeCanShiftWithOneFinger = false;
+                        }
                         _puzzleMaker._statusObject.GetComponent<Text>().alignment = TextAnchor.MiddleCenter;
                         _puzzleMaker._statusObject.GetComponent<Text>().fontSize = 7;
 
@@ -572,8 +576,11 @@ public class SimpleGame : MonoBehaviour
                     {
                         (tabletController as VirtualPadController)._gazeCanShiftWithOneFinger = true;
                     }
-
-                    if(!_isSketchingLog)
+                    if (_usingTabletEF)
+                    {
+                        (efTabletController as VXSlateEFController)._gazeCanShiftWithOneFinger = true;
+                    }
+                    if (!_isSketchingLog)
                     {
                         _isSketchingLog = true;
                         _sketchingSW.Close();
