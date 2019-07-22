@@ -28,6 +28,8 @@ public class VXSlateEFController : MonoBehaviour, IRemoteController
     Bounds boardObjectBound;
     Vector3 gazeAreaCenter;
     double gazeAreaRadius = 0;
+
+    Bounds virtualPadBound;
     Camera gameCamera;
     IGeneralPointerEventListener eventTouchListener;
     MenuItemListener[] menuItems = new MenuItemListener[2];
@@ -120,7 +122,7 @@ public class VXSlateEFController : MonoBehaviour, IRemoteController
             }
         }
         //get the 2D boundary of the board, which serve as the position limits of the virtual pad
-        Bounds virtualPadBound = gameObject.GetComponent<Collider>().bounds;
+        virtualPadBound = gameObject.GetComponent<Collider>().bounds;
         Rect padContainer2DBoundary = new Rect();
         padContainer2DBoundary.xMin = boardObjectBound.min.x + virtualPadBound.size.x / 2;
         padContainer2DBoundary.xMax = boardObjectBound.max.x - virtualPadBound.size.x / 2;
@@ -155,6 +157,7 @@ public class VXSlateEFController : MonoBehaviour, IRemoteController
             setMenuActiveness(false);
         }
         //update current size of the virtual flat boundary
+        virtualPadBound = gameObject.GetComponent<Collider>().bounds;
         padFlatBound.min = new Vector2(gameObject.GetComponent<Collider>().bounds.min.x, gameObject.GetComponent<Collider>().bounds.min.y);
         padFlatBound.max = new Vector2(gameObject.GetComponent<Collider>().bounds.max.x, gameObject.GetComponent<Collider>().bounds.max.y);
         localPadFlatCenter.Set((padFlatBound.center.x - boardFlatBound.center.x)/boardFlatBound.width, 
@@ -402,7 +405,7 @@ public class VXSlateEFController : MonoBehaviour, IRemoteController
                         //Debug.Log("StandardizedTouch: " + String.Format("({0},{1})", eventData[0].x, eventData[0].y));
                         
                         //latestSingleTouchDown = recognizedGesture;
-                        if (gestureRecognizedBroadcaster != null)
+                        if (gestureRecognizedBroadcaster != null && isPointInVirtualPad(gazeAreaCenter))
                         {
                             gestureRecognizedBroadcaster(recognizedGesture);
                             latestStandardizedSingleTouchDown = recognizedGesture;
@@ -442,21 +445,24 @@ public class VXSlateEFController : MonoBehaviour, IRemoteController
                 {
                     if (gestureRecognizedBroadcaster != null)
                     {
-                        if (latestStandardizedSingleTouchDown == null)
+                        if (isPointInVirtualPad(gazeAreaCenter))
                         {
-                            latestStandardizedSingleTouchDown = new TouchGesture();
-                            latestStandardizedSingleTouchDown.GestureType = GestureType.SINGLE_TOUCH_DOWN;
-                            Vector2[] touchDownData = new Vector2[3];
-                            touchDownData[0] = new Vector2((gestureData[1].x + gestureData[2].x) / 2,
-                                                                        (gestureData[1].y + gestureData[2].y) / 2);
-                            Vector2 absTouchOnBoard = relPosToAbsBoardPos(touchDownData[0]);
-                            if(!isPointInGazeArea(absTouchOnBoard))
+                            if (latestStandardizedSingleTouchDown == null)
                             {
-                                touchDownData[0] = AbsBoardPos2RelBoardPos(gazeAreaCenter);
+                                latestStandardizedSingleTouchDown = new TouchGesture();
+                                latestStandardizedSingleTouchDown.GestureType = GestureType.SINGLE_TOUCH_DOWN;
+                                Vector2[] touchDownData = new Vector2[3];
+                                touchDownData[0] = new Vector2((gestureData[1].x + gestureData[2].x) / 2,
+                                                                            (gestureData[1].y + gestureData[2].y) / 2);
+                                Vector2 absTouchOnBoard = relPosToAbsBoardPos(touchDownData[0]);
+                                if (!isPointInGazeArea(absTouchOnBoard))
+                                {
+                                    touchDownData[0] = AbsBoardPos2RelBoardPos(gazeAreaCenter);
+                                }
+                                latestStandardizedSingleTouchDown.MetaData = touchDownData;
                             }
-                            latestStandardizedSingleTouchDown.MetaData = touchDownData;
+                            gestureRecognizedBroadcaster(latestStandardizedSingleTouchDown);
                         }
-                        gestureRecognizedBroadcaster(latestStandardizedSingleTouchDown);
                         //latestSingleTouchDown = null;
                         gestureRecognizedBroadcaster(recognizedGesture);
                     }
@@ -518,6 +524,17 @@ public class VXSlateEFController : MonoBehaviour, IRemoteController
         dif.y = absPosOnBoard.y - gazeAreaCenter.y;
         double distanceToGazeCenter = Math.Sqrt(dif.x * dif.x + dif.y * dif.y);
         if(distanceToGazeCenter <= gazeAreaRadius)
+        {
+            return true;
+        }
+        return false;
+    }
+    bool isPointInVirtualPad(Vector3 absPointPos)
+    {
+        Vector3 padCenter = virtualPadBound.center;
+        Vector2 dif = new Vector2(absPointPos.x - padCenter.x, absPointPos.y - padCenter.y);
+        if(Math.Abs(dif.x) <= virtualPadBound.size.x/2
+            && Math.Abs(dif.y) <= virtualPadBound.size.y/2)
         {
             return true;
         }
