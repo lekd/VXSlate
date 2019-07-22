@@ -9,7 +9,7 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{96EBEDFF-04DB-5674-C2DD-4DAB160BB8B4}</ProjectGuid>
+    <ProjectGuid>{3539E051-4E22-9F3C-AC94-2E7FC632D4BB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -552,19 +552,19 @@
     <None Include="Assets\ExperimentResults\Experimental\PuzzleMatching\README.txt" />
     <None Include="Assets\Oculus\SampleFramework\Usage\DistanceGrab\Materials\CrosshairZCheat.shader" />
     <Reference Include="Unity.TextMeshPro.Editor">
-      <HintPath>E:/Chalmers/VXSlate/VXSlate_Oculus/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
+      <HintPath>C:/Users/duy/VXSlate/VXSlate_virtualpad_oculus/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.PackageManagerUI.Editor">
-      <HintPath>E:/Chalmers/VXSlate/VXSlate_Oculus/Library/ScriptAssemblies/Unity.PackageManagerUI.Editor.dll</HintPath>
+      <HintPath>C:/Users/duy/VXSlate/VXSlate_virtualpad_oculus/Library/ScriptAssemblies/Unity.PackageManagerUI.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.CollabProxy.Editor">
-      <HintPath>E:/Chalmers/VXSlate/VXSlate_Oculus/Library/ScriptAssemblies/Unity.CollabProxy.Editor.dll</HintPath>
+      <HintPath>C:/Users/duy/VXSlate/VXSlate_virtualpad_oculus/Library/ScriptAssemblies/Unity.CollabProxy.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro">
-      <HintPath>E:/Chalmers/VXSlate/VXSlate_Oculus/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
+      <HintPath>C:/Users/duy/VXSlate/VXSlate_virtualpad_oculus/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Analytics.DataPrivacy">
-      <HintPath>E:/Chalmers/VXSlate/VXSlate_Oculus/Library/ScriptAssemblies/Unity.Analytics.DataPrivacy.dll</HintPath>
+      <HintPath>C:/Users/duy/VXSlate/VXSlate_virtualpad_oculus/Library/ScriptAssemblies/Unity.Analytics.DataPrivacy.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AIModule">
       <HintPath>C:/Program Files/Unity/Editor/Data/Managed/UnityEngine/UnityEngine.AIModule.dll</HintPath>
@@ -768,19 +768,19 @@
       <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/UnitySpatialTracking/RuntimeEditor/UnityEngine.SpatialTracking.dll</HintPath>
     </Reference>
     <Reference Include="Google.ProtocolBuffers">
-      <HintPath>E:/Chalmers/VXSlate/VXSlate_Oculus/Assets/GoogleVR/Plugins/Google.ProtocolBuffers.dll</HintPath>
+      <HintPath>C:/Users/duy/VXSlate/VXSlate_virtualpad_oculus/Assets/GoogleVR/Plugins/Google.ProtocolBuffers.dll</HintPath>
     </Reference>
     <Reference Include="websocket-sharp">
-      <HintPath>E:/Chalmers/VXSlate/VXSlate_Oculus/Assets/Plugins/websocket-sharp.dll</HintPath>
+      <HintPath>C:/Users/duy/VXSlate/VXSlate_virtualpad_oculus/Assets/Plugins/websocket-sharp.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Analytics.Editor">
-      <HintPath>E:/Chalmers/VXSlate/VXSlate_Oculus/Library/PackageCache/com.unity.analytics@3.2.2/Unity.Analytics.Editor.dll</HintPath>
+      <HintPath>C:/Users/duy/VXSlate/VXSlate_virtualpad_oculus/Library/PackageCache/com.unity.analytics@3.2.2/Unity.Analytics.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Analytics.StandardEvents">
-      <HintPath>E:/Chalmers/VXSlate/VXSlate_Oculus/Library/PackageCache/com.unity.analytics@3.2.2/Unity.Analytics.StandardEvents.dll</HintPath>
+      <HintPath>C:/Users/duy/VXSlate/VXSlate_virtualpad_oculus/Library/PackageCache/com.unity.analytics@3.2.2/Unity.Analytics.StandardEvents.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Analytics.Tracker">
-      <HintPath>E:/Chalmers/VXSlate/VXSlate_Oculus/Library/PackageCache/com.unity.analytics@3.2.2/Unity.Analytics.Tracker.dll</HintPath>
+      <HintPath>C:/Users/duy/VXSlate/VXSlate_virtualpad_oculus/Library/PackageCache/com.unity.analytics@3.2.2/Unity.Analytics.Tracker.dll</HintPath>
     </Reference>
     <Reference Include="netstandard">
       <HintPath>C:/Program Files/Unity/Editor/Data/NetStandard/ref/2.0.0/netstandard.dll</HintPath>
@@ -1130,15 +1130,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Oculus.VR.Editor.csproj">
-      <Project>{6B281612-2A2F-B5A9-A2F7-5A8577F73A0B}</Project>
+      <Project>{1B070EE9-496C-9FE8-D6DA-FEAF55FC6785}</Project>
       <Name>Oculus.VR.Editor</Name>
     </ProjectReference>
     <ProjectReference Include="Oculus.VR.Scripts.Editor.csproj">
-      <Project>{155CBC38-F38D-C548-BBEB-13BE304B3316}</Project>
+      <Project>{1883C853-0EC5-8954-30EF-19E29A119B5D}</Project>
       <Name>Oculus.VR.Scripts.Editor</Name>
     </ProjectReference>
     <ProjectReference Include="Oculus.VR.csproj">
-      <Project>{A4C4BBA8-DF32-06DE-6423-A76CE5BAC28A}</Project>
+      <Project>{381CAD59-6E7E-BDAB-27C6-B7BA847FE039}</Project>
       <Name>Oculus.VR</Name>
     </ProjectReference>
   </ItemGroup>
