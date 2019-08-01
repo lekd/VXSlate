@@ -999,7 +999,7 @@ public class PuzzleMaker : MonoBehaviour
                                                    + ","
                                                    + _xSketchPoint
                                                    + ","
-                                                   + _xSketchPoint
+                                                   + _ySketchPoint
                                                    + ","
                                                    + _isReverted
                                                    );
