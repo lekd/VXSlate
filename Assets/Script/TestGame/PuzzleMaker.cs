@@ -127,6 +127,13 @@ public class PuzzleMaker : MonoBehaviour
 
     public List<LoggingVariable> _sketchingLogList;
 
+    [Header("Texture")]
+    public int _scaleTextureWidth = 0;
+    public int _scaleTextureHeigh = 0;
+    public int _textureWidth = 0;
+    public int _textureHeigh = 0;
+    public float _scaleRatio = 0;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -597,6 +604,13 @@ public class PuzzleMaker : MonoBehaviour
                 SortPieces();
 
                 Debug.Log("Init finished!");
+
+                //For Texture Inspection
+                _scaleTextureWidth = _puzzleDoneObject.GetComponent<Renderer>().material.mainTexture.width;
+                _scaleTextureHeigh = _puzzleDoneObject.GetComponent<Renderer>().material.mainTexture.height;
+                _textureWidth = _mainPuzzleTexture.width;
+                _textureHeigh = _mainPuzzleTexture.height;
+                _scaleRatio = (float)_puzzleDoneObject.GetComponent<Renderer>().material.mainTexture.width / _mainPuzzleTexture.width;
             }
             else
             {
@@ -985,7 +999,7 @@ public class PuzzleMaker : MonoBehaviour
                                                    + ","
                                                    + _xSketchPoint
                                                    + ","
-                                                   + _xSketchPoint
+                                                   + _ySketchPoint
                                                    + ","
                                                    + _isReverted
                                                    );
