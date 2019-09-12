@@ -602,8 +602,8 @@ public class SimpleGame : MonoBehaviour
         gameMode = mode;
     }
 
-    
 
+    int receivedEventCount = 0;
     void handleControlGesture(TouchGesture gesture)
     {
         lock (gestureUpdateLock)
@@ -623,6 +623,21 @@ public class SimpleGame : MonoBehaviour
                 Vector2[] gesture_params = (Vector2[])gesture.MetaData;
                 Debug.Log(string.Format("{0} with ({1},{2})", gesture.GestureType, gesture_params[0].x, gesture_params[0].y));
             }
+            //logging event count to compute data loss rate
+            /*if (gesture.GestureType == GestureType.SINGLE_TOUCH_DOWN)
+            {
+                receivedEventCount = 1;
+            }
+            else*/
+            {
+                receivedEventCount++;
+                if(gesture.GestureType == GestureType.NONE)
+                {
+                    Debug.Log("Received events count: " + receivedEventCount);
+                    //receivedEventCount = 0;
+                }
+            }
+            // end logging for loss rate
         }
 
         
@@ -644,6 +659,9 @@ public class SimpleGame : MonoBehaviour
 
     }
 
+
+    int processedEventCount = 0;
+    TouchGesture prevProcessedEvent = null;
     void HandleGameLogic()
     {
         TouchGesture backupCurrent = null;
@@ -653,7 +671,25 @@ public class SimpleGame : MonoBehaviour
             _currentGesture = _latestTouchDown;
             _latestTouchDown = null;
         }*/
-
+        //logging event count to compute data loss rate
+        /*if (_currentGesture.GestureType == GestureType.SINGLE_TOUCH_DOWN)
+        {
+            processedEventCount = 1;
+        }
+        else*/
+        {
+            if (_currentGesture != null && _currentGesture != prevProcessedEvent)
+            {
+                processedEventCount++;
+                if (_currentGesture.GestureType == GestureType.NONE)
+                {
+                    Debug.Log("Processed event count: " + processedEventCount);
+                    //processedEventCount = 0;
+                }
+            }
+            prevProcessedEvent = _currentGesture;
+        }
+        // end logging for loss rate
         if (_currentGesture!= null && (_currentGesture.GestureType == GestureType.OBJECT_ROTATING ||
                     _currentGesture.GestureType == GestureType.OBJECT_SCALING))
         {

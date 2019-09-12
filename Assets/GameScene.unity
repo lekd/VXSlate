@@ -1912,13 +1912,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1c04b4c885bb5a4eace06b7fcf054ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _participantID: 
+  _participantID: 0
   _isTraining: 1
   _isExperimental: 0
-  _textureID: 1
-  _experimentOrder: 1
-  _usingTablet: 0
-  _usingController: 1
+  _textureID: 2
+  _experimentOrder: 2
+  _usingTablet: 1
+  _usingController: 0
   _usingMouse: 0
   _isExperimentStarted: 0
   _isExperimentFinished: 0
@@ -1927,7 +1927,7 @@ MonoBehaviour:
   _isSummaryLog: 0
   _prepareTime: 5
   _stateChangeTime: 15
-  _betweenSketchesTime: 9.9
+  _betweenSketchesTime: 10
   _isSketchTesting: 0
   _puzzleMakerObject: {fileID: 1827507204}
   tabletControllerObj: {fileID: 788566888}
