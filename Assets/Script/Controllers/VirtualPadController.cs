@@ -448,7 +448,7 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                 {
                     if (gestureRecognizedBroadcaster != null)
                     {
-                        if (latestSingleTouchDown == null)
+                        /*if (latestSingleTouchDown == null)
                         {
                             latestSingleTouchDown = new TouchGesture();
                             latestSingleTouchDown.GestureType = GestureType.SINGLE_TOUCH_DOWN;
@@ -458,7 +458,7 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                             latestSingleTouchDown.MetaData = singleTouchData;
                         }
                         gestureRecognizedBroadcaster(latestSingleTouchDown);
-                        latestSingleTouchDown = null;
+                        latestSingleTouchDown = null;*/
                         gestureRecognizedBroadcaster(recognizedGesture);
                     }
                 }

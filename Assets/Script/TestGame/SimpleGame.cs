@@ -1,4 +1,5 @@
 ﻿using Assets.Script;
+using Assets.Script.TestGame;
 using BoardGame;
 using System;
 using System.Collections;
@@ -80,6 +81,7 @@ public class SimpleGame : MonoBehaviour
     object gestureUpdateLock = new object();
     TouchGesture _currentGesture;
     TouchGesture _latestTouchDown = null;
+    List<SimpleGameReceivedEvent> receivedTouchEvents = new List<SimpleGameReceivedEvent>();
 
     StreamWriter _puzzleMatchingSW;
     StreamWriter _sketchingSW;
@@ -608,35 +610,28 @@ public class SimpleGame : MonoBehaviour
     {
         lock (gestureUpdateLock)
         {
-            /*if (gesture.GestureType == GestureType.SINGLE_TOUCH_DOWN)
-            {
-                _latestTouchDown = gesture;
-            }
-            else*/
-            {
-                _currentGesture = gesture;
-            }
-            Debug.Log(">> " + gesture.GestureType);
-            if (gesture.GestureType == GestureType.OBJECT_ROTATING ||
-                    gesture.GestureType == GestureType.OBJECT_SCALING)
-            {
-                Vector2[] gesture_params = (Vector2[])gesture.MetaData;
-                Debug.Log(string.Format("{0} with ({1},{2})", gesture.GestureType, gesture_params[0].x, gesture_params[0].y));
-            }
+
+            //_currentGesture = gesture;
+            SimpleGameReceivedEvent receivedEvent = new SimpleGameReceivedEvent();
+            receivedEvent.ReceivedGesture = gesture;
+            receivedEvent.TimeStamp = System.DateTime.Now;
+            receivedTouchEvents.Add(receivedEvent);
+            
+            
             //logging event count to compute data loss rate
             /*if (gesture.GestureType == GestureType.SINGLE_TOUCH_DOWN)
             {
                 receivedEventCount = 1;
             }
             else*/
-            {
+            /*{
                 receivedEventCount++;
                 if(gesture.GestureType == GestureType.NONE)
                 {
                     Debug.Log("Received events count: " + receivedEventCount);
                     //receivedEventCount = 0;
                 }
-            }
+            }*/
             // end logging for loss rate
         }
 
@@ -662,9 +657,10 @@ public class SimpleGame : MonoBehaviour
 
     int processedEventCount = 0;
     TouchGesture prevProcessedEvent = null;
+    double GAME_UPDATE_INTERVAL = 60.0;
     void HandleGameLogic()
     {
-        TouchGesture backupCurrent = null;
+
         /*if (_latestTouchDown != null)
         {
             backupCurrent = _currentGesture;
@@ -672,12 +668,27 @@ public class SimpleGame : MonoBehaviour
             _latestTouchDown = null;
         }*/
         //logging event count to compute data loss rate
+        double elapsedMilliS = 0;
+        lock (gestureUpdateLock)
+        {
+            if (receivedTouchEvents.Count > 0)
+            {
+                _currentGesture = receivedTouchEvents[0].ReceivedGesture;
+                TimeSpan elapseSpan = System.DateTime.Now - receivedTouchEvents[0].TimeStamp;
+                elapsedMilliS = elapseSpan.TotalMilliseconds;
+                receivedTouchEvents.RemoveAt(0);
+            }
+        }
+        if(_currentGesture != null && _currentGesture.GestureType != GestureType.SINGLE_TOUCH_DOWN && elapsedMilliS < 1000/GAME_UPDATE_INTERVAL)
+        {
+            return;
+        }
         /*if (_currentGesture.GestureType == GestureType.SINGLE_TOUCH_DOWN)
         {
             processedEventCount = 1;
         }
         else*/
-        {
+        /*{
             if (_currentGesture != null && _currentGesture != prevProcessedEvent)
             {
                 processedEventCount++;
@@ -688,7 +699,7 @@ public class SimpleGame : MonoBehaviour
                 }
             }
             prevProcessedEvent = _currentGesture;
-        }
+        }*/
         // end logging for loss rate
         if (_currentGesture!= null && (_currentGesture.GestureType == GestureType.OBJECT_ROTATING ||
                     _currentGesture.GestureType == GestureType.OBJECT_SCALING))
