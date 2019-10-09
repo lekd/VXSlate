@@ -100,7 +100,7 @@ namespace Assets.Script
                     double curAngle = Math.Atan2(curBetweenPointerVector.y, curBetweenPointerVector.x);
                     double nextAngle = Math.Atan2(nextBetweenPointerVector.y, nextBetweenPointerVector.x);
                     float rotChange = (float)((nextAngle - curAngle) * 180 / Math.PI) % 360;
-                    rotChange *= 2;
+                    //rotChange *= 2;
                     if (rotChange < -180)
                     {
                         rotChange += 360.0f;

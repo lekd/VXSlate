@@ -617,22 +617,6 @@ public class SimpleGame : MonoBehaviour
             receivedEvent.TimeStamp = System.DateTime.Now;
             receivedTouchEvents.Add(receivedEvent);
             
-            
-            //logging event count to compute data loss rate
-            /*if (gesture.GestureType == GestureType.SINGLE_TOUCH_DOWN)
-            {
-                receivedEventCount = 1;
-            }
-            else*/
-            /*{
-                receivedEventCount++;
-                if(gesture.GestureType == GestureType.NONE)
-                {
-                    Debug.Log("Received events count: " + receivedEventCount);
-                    //receivedEventCount = 0;
-                }
-            }*/
-            // end logging for loss rate
         }
 
         
@@ -657,7 +641,7 @@ public class SimpleGame : MonoBehaviour
 
     int processedEventCount = 0;
     TouchGesture prevProcessedEvent = null;
-    double GAME_UPDATE_INTERVAL = 60.0;
+    double GAME_UPDATE_INTERVAL = 100.0;
     void HandleGameLogic()
     {
 
@@ -667,8 +651,8 @@ public class SimpleGame : MonoBehaviour
             _currentGesture = _latestTouchDown;
             _latestTouchDown = null;
         }*/
-        //logging event count to compute data loss rate
         double elapsedMilliS = 0;
+        _currentGesture = null;
         lock (gestureUpdateLock)
         {
             if (receivedTouchEvents.Count > 0)
@@ -679,28 +663,13 @@ public class SimpleGame : MonoBehaviour
                 receivedTouchEvents.RemoveAt(0);
             }
         }
-        if(_currentGesture != null && _currentGesture.GestureType != GestureType.SINGLE_TOUCH_DOWN && elapsedMilliS < 1000/GAME_UPDATE_INTERVAL)
+        if(_currentGesture != null 
+            && _currentGesture.GestureType != GestureType.SINGLE_TOUCH_DOWN
+            && _currentGesture.GestureType != GestureType.NONE
+            && elapsedMilliS < 1000/GAME_UPDATE_INTERVAL)
         {
             return;
         }
-        /*if (_currentGesture.GestureType == GestureType.SINGLE_TOUCH_DOWN)
-        {
-            processedEventCount = 1;
-        }
-        else*/
-        /*{
-            if (_currentGesture != null && _currentGesture != prevProcessedEvent)
-            {
-                processedEventCount++;
-                if (_currentGesture.GestureType == GestureType.NONE)
-                {
-                    Debug.Log("Processed event count: " + processedEventCount);
-                    //processedEventCount = 0;
-                }
-            }
-            prevProcessedEvent = _currentGesture;
-        }*/
-        // end logging for loss rate
         if (_currentGesture!= null && (_currentGesture.GestureType == GestureType.OBJECT_ROTATING ||
                     _currentGesture.GestureType == GestureType.OBJECT_SCALING))
         {

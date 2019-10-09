@@ -18,7 +18,9 @@ public class HandStreamDecoder : MonoBehaviour
     const int initWidth = 2;
     const int initHeight = 2;
     byte[] CurFrameData;
+    int curHandFrameSize = 0;
     MemoryStream handFrameStream;
+    MemoryStream copiedHandFrameStream;
     Material mainHandMaterial;
     Stream handStream;
     WebResponse response;
@@ -27,6 +29,8 @@ public class HandStreamDecoder : MonoBehaviour
 
     double frameInterval;
     double timer;
+
+    object handstreamLock = new object();
     void Start()
     {
         mainHandMaterial = GetComponent<Renderer>().material;
@@ -48,10 +52,38 @@ public class HandStreamDecoder : MonoBehaviour
     private void OnGetResponse(IAsyncResult asyncResult)
     {
         responseReceived = true;
+        isStreaming = true;
         Debug.Log("OnGetResponse");
         HttpWebRequest req = (HttpWebRequest)asyncResult.AsyncState;
         response = (HttpWebResponse)req.EndGetResponse(asyncResult);
         handStream = response.GetResponseStream();
+        //read hand stream immediately once response received
+        while (isStreaming)
+        {
+            //lock (handstreamLock)
+            //{
+            int bytesToRead = FindLength(handStream);
+            curHandFrameSize = bytesToRead;
+
+            if (bytesToRead == -1)
+            {
+                return;
+            }
+            CurFrameData = new byte[bytesToRead];
+            int leftToRead = bytesToRead;
+            while (leftToRead > 0)
+            {
+                leftToRead -= handStream.Read(CurFrameData, bytesToRead - leftToRead, leftToRead);
+            }
+            //}
+            lock(handstreamLock)
+            { 
+                handFrameStream = new MemoryStream(CurFrameData, 0, bytesToRead, false, true);
+                updateFrame = true;
+            }
+            handStream.ReadByte();
+            handStream.ReadByte();
+        }
     }
     IEnumerator GetFrame()
     {
@@ -67,7 +99,6 @@ public class HandStreamDecoder : MonoBehaviour
             int leftToRead = bytesToRead;
             while(leftToRead >0)
             {
-                
                 leftToRead -= handStream.Read(CurFrameData, bytesToRead - leftToRead, leftToRead);
                 yield return null;
             }
@@ -82,24 +113,43 @@ public class HandStreamDecoder : MonoBehaviour
             //response.Close();
         }
     }
+    byte[] copiedHandFrameBuffer;
+    IEnumerator GrabFrame()
+    {
+        lock (handstreamLock)
+        {
+            //handFrameStream = new MemoryStream(CurFrameData, 0, curHandFrameSize, false, true);
+            copiedHandFrameBuffer = new byte[handFrameStream.GetBuffer().Length];
+            handFrameStream.GetBuffer().CopyTo(copiedHandFrameBuffer, 0);
+            //copiedHandFrameStream = new MemoryStream(copiedHandFrameBuffer, false);
+            updateFrame = true;
+            Debug.Log("Retrieved frame of hand images");
+        }
+        yield return null;
+    }
     void Update()
     {
         timer += Time.deltaTime*1000;
         if(responseReceived)
         {
-            responseReceived = false;
-            isStreaming = true;
-            StartCoroutine(GetFrame());
+            //responseReceived = false;
+            //isStreaming = true;
+            StartCoroutine(GrabFrame());
         }
         if (updateFrame)
         {
             
             if (timer > frameInterval)
             {
-                handVisTexture.LoadImage(handFrameStream.GetBuffer());
+                lock(handstreamLock)
+                {
+                    //handVisTexture.LoadImage(handFrameStream.GetBuffer());
+                    handVisTexture.LoadImage(copiedHandFrameBuffer);
+                    Debug.Log("Showing hand stream");
+                    updateFrame = false;
+                }
                 handVisTexture.alphaIsTransparency = true;
                 mainHandMaterial.mainTexture = handVisTexture;
-                updateFrame = false;
                 timer = timer % frameInterval;
             }
         }
