@@ -663,13 +663,13 @@ public class SimpleGame : MonoBehaviour
                 receivedTouchEvents.RemoveAt(0);
             }
         }
-        if(_currentGesture != null 
+        /*if(_currentGesture != null 
             && _currentGesture.GestureType != GestureType.SINGLE_TOUCH_DOWN
             && _currentGesture.GestureType != GestureType.NONE
             && elapsedMilliS < 1000/GAME_UPDATE_INTERVAL)
         {
             return;
-        }
+        }*/
         if (_currentGesture!= null && (_currentGesture.GestureType == GestureType.OBJECT_ROTATING ||
                     _currentGesture.GestureType == GestureType.OBJECT_SCALING))
         {

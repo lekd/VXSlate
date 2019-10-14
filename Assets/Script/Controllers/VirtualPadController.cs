@@ -197,7 +197,7 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                     break;
                 }
             }
-            if(!isHittingPad)
+            if(!isHittingPad || isHittingPad)
             {
                 for (int i = 0; i < allHits.Length; i++)
                 {
@@ -206,8 +206,11 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                         Vector3 hitPos = allHits[i].point;
                         hitPos.z = PAD_Z;
                         Vector3 curPadCenter = gameObject.transform.position;
-                        Vector2 transDistance2D = new Vector2(hitPos.x - latestGazeInPad.x, hitPos.y - latestGazeInPad.y);
-                        Vector3 newPadCenter = new Vector3(curPadCenter.x + transDistance2D.x, curPadCenter.y + transDistance2D.y, PAD_Z);
+                        //smoothly dragging virtual pad, virtual pad is not centered at the collision of the board and the gaze
+                        /*Vector2 transDistance2D = new Vector2(hitPos.x - latestGazeInPad.x, hitPos.y - latestGazeInPad.y);
+                        Vector3 newPadCenter = new Vector3(curPadCenter.x + transDistance2D.x, curPadCenter.y + transDistance2D.y, PAD_Z);*/
+                        //jerkly moving virtual pad by gaze, the virtual pad is centered at the collision of the board and the gaze
+                        Vector3 newPadCenter = new Vector3(hitPos.x, hitPos.y, PAD_Z);
                         newPadCenter = GlobalUtilities.boundPointToContainer(newPadCenter, board2DBound);
                         if (_gazeCanShift)
                         {
