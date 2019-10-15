@@ -16,6 +16,7 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
     public GameObject gameCameraObject;
     public GameObject gazePointObject;
     public GameObject boardObject;
+    public GameObject gazeTolerantAreaObject;
     public GameObject finger1;
     public GameObject finger2;
     public GameObject finger3;
@@ -37,7 +38,7 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
 
     bool _gazeCanShift = true;
     public bool _gazeCanShiftWithOneFinger = true;
-    Vector3 latestGazeInPad = new Vector3();
+    Vector3 latestGazeInTolerantArea = new Vector3();
     EditMode _currentMode;
     public EditMode CurrentMode
     {
@@ -188,16 +189,16 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
         allHits = Physics.RaycastAll(camRay);
         if (allHits != null && allHits.Length>0)
         {
-            bool isHittingPad = false;
+            bool isGazeTolerantArea = false;
             for (int i = 0; i < allHits.Length; i++)
             {
-                if(allHits[i].collider.name.CompareTo(gameObject.name) == 0)
+                if(allHits[i].collider.name.CompareTo(gazeTolerantAreaObject.name) == 0)
                 {
-                    isHittingPad = true;
+                    isGazeTolerantArea = true;
                     break;
                 }
             }
-            if(!isHittingPad || isHittingPad)
+            if(!isGazeTolerantArea)
             {
                 for (int i = 0; i < allHits.Length; i++)
                 {
@@ -207,15 +208,19 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                         hitPos.z = PAD_Z;
                         Vector3 curPadCenter = gameObject.transform.position;
                         //smoothly dragging virtual pad, virtual pad is not centered at the collision of the board and the gaze
-                        /*Vector2 transDistance2D = new Vector2(hitPos.x - latestGazeInPad.x, hitPos.y - latestGazeInPad.y);
-                        Vector3 newPadCenter = new Vector3(curPadCenter.x + transDistance2D.x, curPadCenter.y + transDistance2D.y, PAD_Z);*/
+                        //Vector2 transDistance2D = new Vector2(hitPos.x - latestGazeInTolerantArea.x, hitPos.y - latestGazeInTolerantArea.y);
+                        //Vector2 shiftFactor = new Vector2(1f, 1f);
+                        //Vector3 newPadCenter = new Vector3(curPadCenter.x + transDistance2D.x*shiftFactor.x, curPadCenter.y + transDistance2D.y*shiftFactor.y, PAD_Z);
                         //jerkly moving virtual pad by gaze, the virtual pad is centered at the collision of the board and the gaze
                         Vector3 newPadCenter = new Vector3(hitPos.x, hitPos.y, PAD_Z);
                         newPadCenter = GlobalUtilities.boundPointToContainer(newPadCenter, board2DBound);
+                        double euclDist = Math.Sqrt((newPadCenter.x - curPadCenter.x) * (newPadCenter.x - curPadCenter.x)
+                                                    + (newPadCenter.y - curPadCenter.y) * (newPadCenter.y - curPadCenter.y))*20;
                         if (_gazeCanShift)
                         {
-                            gameObject.transform.Translate(newPadCenter.x - curPadCenter.x, newPadCenter.y - curPadCenter.y, 0);
-                            latestGazeInPad = hitPos;
+                            //gameObject.transform.Translate(newPadCenter.x - curPadCenter.x, newPadCenter.y - curPadCenter.y, 0);
+                            gameObject.transform.position = Vector3.MoveTowards(curPadCenter, newPadCenter, Time.deltaTime*(float)euclDist);
+                            latestGazeInTolerantArea = hitPos;
                         }
                         //Vector3 newPadPos = GlobalUtilities.boundPointToContainer(hitPos, board2DBound);
                         //gameObject.transform.Translate(new Vector3(newPadPos.x - curPadPos.x, newPadPos.y - curPadPos.y, newPadPos.z - curPadPos.z + VIRTUALPAD_DEPTHOFFSET));
@@ -230,8 +235,8 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                 {
                     if (allHits[i].collider.name.CompareTo(boardObject.name) == 0)
                     {
-                        latestGazeInPad = allHits[i].point;
-                        latestGazeInPad.z = PAD_Z;
+                        latestGazeInTolerantArea = allHits[i].point;
+                        latestGazeInTolerantArea.z = PAD_Z;
                         break;
                     }
                 }
