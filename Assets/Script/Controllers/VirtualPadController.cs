@@ -39,6 +39,7 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
     bool _gazeCanShift = true;
     public bool _gazeCanShiftWithOneFinger = true;
     Vector3 latestGazeInTolerantArea = new Vector3();
+    Vector3 padTargetPosition = new Vector3();
     EditMode _currentMode;
     public EditMode CurrentMode
     {
@@ -99,6 +100,7 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
         padScaleByPointers.CriticData = new Vector2(0, 0);
 
         PAD_Z = gameObject.transform.position.z;
+        padTargetPosition = gameObject.transform.position;
         setMenuActiveness(false);
     }
     // Update is called once per frame
@@ -214,13 +216,14 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                         //jerkly moving virtual pad by gaze, the virtual pad is centered at the collision of the board and the gaze
                         Vector3 newPadCenter = new Vector3(hitPos.x, hitPos.y, PAD_Z);
                         newPadCenter = GlobalUtilities.boundPointToContainer(newPadCenter, board2DBound);
+                        padTargetPosition = newPadCenter;
                         double euclDist = Math.Sqrt((newPadCenter.x - curPadCenter.x) * (newPadCenter.x - curPadCenter.x)
-                                                    + (newPadCenter.y - curPadCenter.y) * (newPadCenter.y - curPadCenter.y))*20;
+                                                    + (newPadCenter.y - curPadCenter.y) * (newPadCenter.y - curPadCenter.y))*15;
                         if (_gazeCanShift)
                         {
                             //gameObject.transform.Translate(newPadCenter.x - curPadCenter.x, newPadCenter.y - curPadCenter.y, 0);
                             gameObject.transform.position = Vector3.MoveTowards(curPadCenter, newPadCenter, Time.deltaTime*(float)euclDist);
-                            latestGazeInTolerantArea = hitPos;
+                            
                         }
                         //Vector3 newPadPos = GlobalUtilities.boundPointToContainer(hitPos, board2DBound);
                         //gameObject.transform.Translate(new Vector3(newPadPos.x - curPadPos.x, newPadPos.y - curPadPos.y, newPadPos.z - curPadPos.z + VIRTUALPAD_DEPTHOFFSET));
@@ -231,15 +234,16 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
             }
             else
             {
-                for (int i = 0; i < allHits.Length; i++)
+                /*for (int i = 0; i < allHits.Length; i++)
                 {
                     if (allHits[i].collider.name.CompareTo(boardObject.name) == 0)
                     {
-                        latestGazeInTolerantArea = allHits[i].point;
-                        latestGazeInTolerantArea.z = PAD_Z;
-                        break;
+                        
                     }
-                }
+                }*/
+                //double euclDist = Math.Sqrt((padTargetPosition.x - gameObject.transform.position.x) * (padTargetPosition.x - gameObject.transform.position.x)
+                                                    //+ (padTargetPosition.y - gameObject.transform.position.y) * (padTargetPosition.y - gameObject.transform.position.y)) * 15;
+                //gameObject.transform.position = Vector3.MoveTowards(gameObject.transform.position, padTargetPosition, Time.deltaTime * (float)euclDist);
             }
         }
         
