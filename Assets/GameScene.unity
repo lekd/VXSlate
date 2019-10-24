@@ -2008,7 +2008,7 @@ MonoBehaviour:
   _participantID: 0
   _isTraining: 0
   _isExperimental: 1
-  _textureID: 2
+  _textureID: 1
   _experimentOrder: 1
   _usingTablet: 1
   _usingController: 0
