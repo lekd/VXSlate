@@ -670,12 +670,12 @@ public class SimpleGame : MonoBehaviour
         {
             return;
         }*/
-        if (_currentGesture!= null && (_currentGesture.GestureType == GestureType.OBJECT_ROTATING ||
+        /*if (_currentGesture!= null && (_currentGesture.GestureType == GestureType.OBJECT_ROTATING ||
                     _currentGesture.GestureType == GestureType.OBJECT_SCALING))
         {
             Vector2[] gesture_params = (Vector2[])_currentGesture.MetaData;
             Debug.Log(string.Format("CURRENT: {0} with ({1},{2})", _currentGesture.GestureType, gesture_params[0].x, gesture_params[0].y));
-        }
+        }*/
 
         if (_puzzleMaker == null && _puzzleMakerObject != null)
         {

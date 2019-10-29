@@ -298,7 +298,7 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
         }
         avgAngleDif /= gazeVeloAngleDiffs.Length;
         //Debug.Log(string.Format("Avg velo angle diff = {0}; Avg velo amplitude = {1}", avgAngleDif, avgVeloAmp));
-        if(Math.Abs(avgAngleDif)>0.009 && Math.Abs(avgVeloAmp)>50)
+        if(Math.Abs(avgAngleDif)>0.008 && Math.Abs(avgVeloAmp)>50)
         {
             return true;
         }
