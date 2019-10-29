@@ -187,7 +187,11 @@ namespace Assets.Script
             {
                 recognizedGesture.GestureType = GestureType.SINGLE_TOUCH_MOVE;
                 //recognizedGesture.MetaData =  TouchPointerData.Create(curTouchEvent.AvaiPointers[0]);
-                recognizedGesture.MetaData = new Vector2(curTouchEvent.AvaiPointers[0].RelX, curTouchEvent.AvaiPointers[0].RelY);
+                //recognizedGesture.MetaData = new Vector2(curTouchEvent.AvaiPointers[0].RelX, curTouchEvent.AvaiPointers[0].RelY);
+                Vector2[] touchMoveData = new Vector2[2];
+                touchMoveData[0] = new Vector2(curTouchEvent.AvaiPointers[0].RelX, curTouchEvent.AvaiPointers[0].RelY);
+                touchMoveData[1] = new Vector2(curTouchEvent.AvaiPointers[0].RelVeloX, curTouchEvent.AvaiPointers[0].RelVeloY);
+                recognizedGesture.MetaData = touchMoveData;
                 /*Vector2[] singleTouchMoveData = new Vector2[2];
                 singleTouchMoveData[0] = new Vector2(curTouchEvent.AvaiPointers[0].RelX, curTouchEvent.AvaiPointers[0].RelY);
                 singleTouchMoveData[1] = new Vector2(curTouchEvent.AvaiPointers[0].RelVeloX, curTouchEvent.AvaiPointers[0].RelVeloY);
