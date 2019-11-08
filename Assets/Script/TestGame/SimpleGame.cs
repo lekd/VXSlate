@@ -110,6 +110,26 @@ public class SimpleGame : MonoBehaviour
         _isSketchingLog = false;
         _isSummaryLog = false;
 
+        //init global game variables to be used in VXSlate for logging the virtual pad state in relation to the game
+        GlobalUtilities.globalGameState = new LoggingVariable();
+        GlobalUtilities._curParticipantID = _participantID;
+        GlobalUtilities.globalGameState.IsTraining = _isTraining ? "TRUE" : "FALSE";
+        GlobalUtilities.globalGameState.ExperimentOrder = _experimentOrder.ToString();
+        GlobalUtilities.globalGameState.TextureID = _textureID.ToString();
+        GlobalUtilities.globalGameState.Stage = "Init";
+        if (_usingController)
+        {
+
+            GlobalUtilities.curControlDevice = GlobalUtilities.DEVICES.CONTROLER;
+        }
+        else if(_usingTablet)
+        {
+            GlobalUtilities.curControlDevice = GlobalUtilities.DEVICES.TABLET;
+        }
+        else if (_usingMouse)
+        {
+            GlobalUtilities.curControlDevice = GlobalUtilities.DEVICES.MOUSE;
+        }
 
         if (!_usingController && !_usingMouse && !_usingTablet)
         {
@@ -329,7 +349,7 @@ public class SimpleGame : MonoBehaviour
             if (!_isExperimentFinished)
             {
                 //_puzzleMaker.HighlightGridPiece();
-
+                GlobalUtilities.globalGameState.Stage = "Matching";
                 if (!_puzzleMaker.isPuzzledDone && _puzzleMaker.CheckPuzzlesDone())
                 {
                     _puzzleMaker.isPuzzledDone = true;
@@ -474,12 +494,16 @@ public class SimpleGame : MonoBehaviour
                             if (!_puzzleMaker.isFirstSketchDone)
                                 _puzzleMaker._statusObject.GetComponent<Text>().text = "FIRST SKETCH\n\n" + ((int)_stateChangeTime + 1).ToString() + "s \n\nPlease start sketching\nfrom the RED point to the BLUE point.";
                             else
+                            {
                                 _puzzleMaker._statusObject.GetComponent<Text>().text = "SECOND SKETCH\n\n" + ((int)_stateChangeTime + 1).ToString() + "s \n\nPlease start sketching\nfrom the RED point to the BLUE point.";
+                                GlobalUtilities.globalGameState.Stage = "Sketching_2";
+                            }
                         }
                         else
                         {
                             _puzzleMaker._statusObject.GetComponent<Text>().color = Color.green;
                             _puzzleMaker._statusObject.GetComponent<Text>().text = "PUZZLE MATCHING IS SUCCESSFULLY DONE!\n\nNext task instruction will be presented in\n" + ((int)_stateChangeTime + 1 - 10).ToString() + "s";
+                            GlobalUtilities.globalGameState.Stage = "Sketching_1";
                         }
 
                         _stateChangeTime -= Time.deltaTime;                    

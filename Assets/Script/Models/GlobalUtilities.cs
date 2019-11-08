@@ -9,8 +9,12 @@ namespace Assets.Script
 {
     public class GlobalUtilities
     {
+        public enum DEVICES { TABLET, CONTROLER, MOUSE, NONE}
         public static string SERVER_ADDR = "192.168.0.103:8080";
         public static string HAND_STREAM_ADDR = "192.168.0.101:4040";
+        public static LoggingVariable globalGameState = null;
+        public static string _curParticipantID = "";
+        public static DEVICES curControlDevice = DEVICES.NONE;
         public static string LoadServerAddress()
         {
             string serverAddr = "";

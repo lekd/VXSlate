@@ -23,6 +23,10 @@
     string _xSketchPoint;
     string _ySketchPoint;
 
+    public LoggingVariable()
+    {
+
+    }
     public LoggingVariable(string isTraining, string experimentOrder, string textureID, string stage, string startTime, string endTime, string duration, string matchingPuzzleTime, string puzzleName, string action, string xFromPoint, string yFromPoint, string xToPoint, string yToPoint, string distanceMoved, string scaleLevel, string rotateAngel, string isTouchPoint, string isOnTrack, string sketchingPointID, string xSketchPoint, string ySketchPoint)
     {
         _isTraining = isTraining;

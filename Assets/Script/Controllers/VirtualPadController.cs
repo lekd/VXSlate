@@ -1,5 +1,6 @@
 ﻿using Assets;
 using Assets.Script;
+using Assets.Script.Controllers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -32,7 +33,7 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
     Camera gameCamera;
     IGeneralPointerEventListener eventTouchListener;
     MenuItemListener[] menuItems = new MenuItemListener[2];
-    
+
     GestureRecognizedEventCallback gestureRecognizedListener = null;
     event GestureRecognizedEventCallback gestureRecognizedBroadcaster = null;
     event MenuItemListener.EditModeSelectedCallBack editModeChangedListener = null;
@@ -54,7 +55,7 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
             _currentMode = value;
         }
     }
-    
+
     CriticVar padTranslationByPointers = new CriticVar();
     CriticVar padScaleByPointers = new CriticVar();
     CriticVar padRotationByPointers = new CriticVar();
@@ -64,12 +65,14 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
     //store past gaze position to detect intentional gaze move vs saccade in order to stabilize the pad
     Vector2[] pastGazeVelocities = new Vector2[NUM_BUFFERED_GAZE_VELOCITIES];
     Vector2[] pastGazeAccelerations = new Vector2[NUM_BUFFERED_GAZE_VELOCITIES - 1];
-    Vector3 previousGazePos = new Vector3(0,0,0);
+    Vector3 previousGazePos = new Vector3(0, 0, 0);
     int curBufferedGazeVeloIndex = 0;
     public string getControllerName()
     {
         return "TabletController";
     }
+
+    VXSlateLogger padStateLogger = null;
     void Start()
     {
         _currentMode = EditMode.OBJECT_MANIP;
@@ -77,12 +80,12 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
         {
             gameCamera = gameCameraObject.GetComponent<Camera>();
         }
-        if(eventListenerObject)
+        if (eventListenerObject)
         {
             eventTouchListener = eventListenerObject.GetComponent<TabletTouchEventManager>();
         }
         gestureRecognizedListener = this.gestureRecognizedHandler;
-        if(eventTouchListener != null)
+        if (eventTouchListener != null)
         {
             eventTouchListener.SetGestureRecognizedListener(gestureRecognizedListener);
         }
@@ -97,7 +100,7 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
         boardFlatBound.min = new Vector2(boardObjectBound.min.x, boardObjectBound.min.y);
         boardFlatBound.max = new Vector2(boardObjectBound.max.x, boardObjectBound.max.y);
         fingers = new GameObject[] { finger1, finger2, finger3, finger4, finger5 };
-        for(int i=0; i< fingers.Length; i++)
+        for (int i = 0; i < fingers.Length; i++)
         {
             fingers[i].SetActive(false);
         }
@@ -112,14 +115,27 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
     // Update is called once per frame
     void Update()
     {
-        
+        if (padStateLogger == null && GlobalUtilities.curControlDevice == GlobalUtilities.DEVICES.TABLET)
+        {
+            padStateLogger = new VXSlateLogger();
+            padStateLogger.init(GlobalUtilities._curParticipantID, GlobalUtilities.globalGameState.ExperimentOrder, GlobalUtilities.globalGameState.TextureID, GlobalUtilities.globalGameState.IsTraining);
+        }
         //Update virtual pad scale
         lock (padScaleByPointers.AccessLock)
         {
             Vector2 scaleRatio = (Vector2)padScaleByPointers.CriticData;
-            if(scaleRatio.x != 0 && scaleRatio.y != 0)
+            if (scaleRatio.x != 0 && scaleRatio.y != 0)
             {
                 Vector3 curScale = gameObject.transform.localScale;
+                if (padStateLogger != null)
+                {
+                    padStateLogger.WriteVirtualPadScaling(GlobalUtilities._curParticipantID,
+                                                          GlobalUtilities.globalGameState.ExperimentOrder,
+                                                          GlobalUtilities.globalGameState.TextureID,
+                                                          GlobalUtilities.globalGameState.Stage,
+                                                          scaleRatio.x,
+                                                          scaleRatio.y);
+                }
                 gameObject.transform.localScale = new Vector3(scaleRatio.x * curScale.x, scaleRatio.y * curScale.y, curScale.z);
                 padScaleByPointers.CriticData = new Vector2(0, 0);
             }
@@ -135,9 +151,9 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
         UpdateVirtualPadBasedOnCamera(padContainer2DBoundary);
         UpdateFingersBasedOnTouch();
         //Update virtual pad translation caused by pointers
-        lock(padTranslationByPointers.AccessLock)
+        lock (padTranslationByPointers.AccessLock)
         {
-            
+
             Vector2 relTranslation = (Vector2)padTranslationByPointers.CriticData;
             if (relTranslation.x != 0 || relTranslation.y != 0)
             {
@@ -162,8 +178,8 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
         //update current size of the virtual flat boundary
         padFlatBound.min = new Vector2(gameObject.GetComponent<Collider>().bounds.min.x, gameObject.GetComponent<Collider>().bounds.min.y);
         padFlatBound.max = new Vector2(gameObject.GetComponent<Collider>().bounds.max.x, gameObject.GetComponent<Collider>().bounds.max.y);
-        localPadFlatCenter.Set((padFlatBound.center.x - boardFlatBound.center.x)/boardFlatBound.width, 
-                                (padFlatBound.center.y - boardFlatBound.center.y)/boardFlatBound.height);
+        localPadFlatCenter.Set((padFlatBound.center.x - boardFlatBound.center.x) / boardFlatBound.width,
+                                (padFlatBound.center.y - boardFlatBound.center.y) / boardFlatBound.height);
     }
     #region gaze_handling
     private void UpdateVirtualPadBasedOnCamera(Rect board2DBound)
@@ -180,12 +196,12 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
         //allHits = Physics.RaycastAll(camRay, 1000, hittableLayerMask);
         allHits = Physics.RaycastAll(camRay);
         bool hitLargeDisplay = false;
-        if (allHits != null && allHits.Length>0)
+        if (allHits != null && allHits.Length > 0)
         {
             bool isGazeTolerantArea = false;
             for (int i = 0; i < allHits.Length; i++)
             {
-                if(allHits[i].collider.name.CompareTo(gazeTolerantAreaObject.name) == 0)
+                if (allHits[i].collider.name.CompareTo(gazeTolerantAreaObject.name) == 0)
                 {
                     isGazeTolerantArea = true;
                     break;
@@ -201,7 +217,7 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                         hitLargeDisplay = true;
                         Vector3 hitPos = allHits[i].point;
                         //calculating and storing gaze velo and accels to determine intentional movement
-                        if(previousGazePos == Vector3.zero)
+                        if (previousGazePos == Vector3.zero)
                         {
                             previousGazePos = hitPos;
                             curBufferedGazeVeloIndex = 0;
@@ -210,23 +226,23 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                         {
                             Vector3 gazeMove = hitPos - previousGazePos;
                             pastGazeVelocities[curBufferedGazeVeloIndex] = new Vector2(gazeMove.x / Time.deltaTime, gazeMove.y / Time.deltaTime);
-                            if(curBufferedGazeVeloIndex > 0)
+                            if (curBufferedGazeVeloIndex > 0)
                             {
                                 Vector2 gazeAccel = pastGazeVelocities[curBufferedGazeVeloIndex] - pastGazeVelocities[curBufferedGazeVeloIndex - 1];
                                 gazeAccel.x /= Time.deltaTime;
                                 gazeAccel.y /= Time.deltaTime;
                                 pastGazeAccelerations[curBufferedGazeVeloIndex - 1] = gazeAccel;
                             }
-                            if (curBufferedGazeVeloIndex == NUM_BUFFERED_GAZE_VELOCITIES -1)
+                            if (curBufferedGazeVeloIndex == NUM_BUFFERED_GAZE_VELOCITIES - 1)
                             {
-                                isIntentionalGazeMove = detectIntentionalGazeMovement(pastGazeVelocities,pastGazeAccelerations);
+                                isIntentionalGazeMove = detectIntentionalGazeMovement(pastGazeVelocities, pastGazeAccelerations);
                                 //remove the oldest velocity, shift everything to the left
-                                for(int veloIdx = 0; veloIdx < pastGazeVelocities.Length-1; veloIdx++)
+                                for (int veloIdx = 0; veloIdx < pastGazeVelocities.Length - 1; veloIdx++)
                                 {
                                     pastGazeVelocities[veloIdx] = pastGazeVelocities[veloIdx + 1];
                                 }
                                 //remove the oldest acceleration, shift everything to the left
-                                for (int accelIdx = 0; accelIdx < pastGazeAccelerations.Length-1; accelIdx++)
+                                for (int accelIdx = 0; accelIdx < pastGazeAccelerations.Length - 1; accelIdx++)
                                 {
                                     pastGazeAccelerations[accelIdx] = pastGazeAccelerations[accelIdx + 1];
                                 }
@@ -247,12 +263,20 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                         newPadCenter = GlobalUtilities.boundPointToContainer(newPadCenter, board2DBound);
                         padTargetPosition = newPadCenter;
                         double euclDist = Math.Sqrt((newPadCenter.x - curPadCenter.x) * (newPadCenter.x - curPadCenter.x)
-                                                    + (newPadCenter.y - curPadCenter.y) * (newPadCenter.y - curPadCenter.y))*15;
+                                                    + (newPadCenter.y - curPadCenter.y) * (newPadCenter.y - curPadCenter.y)) * 15;
                         if (_gazeCanShift && isIntentionalGazeMove)
                         {
                             //gameObject.transform.Translate(newPadCenter.x - curPadCenter.x, newPadCenter.y - curPadCenter.y, 0);
-                            gameObject.transform.position = Vector3.MoveTowards(curPadCenter, newPadCenter, Time.deltaTime*(float)euclDist);
-                            
+                            gameObject.transform.position = Vector3.MoveTowards(curPadCenter, newPadCenter, Time.deltaTime * (float)euclDist);
+                            if (padStateLogger != null)
+                            {
+                                padStateLogger.WriteVirtualPadTranslation(GlobalUtilities._curParticipantID,
+                                                                          GlobalUtilities.globalGameState.ExperimentOrder,
+                                                                          GlobalUtilities.globalGameState.TextureID,
+                                                                          GlobalUtilities.globalGameState.Stage,
+                                                                          newPadCenter.x - curPadCenter.x,
+                                                                          newPadCenter.y - curPadCenter.y);
+                            }
                         }
                         //Vector3 newPadPos = GlobalUtilities.boundPointToContainer(hitPos, board2DBound);
                         //gameObject.transform.Translate(new Vector3(newPadPos.x - curPadPos.x, newPadPos.y - curPadPos.y, newPadPos.z - curPadPos.z + VIRTUALPAD_DEPTHOFFSET));
@@ -268,17 +292,17 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                 //gameObject.transform.position = Vector3.MoveTowards(gameObject.transform.position, padTargetPosition, Time.deltaTime * (float)euclDist);
             }*/
         }
-        
-        if(hitLargeDisplay == false)
+
+        if (hitLargeDisplay == false)
         {
             previousGazePos = Vector3.zero;
         }
     }
 
-    private bool detectIntentionalGazeMovement(Vector2[] pastGazeVelocities,Vector2[] pastGazeAccelerations)
+    private bool detectIntentionalGazeMovement(Vector2[] pastGazeVelocities, Vector2[] pastGazeAccelerations)
     {
         Vector2 avgGazeVelo = new Vector2(0, 0);
-        for(int i=0; i < pastGazeVelocities.Length; i++)
+        for (int i = 0; i < pastGazeVelocities.Length; i++)
         {
             avgGazeVelo = avgGazeVelo + pastGazeVelocities[i];
         }
@@ -289,16 +313,16 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
         double[] gazeVeloAngleDiffs = new double[pastGazeVelocities.Length];
         string veloAnglesStr = "";
         double avgAngleDif = 0;
-        for (int i=0; i< gazeVeloAngleDiffs.Length; i++)
+        for (int i = 0; i < gazeVeloAngleDiffs.Length; i++)
         {
             Vector2 velo = pastGazeVelocities[i];
-            gazeVeloAngleDiffs[i] = Math.Atan2(velo.x * avgGazeVelo.y - velo.y * avgGazeVelo.x, velo.x * avgGazeVelo.x + velo.y * avgGazeVelo.y)*180/Math.PI;
+            gazeVeloAngleDiffs[i] = Math.Atan2(velo.x * avgGazeVelo.y - velo.y * avgGazeVelo.x, velo.x * avgGazeVelo.x + velo.y * avgGazeVelo.y) * 180 / Math.PI;
             avgAngleDif += gazeVeloAngleDiffs[i];
             veloAnglesStr += string.Format("{0};", gazeVeloAngleDiffs[i]);
         }
         avgAngleDif /= gazeVeloAngleDiffs.Length;
         //Debug.Log(string.Format("Avg velo angle diff = {0}; Avg velo amplitude = {1}", avgAngleDif, avgVeloAmp));
-        if(Math.Abs(avgAngleDif)>0.008 && Math.Abs(avgVeloAmp)>50)
+        if (Math.Abs(avgAngleDif) > 0.008 && Math.Abs(avgVeloAmp) > 50)
         {
             return true;
         }
@@ -308,14 +332,14 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
     #endregion
     private void UpdateFingersBasedOnTouch()
     {
-        if(fingers == null)
+        if (fingers == null)
         {
             fingers = new GameObject[] { finger1, finger2, finger3, finger4, finger5 };
         }
         CriticVar curAvaiPointers = eventTouchListener.getCurrentAvaiPointers();
         lock (curAvaiPointers.AccessLock)
         {
-            if(curAvaiPointers.CriticData == null)
+            if (curAvaiPointers.CriticData == null)
             {
                 return;
             }
@@ -344,9 +368,9 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
     }
     private void setMenuActiveness(bool isActive)
     {
-        if(isActive == false)
+        if (isActive == false)
         {
-            for(int i=0;i<menuItems.Length; i++)
+            for (int i = 0; i < menuItems.Length; i++)
             {
                 menuItems[i].off();
             }
@@ -368,17 +392,17 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
     TouchGesture latestSingleTouchDown = null;
     void gestureRecognizedHandler(TouchGesture recognizedGesture)
     {
-        if(recognizedGesture.GestureType == GestureType.NONE)
+        if (recognizedGesture.GestureType == GestureType.NONE)
         {
             isMultiTouch = false;
         }
-        if(_currentMode == EditMode.MENU_SELECTION)
+        if (_currentMode == EditMode.MENU_SELECTION)
         {
             if (recognizedGesture.GestureType == GestureType.NONE
                 || recognizedGesture.GestureType == GestureType.SINGLE_TOUCH_DOWN
                 || recognizedGesture.GestureType == GestureType.SINGLE_TAP)
             {
-                if(recognizedGesture.GestureType != GestureType.NONE)
+                if (recognizedGesture.GestureType != GestureType.NONE)
                 {
                     Vector2 rawLocalTouchPos = (Vector2)recognizedGesture.MetaData;
                     recognizedGesture.MetaData = GlobalUtilities.ConvertMobileRelPosToUnityRelPos(rawLocalTouchPos);
@@ -414,9 +438,9 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                 latestSingleTouchDown = null;
                 return;
             }
-            else if(recognizedGesture.GestureType == GestureType.PAD_SCALING)
+            else if (recognizedGesture.GestureType == GestureType.PAD_SCALING)
             {
-                lock(padScaleByPointers)
+                lock (padScaleByPointers)
                 {
                     padScaleByPointers.CriticData = recognizedGesture.MetaData;
                 }
@@ -432,13 +456,13 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
             {
                 if (!isMultiTouch)
                 {
-                    if(!_gazeCanShiftWithOneFinger)
+                    if (!_gazeCanShiftWithOneFinger)
                     {
                         _gazeCanShift = false;
                     }
                     //Vector2 rawTouchLocalPos = (Vector2)recognizedGesture.MetaData;
                     Vector2 rawTouchLocalPos;
-                    if(recognizedGesture.GestureType == GestureType.SINGLE_TOUCH_MOVE)
+                    if (recognizedGesture.GestureType == GestureType.SINGLE_TOUCH_MOVE)
                     {
                         Vector2[] touchMoveData = (Vector2[])recognizedGesture.MetaData;
                         rawTouchLocalPos = touchMoveData[0];
@@ -456,14 +480,14 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                     {
                         rawTouchLocalPos = (Vector2)recognizedGesture.MetaData;
                     }
-                    
+
                     Vector2 localPosOnPad = GlobalUtilities.ConvertMobileRelPosToUnityRelPos(rawTouchLocalPos);
                     Vector2 localPosOnBoard = toLocalPosOnBoard(localPosOnPad);
                     Vector2[] eventData = new Vector2[3];
                     eventData[0] = localPosOnBoard;
                     eventData[1] = eventData[2] = new Vector2();
                     recognizedGesture.MetaData = eventData;
-                    if(recognizedGesture.GestureType == GestureType.SINGLE_TOUCH_DOWN)
+                    if (recognizedGesture.GestureType == GestureType.SINGLE_TOUCH_DOWN)
                     {
                         //latestSingleTouchDown = recognizedGesture;
                         if (gestureRecognizedBroadcaster != null)
@@ -475,7 +499,7 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                     {
                         if (gestureRecognizedBroadcaster != null)
                         {
-                                gestureRecognizedBroadcaster(recognizedGesture);
+                            gestureRecognizedBroadcaster(recognizedGesture);
                         }
                     }
                 }
@@ -494,7 +518,7 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                 }
                 recognizedGesture.MetaData = gestureData;
                 isMultiTouch = true;
-                if (prevMultiTouchGesture!= null && !TouchGestureRecognizer.isGestureTypeRelatedPad(prevMultiTouchGesture.GestureType))
+                if (prevMultiTouchGesture != null && !TouchGestureRecognizer.isGestureTypeRelatedPad(prevMultiTouchGesture.GestureType))
                 {
                     if (gestureRecognizedBroadcaster != null)
                     {
@@ -514,7 +538,7 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                 }
                 prevMultiTouchGesture = recognizedGesture;
             }
-            else if(recognizedGesture.GestureType == GestureType.NONE)
+            else if (recognizedGesture.GestureType == GestureType.NONE)
             {
                 _gazeCanShift = true;
                 prevMultiTouchGesture = null;
@@ -524,14 +548,14 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                 }
                 latestSingleTouchDown = null;
             }
-            
-            
+
+
         }
     }
     private void VirtualPadController_menuSelectedListener(EditMode selectedMode)
     {
         _currentMode = selectedMode;
-        if(editModeChangedListener != null)
+        if (editModeChangedListener != null)
         {
             editModeChangedListener(selectedMode);
         }
@@ -545,5 +569,11 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
         return localPostOnBoard;
     }
     #endregion
-
+    private void OnApplicationQuit()
+    {
+        if (padStateLogger != null)
+        {
+            padStateLogger.Close();
+        }
+    }
 }
