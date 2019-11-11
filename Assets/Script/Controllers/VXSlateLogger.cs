@@ -15,11 +15,11 @@ namespace Assets.Script.Controllers
         List<string> loggedData = new List<string>();
         public void init(string participantID,string order,string textureID,string isTraining)
         {
-            fileName = string.Format("VXSlateLog_{0}_{1}_{2}.csv", participantID, order, textureID);
+            fileName = string.Format("VXSlateLog_{0}_{1}_{2}_{3}.csv", participantID, order, textureID,isTraining.CompareTo("TRUE")==0?"Training":"Experiment");
             streamWriter = new StreamWriter(fileLocation + fileName);
             streamWriter.WriteLine("ParticipantID,Order,textureID,IsTraining,Stage,IsPadMoved,MoveX,MoveY,IsPadScaled,ScaleX,ScaleY");
         }
-        public void WriteVirtualPadTranslation(string participandID,string order,string textureID,string stage, double moveX,double moveY)
+        public void WriteVirtualPadTranslation(string participandID,string order,string textureID,string istraining, string stage, double moveX,double moveY)
         {
             /*streamWriter.WriteLine(participandID + ","
                                + order + ","
@@ -34,13 +34,14 @@ namespace Assets.Script.Controllers
                                + order + ","
                                + textureID + ","
                                + stage + ","
-                               + "TRUE"
+                               + istraining + ","
+                               + "TRUE,"
                                + moveX.ToString() + ","
                                + moveY.ToString() + ","
                                + "FALSE,"
                                + "0,0");
         }
-        public void WriteVirtualPadScaling(string participandID, string order, string textureID, string stage, double scaleX, double scaleY)
+        public void WriteVirtualPadScaling(string participandID, string order, string textureID,string istraining, string stage, double scaleX, double scaleY)
         {
             /*streamWriter.WriteLine(participandID + ","
                                + order + ","
@@ -55,7 +56,8 @@ namespace Assets.Script.Controllers
                                + order + ","
                                + textureID + ","
                                + stage + ","
-                               + "FALSE"
+                               + istraining + ","
+                               + "FALSE,"
                                + "0,0,"
                                + "TRUE,"
                                + scaleX.ToString() + ","

@@ -132,6 +132,7 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                     padStateLogger.WriteVirtualPadScaling(GlobalUtilities._curParticipantID,
                                                           GlobalUtilities.globalGameState.ExperimentOrder,
                                                           GlobalUtilities.globalGameState.TextureID,
+                                                          GlobalUtilities.globalGameState.IsTraining,
                                                           GlobalUtilities.globalGameState.Stage,
                                                           scaleRatio.x,
                                                           scaleRatio.y);
@@ -273,6 +274,7 @@ public class VirtualPadController : MonoBehaviour, IRemoteController
                                 padStateLogger.WriteVirtualPadTranslation(GlobalUtilities._curParticipantID,
                                                                           GlobalUtilities.globalGameState.ExperimentOrder,
                                                                           GlobalUtilities.globalGameState.TextureID,
+                                                                          GlobalUtilities.globalGameState.IsTraining,
                                                                           GlobalUtilities.globalGameState.Stage,
                                                                           newPadCenter.x - curPadCenter.x,
                                                                           newPadCenter.y - curPadCenter.y);

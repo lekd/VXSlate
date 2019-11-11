@@ -1,0 +1,4 @@
+ParticipantID,IsTraining,ExperimentOrder,TextureID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration
+-01,True,1,1,MATCHING,True,False,False,24.49818,87.64175,63.14357
+-01,True,1,1,SKETCHING,True,False,False,102.6533,105.8645,3.211197
+-01,True,1,1,SKETCHING_REVERTED,True,False,False,115.8778,120.128,4.250145

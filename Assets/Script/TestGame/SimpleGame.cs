@@ -266,6 +266,7 @@ public class SimpleGame : MonoBehaviour
         {
             _prepareTime = 0;
             _isExperimentStarted = true;
+            GlobalUtilities.globalGameState.Stage = "Matching";
             _startTimer = false;
 
             _puzzleMaker.SetObjectsTransparency(0.5f);
@@ -349,7 +350,7 @@ public class SimpleGame : MonoBehaviour
             if (!_isExperimentFinished)
             {
                 //_puzzleMaker.HighlightGridPiece();
-                GlobalUtilities.globalGameState.Stage = "Matching";
+                
                 if (!_puzzleMaker.isPuzzledDone && _puzzleMaker.CheckPuzzlesDone())
                 {
                     _puzzleMaker.isPuzzledDone = true;
@@ -514,6 +515,7 @@ public class SimpleGame : MonoBehaviour
                 if (_puzzleMaker.isSketchDoneSucessfully)
                 {
                     //VXSlate: restore to allow shifting virtual pad with gaze while one finger is touching
+                    GlobalUtilities.globalGameState.Stage = "Done";
                     if (_usingTablet)
                     {
                         (tabletController as VirtualPadController)._gazeCanShiftWithOneFinger = true;
@@ -607,6 +609,8 @@ public class SimpleGame : MonoBehaviour
                     _puzzleMaker._statusObject.GetComponent<Text>().text = "THE TRAINING TASK IS FINISHED!\nPlease take off the HMD.";
                 else
                     _puzzleMaker._statusObject.GetComponent<Text>().text = "THE EXPERIMENTAL TASK IS FINISHED!\nPlease take off the HMD.";
+
+                GlobalUtilities.globalGameState.Stage = "Done";
             }
         }
 
