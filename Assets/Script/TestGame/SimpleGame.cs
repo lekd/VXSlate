@@ -351,13 +351,14 @@ public class SimpleGame : MonoBehaviour
             _sketchingSW.WriteLine("ParticipantID,IsTraining,ExperimentOrder,TextureID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,IsTouchPoint,IsOnTrack,SketchingPointID,XSketchingPoint,YSketchingPoint,IsReversed");
             _sketchingSWReverted.WriteLine("ParticipantID,IsTraining,ExperimentOrder,TextureID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,IsTouchPoint,IsOnTrack,SketchingPointID,XSketchingPoint,YSketchingPoint,IsReversed");
             _summarySW.WriteLine("ParticipantID,IsTraining,ExperimentOrder,TextureID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration");
-            _initSW.WriteLine("ParticipantID,Puzzle,Xpos,Ypos,Zpos,Xrot,Yrot,Zrot,Xscale,Yscale,Zscale");
+            _initSW.WriteLine("ParticipantID,TextureID,Puzzle,Xpos,Ypos,Zpos,Xrot,Yrot,Zrot,Xscale,Yscale,Zscale");
 
             for(int i = 1; i <= _puzzleMaker._puzzlePieces.Count; i++)
             {
                 var tempTransform = _puzzleMaker._puzzlePieces[i-1].GameObject.GetComponent<Transform>();
 
                 _initSW.WriteLine(_participantID + "," +
+                    _textureID.ToString() + "," +
                     i.ToString() + "," +
                     tempTransform.position.x.ToString() + "," +
                     tempTransform.position.y.ToString() + "," +
