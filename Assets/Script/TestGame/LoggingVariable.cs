@@ -23,6 +23,9 @@
     string _xSketchPoint;
     string _ySketchPoint;
 
+    //string _xpos, _ypos, _zpos, _xrot, _yrot, _zrot, _xscale, _yscale, _zscale;
+
+
     public LoggingVariable()
     {
 

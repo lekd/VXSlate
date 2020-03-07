@@ -87,6 +87,7 @@ public class SimpleGame : MonoBehaviour
     StreamWriter _sketchingSW;
     StreamWriter _sketchingSWReverted;
     StreamWriter _summarySW;
+    StreamWriter _initSW;
 
     float _experimentStartTime;
     float _sketchingTime;
@@ -273,7 +274,7 @@ public class SimpleGame : MonoBehaviour
 
             Debug.Log(">> Experiment Started!");
 
-            _puzzleMaker._statusObject.GetComponent<Text>().text = "Experiment Started!\nPlease start marching...";
+            _puzzleMaker._statusObject.GetComponent<Text>().text = "Experiment Started!\nPlease start matching...";
             _puzzleMaker._statusObject.GetComponent<Text>().font = _puzzleMaker._statusFont;
             _puzzleMaker._statusObject.GetComponent<Text>().color = Color.black;
             _puzzleMaker._statusObject.GetComponent<Text>().fontSize = 5;
@@ -292,12 +293,15 @@ public class SimpleGame : MonoBehaviour
             string sketchingFilename = ".\\Assets\\ExperimentResults\\";
             string sketchingRevertedFilename = ".\\Assets\\ExperimentResults\\";
             string summaryFilename = ".\\Assets\\ExperimentResults\\";
+            string initFilename = ".\\Assets\\ExperimentResults\\";
+
             if (_isTraining)
             {
                 matchingFilename += "Training\\";
                 sketchingFilename += "Training\\";
                 sketchingRevertedFilename += "Training\\";
                 summaryFilename += "Training\\";
+                initFilename += "Training\\";
             }
             else
             {
@@ -305,12 +309,14 @@ public class SimpleGame : MonoBehaviour
                 sketchingFilename += "Experimental\\";
                 sketchingRevertedFilename += "Experimental\\";
                 summaryFilename += "Experimental\\";
+                initFilename += "Experimental\\";
             }
 
             matchingFilename += "PuzzleMatching\\Matching_" + _participantID + "_" + extension;
             sketchingFilename += "Sketching\\Sketching_" + _participantID + "_" + extension;
             sketchingRevertedFilename += "Sketching\\SketchingReverted_" + _participantID + "_" + extension;
             summaryFilename += "Summary\\Summary_" + _participantID + "_" + extension;
+            initFilename += "Init\\Init_" + _participantID + "_" + extension;
 
             if (_isTraining)
             {
@@ -318,6 +324,7 @@ public class SimpleGame : MonoBehaviour
                 sketchingFilename += "_Training";
                 sketchingRevertedFilename += "_Training";
                 summaryFilename += "_Training";
+                initFilename += "_Training";
             }
             else
             {
@@ -325,23 +332,45 @@ public class SimpleGame : MonoBehaviour
                 sketchingFilename += "_Experimental";
                 sketchingRevertedFilename += "_Experimental";
                 summaryFilename += "_Experimental";
+                initFilename += "_Experimental";
             }
 
             matchingFilename += ".csv";
             sketchingFilename += ".csv";
             sketchingRevertedFilename += ".csv";
             summaryFilename += ".csv";
+            initFilename += ".csv";
 
             _puzzleMatchingSW = new StreamWriter(matchingFilename);
             _sketchingSW = new StreamWriter(sketchingFilename);
             _sketchingSWReverted = new StreamWriter(sketchingRevertedFilename);
             _summarySW = new StreamWriter(summaryFilename);
+            _initSW = new StreamWriter(initFilename);
 
-            _puzzleMatchingSW.WriteLine("ParticipantID,IsTraining,ExperimentOrder,TextureID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,MatchingPuzzleTime,PuzzleName,Action,DistanceMoved,ScaledLevel,RotatedAngle");
+            _puzzleMatchingSW.WriteLine("ParticipantID,IsTraining,ExperimentOrder,TextureID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,MatchingPuzzleTime,PuzzleName,Action,DistanceMoved,ScaledLevel,RotatedAngle,xFromPoint,yFromPoint,_xToPoint,_yToPoint");
             _sketchingSW.WriteLine("ParticipantID,IsTraining,ExperimentOrder,TextureID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,IsTouchPoint,IsOnTrack,SketchingPointID,XSketchingPoint,YSketchingPoint,IsReversed");
             _sketchingSWReverted.WriteLine("ParticipantID,IsTraining,ExperimentOrder,TextureID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,IsTouchPoint,IsOnTrack,SketchingPointID,XSketchingPoint,YSketchingPoint,IsReversed");
-
             _summarySW.WriteLine("ParticipantID,IsTraining,ExperimentOrder,TextureID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration");
+            _initSW.WriteLine("ParticipantID,Puzzle,Xpos,Ypos,Zpos,Xrot,Yrot,Zrot,Xscale,Yscale,Zscale");
+
+            for(int i = 1; i <= _puzzleMaker._puzzlePieces.Count; i++)
+            {
+                var tempTransform = _puzzleMaker._puzzlePieces[i-1].GameObject.GetComponent<Transform>();
+
+                _initSW.WriteLine(_participantID + "," +
+                    i.ToString() + "," +
+                    tempTransform.position.x.ToString() + "," +
+                    tempTransform.position.y.ToString() + "," +
+                    tempTransform.position.z.ToString() + "," +
+                    tempTransform.rotation.x.ToString() + "," +
+                    tempTransform.rotation.y.ToString() + "," +
+                    tempTransform.rotation.z.ToString() + "," +
+                    tempTransform.localScale.x.ToString() + "," +
+                    tempTransform.localScale.y.ToString() + "," +
+                    tempTransform.localScale.z.ToString());
+            }
+
+            _initSW.Close();
 
             _experimentStartTime = Time.time;
         }
@@ -420,7 +449,15 @@ public class SimpleGame : MonoBehaviour
                                                         + ","
                                                         + e.ScaleLevel
                                                         + ","
-                                                        + e.RotateAngel);
+                                                        + e.RotateAngel
+                                                        + ","
+                                                        + e.XFromPoint
+                                                        + ","
+                                                        + e.YFromPoint
+                                                        + ","
+                                                        + e.XToPoint
+                                                        + ","
+                                                        + e.YToPoint);
                         }
 
                         _isMatchingLog = true;
