@@ -347,7 +347,7 @@ public class SimpleGame : MonoBehaviour
             _summarySW = new StreamWriter(summaryFilename);
             _initSW = new StreamWriter(initFilename);
 
-            _puzzleMatchingSW.WriteLine("ParticipantID,IsTraining,ExperimentOrder,TextureID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,MatchingPuzzleTime,PuzzleName,Action,DistanceMoved,ScaledLevel,RotatedAngle,xFromPoint,yFromPoint,_xToPoint,_yToPoint");
+            _puzzleMatchingSW.WriteLine("ParticipantID,IsTraining,ExperimentOrder,TextureID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,MatchingPuzzleTime,PuzzleName,Action,DistanceMoved,ScaledLevel,RotatedAngle,xFromPoint,yFromPoint,xToPoint,yToPoint");
             _sketchingSW.WriteLine("ParticipantID,IsTraining,ExperimentOrder,TextureID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,IsTouchPoint,IsOnTrack,SketchingPointID,XSketchingPoint,YSketchingPoint,IsReversed");
             _sketchingSWReverted.WriteLine("ParticipantID,IsTraining,ExperimentOrder,TextureID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration,IsTouchPoint,IsOnTrack,SketchingPointID,XSketchingPoint,YSketchingPoint,IsReversed");
             _summarySW.WriteLine("ParticipantID,IsTraining,ExperimentOrder,TextureID,Stage,IsTablet,IsController,IsMouse,StartTime,EndTime,Duration");
@@ -363,9 +363,9 @@ public class SimpleGame : MonoBehaviour
                     tempTransform.position.x.ToString() + "," +
                     tempTransform.position.y.ToString() + "," +
                     tempTransform.position.z.ToString() + "," +
-                    tempTransform.rotation.x.ToString() + "," +
-                    tempTransform.rotation.y.ToString() + "," +
-                    tempTransform.rotation.z.ToString() + "," +
+                    tempTransform.rotation.eulerAngles.x.ToString() + "," +
+                    tempTransform.rotation.eulerAngles.y.ToString() + "," +
+                    tempTransform.rotation.eulerAngles.z.ToString() + "," +
                     tempTransform.localScale.x.ToString() + "," +
                     tempTransform.localScale.y.ToString() + "," +
                     tempTransform.localScale.z.ToString());

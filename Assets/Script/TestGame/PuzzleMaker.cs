@@ -1,4 +1,5 @@
-﻿using BoardGame;
+﻿using Assets.Script.TestGame;
+using BoardGame;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -665,6 +666,455 @@ public class PuzzleMaker : MonoBehaviour
         {
             SetObjectsTransparency(1f);
         }
+
+        _isInit = true;
+    }
+
+    public void StimulateInit(bool isTraining, List<InitPuzzle> lPuzzles)
+    {
+        _listOfGameObjects = new List<GameObject>();
+
+        _isTraining = isTraining;
+        _textureID = lPuzzles[0].TextureID;
+
+        if (isTraining)
+        {
+            _mainPuzzleTexture = _trainingO;
+            _drawPuzzleTexture = _trainingL;
+            _x = 2;
+            _y = 2;
+            _percentageForMargins = 0.125f;
+        }
+        else
+        {
+            _x = 4;
+            _y = 4;
+            _percentageForMargins = 0.05f;
+
+            if (_textureID == 1)
+            {
+                _mainPuzzleTexture = _puzzle1O;
+                _drawPuzzleTexture = _puzzle1L;
+            }
+            else
+            {
+                _mainPuzzleTexture = _puzzle2O;
+                _drawPuzzleTexture = _puzzle2L;
+            }
+        }
+
+        _originalPuzzleTexture = new Texture2D(_drawPuzzleTexture.width, _drawPuzzleTexture.height);
+        _originalPuzzleTexture.SetPixels(_drawPuzzleTexture.GetPixels());
+        _originalPuzzleTexture.Apply();
+
+
+        /// Large Screen Object
+        /// 
+
+        if (_largeScreenObject != null)
+        {
+            _largeScreenWidth = ConvertMetersToPixels(_largeScreenObject.transform.localScale.x);
+            _largeScreenHeight = ConvertMetersToPixels(_largeScreenObject.transform.localScale.y);
+        }
+        else
+        {
+            _largeScreenObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            _largeScreenObject.name = "Large Screen";
+
+            _largeScreenWidth = ConvertMetersToPixels(7f);
+            _largeScreenHeight = ConvertMetersToPixels(3f);
+
+            _largeScreenObject.transform.position = new Vector3(0, 2.5f, 0);
+            _largeScreenObject.transform.rotation = Quaternion.identity;
+            _largeScreenObject.transform.localScale = new Vector3(ConvertPixelsToMeters(_largeScreenWidth), ConvertPixelsToMeters(_largeScreenHeight), 0.01f);
+
+            if (_screenMaterial != null)
+            {
+                _largeScreenObject.GetComponent<Renderer>().material = _screenMaterial;
+            }
+            else
+            {
+                Debug.LogWarning("Missing screen material!", _screenMaterial);
+            }
+
+            Debug.LogWarning("Large screen object is missed! A random object is generated.", _largeScreenObject);
+        }
+
+        difLargeScreenZ = _largeScreenObject.transform.position.z - _largeScreenObject.transform.localScale.z / 2;
+
+
+        if (_mainPuzzleTexture != null)
+        {
+            _largeScreenCenter = new Vector2(_largeScreenWidth / 2, _largeScreenHeight / 2);
+
+            _marginSize = _largeScreenWidth * _percentageForMargins;
+
+            Vector2 _mainTextureArea = new Vector2(0.33f * (_largeScreenWidth - 4 * _marginSize), _largeScreenHeight - 2 * _marginSize);
+
+            _mainTextureArea = RescaleArea(_mainTextureArea, new Vector2(_mainPuzzleTexture.width, _mainPuzzleTexture.height));
+
+            _mainPuzzleTextureRatio = _mainTextureArea.x / _mainPuzzleTexture.width;
+
+            /// Sample Screen Area
+            /// 
+
+            int puzzlePieceWidth = (int)(_mainPuzzleTexture.width / _x);
+            int puzzlePieceHeight = (int)(_mainPuzzleTexture.height / _y);
+
+            Vector2 _sampleScreenArea = new Vector2(0.33f * (_largeScreenWidth - 4 * _marginSize), _largeScreenHeight - 2 * _marginSize);
+
+            _sampleScreenArea = RescaleArea(_sampleScreenArea, new Vector2(_mainPuzzleTexture.width, _mainPuzzleTexture.height));
+
+
+            _sampleScreenCenter = new Vector2(_sampleScreenArea.x / 2, _sampleScreenArea.y / 2);
+
+            Quaternion sampleScreenRotation = new Quaternion();
+            sampleScreenRotation.eulerAngles = new Vector3(0, 0, 180);
+
+            _sampleTexture = new Texture2D(_mainPuzzleTexture.width, _mainPuzzleTexture.height);
+
+            for (int i = 0; i < _x; i++)
+            {
+                for (int j = 0; j < _y; j++)
+                {
+                    for (int k = 0; k < puzzlePieceWidth; k++)
+                    {
+                        for (int l = 0; l < puzzlePieceWidth; l++)
+                        {
+                            if ((k < 15) || (k > puzzlePieceWidth - 15) || (l < 15) || (l > puzzlePieceHeight - 15))
+                            {
+                                _sampleTexture.SetPixel(i * puzzlePieceWidth + k, j * puzzlePieceHeight + l, Color.gray);
+                            }
+                            else
+                            {
+                                _sampleTexture.SetPixel(i * puzzlePieceWidth + k, j * puzzlePieceHeight + l, _mainPuzzleTexture.GetPixel(i * puzzlePieceWidth + k, j * puzzlePieceHeight + l));
+                            }
+                        }
+                    }
+                }
+            }
+
+            _sampleTexture.Apply();
+
+            GameObject sampleScreenObject = CreateCubeGameObject("Sample Screen",
+                                                            new Vector3(_largeScreenObject.transform.position.x - ConvertPixelsToMeters(_largeScreenCenter.x - _marginSize - _mainTextureArea.x / 2),
+                                                                        _largeScreenObject.transform.position.y,
+                                                                        difLargeScreenZ - 0.0001f),
+                                                            sampleScreenRotation,
+                                                            new Vector3(ConvertPixelsToMeters(_sampleScreenArea.x),
+                                                                        ConvertPixelsToMeters(_sampleScreenArea.y),
+                                                                        0.01f),
+                                                            null,
+                                                            _sampleTexture,
+                                                            Color.white);
+
+
+
+            /// Puzzle Area
+            /// 
+
+            Vector2 puzzleArea = new Vector2(0.33f * (_largeScreenWidth - 4 * _marginSize), 0.33f * (_largeScreenWidth - 4 * _marginSize));
+
+            Quaternion puzzleAreaRotation = new Quaternion();
+            sampleScreenRotation.eulerAngles = new Vector3(0, 0, 180);
+
+            float middleMargin = (_largeScreenWidth - puzzleArea.x - _sampleScreenArea.x - _mainTextureArea.x - 4 * _marginSize) / 2;
+            float rightPart = middleMargin + 2 * _marginSize + _sampleScreenArea.x;
+            float shift = rightPart - _largeScreenWidth / 2;
+
+            float puzzlePositionX = puzzleArea.x / 2 + shift;
+
+            GameObject puzzleAreaObject = CreateCubeGameObject("Puzzle Area",
+                                                                new Vector3(_largeScreenObject.transform.position.x + ConvertPixelsToMeters(_largeScreenWidth * 0.5f -
+                                                                                                                                            _marginSize -
+                                                                                                                                            (int)_sampleScreenArea.x / 2),
+                                                                        _largeScreenObject.transform.position.y,
+                                                                        difLargeScreenZ - 0.0001f),
+                                                                puzzleAreaRotation,
+                                                                new Vector3(ConvertPixelsToMeters(puzzleArea.x),
+                                                                            ConvertPixelsToMeters(puzzleArea.y),
+                                                                            0.01f),
+                                                                null,
+                                                                null,
+                                                                Color.white);
+
+
+
+
+            /// Puzzle Grid Area
+            /// 
+            if (_gridPieceTexture != null)
+            {
+                Quaternion puzzleDoneRotation = new Quaternion();
+                puzzleDoneRotation.eulerAngles = new Vector3(0, 0, 180);
+
+                Vector3 puzzleDonePosition = Vector3.zero;
+
+                puzzleDonePosition.x = _largeScreenObject.transform.position.x - ConvertPixelsToMeters(puzzlePositionX);
+                puzzleDonePosition.y = _largeScreenObject.transform.position.y;
+                puzzleDonePosition.z = difLargeScreenZ - 0.005f;
+
+                _puzzleDoneObject = CreateCubeGameObject("Puzzle Done",
+                                                         puzzleDonePosition,
+                                                         puzzleDoneRotation,
+                                                         new Vector3(ConvertPixelsToMeters(_mainTextureArea.x),
+                                                                     ConvertPixelsToMeters(_mainTextureArea.y),
+                                                                     0.01f),
+                                                         null,
+                                                         _drawPuzzleTexture,
+                                                         Color.white);
+
+                Destroy(_puzzleDoneObject.GetComponent<BoxCollider>());
+                _puzzleDoneObject.AddComponent<MeshCollider>();
+
+                _puzzleDoneObject.SetActive(false);
+
+                _gridPieces = new List<Piece>();
+                _puzzlePieces = new List<Piece>();
+
+                GameObject gridMasterObject = new GameObject();
+                gridMasterObject.name = "Puzzle Grid";
+
+                puzzleMasterObject = new GameObject();
+                puzzleMasterObject.name = "Puzzle Pieces";
+
+                float _gridPieceWidth = _mainTextureArea.x / _x;
+                float _gridPieceHeight = _mainTextureArea.y / _y;
+
+                Vector2 _firstGridPosition = new Vector2(_largeScreenObject.transform.position.x
+                                       - (_x / 2)
+                                       * ConvertPixelsToMeters(_gridPieceWidth)
+                                       + ConvertPixelsToMeters(_gridPieceWidth)
+                                       / 2,
+                                                         _largeScreenObject.transform.position.y
+                                       + (_y / 2)
+                                       * ConvertPixelsToMeters(_gridPieceHeight)
+                                       - ConvertPixelsToMeters(_gridPieceHeight)
+                                       / 2);
+
+
+
+                int puzzlePieceWidthScaledUp = (int)(_mainTextureArea.x / _x);
+                int puzzlePieceHeightScaledUp = (int)(_mainTextureArea.y / _y);
+
+                _overlapThreshold = ConvertPixelsToMeters(puzzlePieceHeightScaledUp / 20);
+
+                _startStopPoints = new List<Vector2>();
+                _linePoints = new List<Vector2>();
+
+                for (int i = 0; i < _x; i++)
+                {
+                    for (int j = 0; j < _y; j++)
+                    {
+                        Quaternion gridPieceRotation = new Quaternion();
+                        gridPieceRotation.eulerAngles = new Vector3(0, 0, 180);
+
+                        Vector3 gridPiecePosition = new Vector3(_firstGridPosition.x + ConvertPixelsToMeters(i * _gridPieceWidth),
+                                                                _firstGridPosition.y - ConvertPixelsToMeters(j * _gridPieceHeight),
+                                                                difLargeScreenZ - 0.0001f);
+
+                        GameObject gridPieceObject = CreateCubeGameObject("Grid Piece " + (i * _x + _y - j).ToString(),
+                                                                        gridPiecePosition,
+                                                                        gridPieceRotation,
+                                                                        new Vector3(ConvertPixelsToMeters(_gridPieceWidth),
+                                                                                    ConvertPixelsToMeters(_gridPieceHeight),
+                                                                                    0.01f),
+                                                                        null,
+                                                                        _gridPieceTexture,
+                                                                        Color.white);
+
+                        gridPieceObject.transform.parent = gridMasterObject.transform;
+
+                        Piece gridPiece = new Piece(gridPieceObject, i.ToString() + (_y - j - 1).ToString());
+                        _gridPieces.Add(gridPiece);
+
+
+
+                        /// Generate Puzzle Pieces
+                        /// 
+
+                        Texture2D puzzleTextureOrginal = new Texture2D(puzzlePieceWidth, puzzlePieceHeight);
+                        Texture2D puzzleTextureHighlighted = new Texture2D(puzzlePieceWidth, puzzlePieceHeight);
+
+                        for (int x = 0; x < puzzlePieceWidth; x++)
+                        {
+                            for (int y = 0; y < puzzlePieceHeight; y++)
+                            {
+                                Color color = _mainPuzzleTexture.GetPixel(x + i * puzzlePieceWidth, y + j * puzzlePieceHeight);
+                                puzzleTextureOrginal.SetPixel(x, y, color);
+
+                                if ((x < 15) || (x > puzzlePieceWidth - 15) || (y < 15) || (y > puzzlePieceHeight - 15))
+                                {
+                                    puzzleTextureHighlighted.SetPixel(x, y, Color.red);
+                                }
+                                else
+                                {
+                                    puzzleTextureHighlighted.SetPixel(x, y, color);
+                                }
+
+
+                                // Get Start, Stop, and Line Points
+                                if (color.r == 1f && color.g == 0f && color.b == 0f)
+                                {
+                                    _startStopPoints.Add(new Vector2(x + i * puzzlePieceWidth, y + j * puzzlePieceHeight));
+                                }
+                                else if (color.r == 1f && color.g == 1f && color.b == 0f)
+                                {
+                                    _linePoints.Add(new Vector2(x + i * puzzlePieceWidth, y + j * puzzlePieceHeight));
+                                }
+                            }
+                        }
+
+                        puzzleTextureOrginal.Apply();
+                        puzzleTextureHighlighted.Apply();
+
+                        Quaternion puzzlePieceRotation = new Quaternion();
+
+                        _standardRotation = new Vector3(0, 0, 180);
+
+                        int zAngle;
+                        do
+                        {
+                            zAngle = (int)UnityEngine.Random.Range(0, 360);
+                        }
+                        while (zAngle % 5 != 0);
+
+                        puzzlePieceRotation.eulerAngles = new Vector3(0, 0, zAngle);
+
+                        Vector3 puzzlePiecePosition = Vector3.zero;
+
+                        float gridPieceWidthInMeter = ConvertPixelsToMeters(_gridPieceWidth);
+                        float gridPieceHeightInMeter = ConvertPixelsToMeters(_gridPieceHeight);
+
+                        _standardPieceScale = new Vector3(gridPieceWidthInMeter, gridPieceHeightInMeter, 0.01f);
+
+                        float ratio = ((int)(((int)(UnityEngine.Random.Range(1, _numberOfScale))) / 2)) * _differentScale;
+
+                        if (UnityEngine.Random.Range(-1, 1) < 0)
+                        {
+                            ratio *= (-1);
+                        }
+
+                        Vector3 puzzlePieceScale = Vector3.zero;
+                        puzzlePieceScale.x = _standardPieceScale.x * (1 + ratio);
+                        puzzlePieceScale.y = _standardPieceScale.y * (1 + ratio);
+                        puzzlePieceScale.z = _standardPieceScale.z;
+
+                        do
+                        {
+                            bool flag = false;
+
+                            float x = UnityEngine.Random.Range(puzzleAreaObject.transform.position.x - puzzleAreaObject.transform.localScale.x / 2 + puzzlePieceScale.x / 2,
+                                                    puzzleAreaObject.transform.position.x + puzzleAreaObject.transform.localScale.x / 2 - puzzlePieceScale.x / 2);
+                            float y = UnityEngine.Random.Range(puzzleAreaObject.transform.position.y - puzzleAreaObject.transform.localScale.y / 2 + puzzlePieceScale.y / 2,
+                                                    puzzleAreaObject.transform.position.y + puzzleAreaObject.transform.localScale.y / 2 - puzzlePieceScale.y / 2);
+
+                            float z = UnityEngine.Random.Range(-0.0075f, -0.0015f);
+                            z = difLargeScreenZ + z;
+
+                            for (int id = 0; id < _puzzlePieces.Count; id++)
+                            {
+                                if (Mathf.Abs(_puzzlePieces[id].GameObject.transform.position.z - z) < 0.00005)
+                                {
+                                    flag = true;
+                                }
+                            }
+
+                            if (!flag)
+                            {
+                                puzzlePiecePosition = new Vector3(x, y, z);
+
+                                break;
+                            }
+                        }
+                        while (true);
+
+                        
+                        for(int id = 0; id < lPuzzles.Count; id++)
+                        {
+                            if(lPuzzles[id].Name == (i * _x + j + 1).ToString())
+                            {
+                                puzzlePieceRotation.eulerAngles = lPuzzles[id].Rotation;
+
+                                GameObject puzzlePieceObject = CreateCubeGameObject("Puzzle Piece " + (i * _x + j + 1).ToString(),
+                                    lPuzzles[id].Position,
+                                    puzzlePieceRotation,
+                                    lPuzzles[id].Scale,
+                                                                                    null,
+                                                                                    puzzleTextureOrginal,
+                                                                                    Color.white);
+
+                                Destroy(puzzlePieceObject.GetComponent<BoxCollider>());
+                                puzzlePieceObject.AddComponent<MeshCollider>();
+
+                                puzzlePieceObject.transform.parent = puzzleMasterObject.transform;
+
+                                Piece puzzlePiece = new Piece(puzzlePieceObject, i.ToString() + j.ToString(), false, puzzleTextureOrginal, puzzleTextureHighlighted, (1 + ratio));
+                                _puzzlePieces.Add(puzzlePiece);
+
+                                break;
+                            }
+                        }
+
+                        
+                    }
+                }
+
+                SortPieces();
+
+                Debug.Log("Init finished!");
+
+                //For Texture Inspection
+                _scaleTextureWidth = _puzzleDoneObject.GetComponent<Renderer>().material.mainTexture.width;
+                _scaleTextureHeigh = _puzzleDoneObject.GetComponent<Renderer>().material.mainTexture.height;
+                _textureWidth = _mainPuzzleTexture.width;
+                _textureHeigh = _mainPuzzleTexture.height;
+                _scaleRatio = (float)_puzzleDoneObject.GetComponent<Renderer>().material.mainTexture.width / _mainPuzzleTexture.width;
+            }
+            else
+            {
+                Debug.LogWarning("Missing grid piece texture!", _gridPieceTexture);
+            }
+
+            _listOfGameObjects.Add(_largeScreenObject);
+            _listOfGameObjects.Add(sampleScreenObject);
+            _listOfGameObjects.Add(puzzleAreaObject);
+        }
+        else
+        {
+            Debug.LogWarning("Missing puzzle texture!", _mainPuzzleTexture);
+        }
+
+        _canvasObject = new GameObject();
+        _canvasObject.AddComponent<Canvas>();
+        _canvasObject.AddComponent<CanvasScaler>();
+        _canvasObject.GetComponent<CanvasScaler>().dynamicPixelsPerUnit = 75;
+        _canvasObject.GetComponent<RectTransform>().position = new Vector3(_largeScreenObject.transform.position.x,
+                                                                           _largeScreenObject.transform.position.y,
+                                                                           _largeScreenObject.transform.position.z - 0.02f);
+
+        float canvasScaleXY = _largeScreenObject.transform.localScale.x / 100 > _largeScreenObject.transform.localScale.y / 100 ? _largeScreenObject.transform.localScale.y / 100 : _largeScreenObject.transform.localScale.x / 100;
+        _canvasObject.GetComponent<RectTransform>().localScale = new Vector3(canvasScaleXY,
+                                                                             canvasScaleXY,
+                                                                             _largeScreenObject.transform.localScale.z / 100);
+        _canvasObject.gameObject.name = "Status Canvas";
+        //_canvasObject.gameObject.transform.position = _largeScreenObject.transform.position;
+
+        _statusObject = new GameObject();
+        _statusObject.gameObject.transform.parent = _canvasObject.transform;
+        _statusObject.gameObject.name = "Status Text";
+        _statusObject.AddComponent<Text>();
+        _statusObject.GetComponent<Text>().text = "Please start to sketch!";
+        _statusObject.GetComponent<Text>().font = _statusFont;
+        _statusObject.GetComponent<Text>().color = Color.black;
+        _statusObject.GetComponent<Text>().fontSize = 5;
+        _statusObject.GetComponent<Text>().alignment = TextAnchor.LowerCenter;
+        _statusObject.GetComponent<RectTransform>().localScale = new Vector3(1, 1, 1);
+        _statusObject.GetComponent<RectTransform>().localPosition = new Vector3(0, 0.75f, 0);
+
+        _listOfGameObjects.Add(_largeScreenObject);
+
+        SetObjectsTransparency(1f);        
 
         _isInit = true;
     }
